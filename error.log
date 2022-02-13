@@ -1,0 +1,108 @@
+    Checking physdes-rs v0.1.0 (/home/lubuntu/Documents/github/physdes-rs)
+warning: unused import: `Signed`
+  --> src/point.rs:17:23
+   |
+17 | use num_traits::{Num, Signed};
+   |                       ^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+error[E0053]: method `add` has an incompatible type for trait
+  --> src/point.rs:43:37
+   |
+43 |             fn $method(self, other: &Vector2<T>) -> Self::Output {
+   |                                     ^^^^^^^^^^^
+   |                                     |
+   |                                     expected struct `Point`, found struct `Vector2`
+   |                                     help: change the parameter type to match the trait: `&'b Point<T>`
+...
+85 | forward_all_binop!(impl Add, add);
+   | --------------------------------- in this macro invocation
+   |
+   = note: expected fn pointer `fn(&'a Point<T>, &'b Point<T>) -> Point<_>`
+              found fn pointer `fn(&'a Point<T>, &Vector2<T>) -> Point<_>`
+   = note: this error originates in the macro `forward_xf_xf_binop` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0053]: method `add` has an incompatible type for trait
+  --> src/point.rs:56:37
+   |
+56 |             fn $method(self, other: Vector2<T>) -> Self::Output {
+   |                                     ^^^^^^^^^^
+   |                                     |
+   |                                     expected struct `Point`, found struct `Vector2`
+   |                                     help: change the parameter type to match the trait: `Point<T>`
+...
+85 | forward_all_binop!(impl Add, add);
+   | --------------------------------- in this macro invocation
+   |
+   = note: expected fn pointer `fn(&'a Point<T>, Point<T>) -> Point<_>`
+              found fn pointer `fn(&'a Point<T>, Vector2<T>) -> Point<_>`
+   = note: this error originates in the macro `forward_xf_val_binop` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0053]: method `add` has an incompatible type for trait
+  --> src/point.rs:69:37
+   |
+69 |             fn $method(self, other: &Vector2<T>) -> Self::Output {
+   |                                     ^^^^^^^^^^^
+   |                                     |
+   |                                     expected struct `Point`, found struct `Vector2`
+   |                                     help: change the parameter type to match the trait: `&'a Point<T>`
+...
+85 | forward_all_binop!(impl Add, add);
+   | --------------------------------- in this macro invocation
+   |
+   = note: expected fn pointer `fn(Point<_>, &'a Point<T>) -> Point<_>`
+              found fn pointer `fn(Point<_>, &Vector2<T>) -> Point<_>`
+   = note: this error originates in the macro `forward_val_xf_binop` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0053]: method `sub` has an incompatible type for trait
+  --> src/point.rs:43:37
+   |
+43 |             fn $method(self, other: &Vector2<T>) -> Self::Output {
+   |                                     ^^^^^^^^^^^
+   |                                     |
+   |                                     expected struct `Point`, found struct `Vector2`
+   |                                     help: change the parameter type to match the trait: `&'b Point<T>`
+...
+97 | forward_all_binop!(impl Sub, sub);
+   | --------------------------------- in this macro invocation
+   |
+   = note: expected fn pointer `fn(&'a Point<T>, &'b Point<T>) -> Point<_>`
+              found fn pointer `fn(&'a Point<T>, &Vector2<T>) -> Point<_>`
+   = note: this error originates in the macro `forward_xf_xf_binop` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0053]: method `sub` has an incompatible type for trait
+  --> src/point.rs:56:37
+   |
+56 |             fn $method(self, other: Vector2<T>) -> Self::Output {
+   |                                     ^^^^^^^^^^
+   |                                     |
+   |                                     expected struct `Point`, found struct `Vector2`
+   |                                     help: change the parameter type to match the trait: `Point<T>`
+...
+97 | forward_all_binop!(impl Sub, sub);
+   | --------------------------------- in this macro invocation
+   |
+   = note: expected fn pointer `fn(&'a Point<T>, Point<T>) -> Point<_>`
+              found fn pointer `fn(&'a Point<T>, Vector2<T>) -> Point<_>`
+   = note: this error originates in the macro `forward_xf_val_binop` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0053]: method `sub` has an incompatible type for trait
+  --> src/point.rs:69:37
+   |
+69 |             fn $method(self, other: &Vector2<T>) -> Self::Output {
+   |                                     ^^^^^^^^^^^
+   |                                     |
+   |                                     expected struct `Point`, found struct `Vector2`
+   |                                     help: change the parameter type to match the trait: `&'a Point<T>`
+...
+97 | forward_all_binop!(impl Sub, sub);
+   | --------------------------------- in this macro invocation
+   |
+   = note: expected fn pointer `fn(Point<_>, &'a Point<T>) -> Point<_>`
+              found fn pointer `fn(Point<_>, &Vector2<T>) -> Point<_>`
+   = note: this error originates in the macro `forward_val_xf_binop` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0053`.
+warning: `physdes-rs` (bin "physdes-rs") generated 1 warning
+error: could not compile `physdes-rs` due to 6 previous errors; 1 warning emitted
