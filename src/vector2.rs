@@ -40,7 +40,7 @@ impl<T: Clone + Num> Vector2<T> {
         self.x_.clone() * other.x_.clone() + self.y_.clone() * other.y_.clone()
     }
 
-    /// Returns the dot product
+    /// Returns the cross product
     #[inline]
     pub fn cross(&self, other: &Self) -> T {
         self.x_.clone() * other.y_.clone() - self.y_.clone() * other.x_.clone()

@@ -162,7 +162,7 @@ impl<T: Clone + Num> Sub for Point<T> {
 
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
-        Self::Output::new(self.x_ + other.x_, self.y_ + other.y_)
+        Self::Output::new(self.x_ - other.x_, self.y_ - other.y_)
     }
 }
 
