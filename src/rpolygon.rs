@@ -1,5 +1,5 @@
 use super::{Point, Vector2};
-use num_traits::{Num};
+use num_traits::Num;
 // use core::ops::{Add, Neg, Sub};
 
 /**
@@ -63,14 +63,14 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
 }
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
-    pub fn create_xmono_polygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
+    pub fn create_xmono_rpolygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
         let rightmost = *coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
         let leftmost = *coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
         let is_anticlockwise = rightmost.y_ <= leftmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            coords.iter().partition(|&pt| (pt.x_ <= leftmost.x_))
+            coords.iter().partition(|&pt| (pt.y_ <= leftmost.y_))
         } else {
-            coords.iter().partition(|&pt| (pt.x_ >= leftmost.x_))
+            coords.iter().partition(|&pt| (pt.y_ >= leftmost.y_))
         };
         lst1.sort_by_key(|&a| (a.x_, a.y_));
         lst2.sort_by_key(|&a| (a.x_, a.y_));
@@ -79,14 +79,14 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
         (lst1, is_anticlockwise)
     }
 
-    pub fn create_ymono_polygon(coords: &Vec<Point<T>>) -> (Vec<Point<T>>, bool) {
+    pub fn create_ymono_rpolygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
         let topmost = *coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
         let botmost = *coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let is_anticlockwise = topmost.y_ <= botmost.y_;
+        let is_anticlockwise = topmost.y_ >= botmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            coords.iter().partition(|&pt| (pt.y_ <= botmost.y_))
+            coords.iter().partition(|&pt| (pt.x_ >= botmost.x_))
         } else {
-            coords.iter().partition(|&pt| (pt.y_ >= botmost.y_))
+            coords.iter().partition(|&pt| (pt.x_ <= botmost.x_))
         };
         lst1.sort_by_key(|&a| (a.y_, a.x_));
         lst2.sort_by_key(|&a| (a.y_, a.x_));
@@ -119,12 +119,77 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
         let n = pointset.len();
         let mut p0 = &pointset[n - 1];
         for p1 in pointset.iter() {
-            if ((p1.y_ <= q.y_ && q.y_ < p0.y_) || (p0.y_ <= q.y_ && q.y_ < p1.y_)) && p1.x_ > q.x_ {
+            if ((p1.y_ <= q.y_ && q.y_ < p0.y_) || (p0.y_ <= q.y_ && q.y_ < p1.y_)) && p1.x_ > q.x_
+            {
                 c = !c;
-
             }
             p0 = p1;
         }
         c
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #![allow(non_upper_case_globals)]
+
+    use super::*;
+
+    #[test]
+    pub fn test_rpolygon_ymono() {
+        let coords = vec![
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -4),
+            (1, 4),
+        ];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32>::new(*x, *y));
+        }
+        let (pointset, is_anticw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
+        for p in pointset.iter() {
+            print!("({}, {}) ", p.x_, p.y_);
+        }
+        let poly = RPolygon::<i32>::new(&pointset);
+        assert!(is_anticw);
+        assert_eq!(poly.signed_area(), 45);
+    }
+
+    #[test]
+    pub fn test_rpolygon_xmono() {
+        let coords = vec![
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -4),
+            (1, 4),
+        ];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32>::new(*x, *y));
+        }
+        let (pointset, is_anticw) = RPolygon::<i32>::create_xmono_rpolygon(&pointset);
+        for p in pointset.iter() {
+            print!("({}, {}) ", p.x_, p.y_);
+        }
+        let poly = RPolygon::<i32>::new(&pointset);
+        assert!(!is_anticw);
+        assert_eq!(poly.signed_area(), -53);
     }
 }

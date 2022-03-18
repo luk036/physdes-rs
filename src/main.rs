@@ -14,9 +14,7 @@ use crate::rectangle::Rect;
 
 mod polygon;
 
-
 mod rpolygon;
-
 
 fn main() {
     let a = Point::<i32>::new(12, 23);

@@ -78,7 +78,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a y-mono Polygon object
      */
-    pub fn create_ymono_polygon(coords: &Vec<Point<T>>) -> Vec<Point<T>> {
+    pub fn create_ymono_polygon(coords: &[Point<T>]) -> Vec<Point<T>> {
         let max_pt = *coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
         let min_pt = *coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
         let d = max_pt - min_pt;
@@ -112,9 +112,9 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
      * @return false
      */
     pub fn point_in_polygon(pointset: &[Point<T>], q: &Point<T>) -> bool {
-        let mut c = false;
         let n = pointset.len();
         let mut p0 = &pointset[n - 1];
+        let mut c = false;
         for p1 in pointset.iter() {
             if (p1.y_ <= q.y_ && q.y_ < p0.y_) || (p0.y_ <= q.y_ && q.y_ < p1.y_) {
                 let d = (q - p0).cross(&(p1 - p0));
@@ -140,13 +140,25 @@ mod test {
     #![allow(non_upper_case_globals)]
 
     use super::*;
-    
-    
 
     #[test]
-    pub fn test_polygon() {
-        let coords = vec![(-2, 2), (0, -1), (-5, 1), (-2, 4), (0, -4), (-4, 3), (-6, -2),
-                  (5, 1), (2, 2), (3, -3), (-3, -3), (3, 3), (-3, -4), (1, 4)];
+    pub fn test_polygon_xmono() {
+        let coords = vec![
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -3),
+            (3, 3),
+            (-3, -4),
+            (1, 4),
+        ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
             pointset.push(Point::<i32>::new(*x, *y));

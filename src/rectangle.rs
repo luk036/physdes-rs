@@ -1,6 +1,5 @@
 // #![no_std]
 
-
 // use core::iter::{Product, Sum};
 use core::ops::{Add, Sub};
 
@@ -17,8 +16,7 @@ use interval::Interval;
 
 use super::Vector2;
 
-use num_traits::{Num};
-
+use num_traits::Num;
 
 #[derive(Copy, Clone, Debug)]
 // #[repr(C)]
@@ -176,4 +174,3 @@ fn hash<T: hash::Hash>(x: &T) -> u64 {
     hasher.finish()
 }
 */
-
