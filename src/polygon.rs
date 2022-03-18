@@ -19,10 +19,10 @@ impl<T: Clone + Num + Copy> Polygon<T> {
      * @param[in] coords
      */
     pub fn new(coords: &[Point<T>]) -> Self {
-        let origin = coords[0].clone();
+        let origin = coords[0];
         let mut vecs = vec![];
         for pt in coords.iter().skip(1) {
-            vecs.push(pt - &origin);
+            vecs.push(pt - origin);
         }
         Polygon { origin, vecs }
     }
@@ -61,7 +61,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a x-mono Polygon object
      */
-    pub fn create_xmono_polygon(coords: &Vec<Point<T>>) -> Vec<Point<T>> {
+    pub fn create_xmono_polygon(coords: &[Point<T>]) -> Vec<Point<T>> {
         let max_pt = *coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
         let min_pt = *coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
         let d = max_pt - min_pt;
@@ -132,5 +132,30 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
             p0 = p1;
         }
         c
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #![allow(non_upper_case_globals)]
+
+    use super::*;
+    use core::f64;
+    use num_traits::Zero;
+
+    #[test]
+    pub fn test_polygon() {
+        let coords = vec![(-2, 2), (0, -1), (-5, 1), (-2, 4), (0, -4), (-4, 3), (-6, -2),
+                  (5, 1), (2, 2), (3, -3), (-3, -3), (3, 3), (-3, -4), (1, 4)];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32>::new(*x, *y));
+        }
+        let pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
+        for p in pointset.iter() {
+            print!("({}, {}) ", p.x_, p.y_);
+        }
+        let poly = Polygon::<i32>::new(&pointset);
+        assert_eq!(poly.signed_area_x2(), 111);
     }
 }
