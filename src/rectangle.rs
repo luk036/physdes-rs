@@ -1,14 +1,8 @@
 // #![no_std]
 
-#[cfg(any(test, feature = "std"))]
-// #[cfg_attr(test, macro_use)]
-// extern crate std;
 
-// use core::fmt;
-#[cfg(test)]
-use core::hash;
 // use core::iter::{Product, Sum};
-use core::ops::{Add, Neg, Sub};
+use core::ops::{Add, Sub};
 
 // use core::str::FromStr;
 #[cfg(feature = "std")]
@@ -23,8 +17,8 @@ use interval::Interval;
 
 use super::Vector2;
 
-use num_traits::{Num, Zero};
-use std::cmp::{max, min};
+use num_traits::{Num};
+
 
 #[derive(Copy, Clone, Debug)]
 // #[repr(C)]

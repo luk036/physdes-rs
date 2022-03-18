@@ -1,6 +1,6 @@
 use super::{Point, Vector2};
-use core::ops::{Add, Mul, Neg, Sub};
-use num_traits::{Num, Signed, Zero};
+
+use num_traits::{Num, Zero};
 
 /**
  * @brief Polygon
@@ -140,8 +140,8 @@ mod test {
     #![allow(non_upper_case_globals)]
 
     use super::*;
-    use core::f64;
-    use num_traits::Zero;
+    
+    
 
     #[test]
     pub fn test_polygon() {

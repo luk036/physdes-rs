@@ -1,5 +1,5 @@
 use super::{Point, Vector2};
-use num_traits::{Num, Signed, Zero};
+use num_traits::{Num};
 // use core::ops::{Add, Neg, Sub};
 
 /**
@@ -125,6 +125,6 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
             }
             p0 = p1;
         }
-        c;
+        c
     }
 }

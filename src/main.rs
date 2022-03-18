@@ -13,10 +13,10 @@ mod rectangle;
 use crate::rectangle::Rect;
 
 mod polygon;
-use crate::polygon::Polygon;
+
 
 mod rpolygon;
-use crate::rpolygon::RPolygon;
+
 
 fn main() {
     let a = Point::<i32>::new(12, 23);
