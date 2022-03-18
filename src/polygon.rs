@@ -1,53 +1,41 @@
-use super::Point;
+use super::{Point, Vector2};
+use core::ops::{Add, Mul, Neg, Sub};
+use num_traits::{Num, Signed, Zero};
 
 /**
  * @brief Polygon
  *
  * @tparam T
  */
-pub struct Polygon {
-  private:
-    Point<T> _origin;
-    Vec<Vector2<T>> _vecs;
+pub struct Polygon<T> {
+    origin: Point<T>,
+    vecs: Vec<Vector2<T>>,
+}
 
-  public:
+impl<T: Clone + Num + Copy> Polygon<T> {
     /**
      * @brief Construct a new Polygon object
      *
-     * @param[in] pointset
+     * @param[in] coords
      */
-    explicit constexpr Polygon(&[Point<T>] pointset) : _origin{pointset.front()} {
-        let mut it = pointset.begin();
-        for (++it; it != pointset.end(); ++it) {
-            self.vecs.push_back(*it - self.origin);
+    pub fn new(coords: &[Point<T>]) -> Self {
+        let origin = coords[0].clone();
+        let mut vecs = vec![];
+        for pt in coords.iter().skip(1) {
+            vecs.push(pt - &origin);
         }
+        Polygon { origin, vecs }
     }
 
-    /**
-     * @brief
-     *
-     * @param[in] rhs
-     * @return constexpr Point&
-     */
-    pub fn operator+=(&mut self, rhs: &Vector2<T>) -> Polygon& {
-        self.origin += rhs;
-        return *this;
-    }
-
-    /**
-     * @brief
-     *
-     * @return T
-     */
     pub fn signed_area_x2(&self) -> T {
         let vs = &self.vecs;
         let n = vs.len();
         assert!(n >= 2);
-        let mut res = vs[0].x() * vs[1].y() - vs[n - 1].x() * vs[n - 2].y();
-        for i in 1..n-1 {
-            res += vs[i].x() * (vs[i + 1].y() - vs[i - 1].y());
+        let mut res = vs[0].x_ * vs[1].y_ - vs[n - 1].x_ * vs[n - 2].y_;
+        for i in 1..n - 1 {
+            res = res + vs[i].x_ * (vs[i + 1].y_ - vs[i - 1].y_);
         }
-        res;
+        res
     }
 
     /**
@@ -55,80 +43,53 @@ pub struct Polygon {
      *
      * @return Point<T>
      */
-    pub fn lb(&self) -> Point<T>;
+    pub fn lb(&self) -> Point<T> {
+        unimplemented!()
+    }
 
     /**
      * @brief
      *
      * @return Point<T>
      */
-    pub fn ub(&self) -> Point<T>;
+    pub fn ub(&self) -> Point<T> {
+        unimplemented!()
+    }
 }
 
-impl<T> Polygon<T> {
-
+impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
-     * @brief
-     *
-     * @tparam Stream
-     * @tparam T
-     * @param[out] out
-     * @param[in] r
-     * @return Stream&
+     * @brief Create a x-mono Polygon object
      */
-    template <class Stream, typename T> let mut operator<<(Stream& out, r: &Polygon<T>)
-        -> Stream& {
-        for (let p : r) {
-            out << "  \\draw " << p << ";\n";
-        }
-        return out;
+    pub fn create_xmono_polygon(coords: &Vec<Point<T>>) -> Vec<Point<T>> {
+        let max_pt = *coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let min_pt = *coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let d = max_pt - min_pt;
+        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = coords
+            .iter()
+            .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
+        lst1.sort_by_key(|&a| (a.x_, a.y_));
+        lst2.sort_by_key(|&a| (a.x_, a.y_));
+        lst2.reverse();
+        lst1.append(&mut lst2);
+        lst1
     }
 
     /**
-     * @brief Create a mono Polygon object
-     *
-     * @tparam FwIter
-     * @tparam Compare
-     * @param[in] first
-     * @param[in] last
-     * @param dir
+     * @brief Create a y-mono Polygon object
      */
-    template <typename FwIter, typename Compare>
-    pub fn create_mono_polygon(FwIter&& first, FwIter&& last, Compare&& dir) {
-        assert!(first != last);
-
-        let mut max_pt = *std::max_element(first, last, dir);
-        let mut min_pt = *std::min_element(first, last, dir);
-        let mut d = max_pt - min_pt;
-        let mut middle
-            = std::partition(first, last, [&](let& a) { return d.cross(a - min_pt) <= 0; });
-        std::sort(first, middle, dir);
-        std::sort(middle, last, dir);
-        std::reverse(middle, last);
-    }
-
-    /**
-     * @brief Create a xmono Polygon object
-     *
-     * @tparam FwIter
-     * @param[in] first
-     * @param[in] last
-     */
-    template <typename FwIter> pub fn create_xmono_polygon(FwIter&& first, FwIter&& last) {
-        return create_mono_polygon(first, last, std::less<>());
-    }
-
-    /**
-     * @brief Create a ymono Polygon object
-     *
-     * @tparam FwIter
-     * @param[in] first
-     * @param[in] last
-     */
-    template <typename FwIter> pub fn create_ymono_polygon(FwIter&& first, FwIter&& last) {
-        return create_mono_polygon(first, last, [](let& a, let& b) {
-            return std::tie(a.y(), a.x()) < std::tie(b.y(), b.x());
-        });
+    pub fn create_ymono_polygon(coords: &Vec<Point<T>>) -> Vec<Point<T>> {
+        let max_pt = *coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let min_pt = *coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let d = max_pt - min_pt;
+        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = coords
+            .iter()
+            .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
+        lst1.sort_by_key(|&a| (a.y_, a.x_));
+        lst2.sort_by_key(|&a| (a.y_, a.x_));
+        lst2.reverse();
+        lst1.append(&mut lst2);
+        lst1
     }
 
     /**
@@ -145,46 +106,31 @@ impl<T> Polygon<T> {
      * See http://www.faqs.org/faqs/graphics/algorithms-faq/ Subject 2.03
      *
      * @tparam T
-     * @param[in] pointset
+     * @param[in] coords
      * @param[in] q
      * @return true
      * @return false
      */
-    template <typename T>
-    pub fn point_in_polygon(&[Point<T>] pointset, q: &Point<T>) -> bool {
+    pub fn point_in_polygon(pointset: &[Point<T>], q: &Point<T>) -> bool {
         let mut c = false;
-        let n = vs.len();
-        let mut p0 = pointset[n - 1];
-        for p1 in pointset {
-            if (p1.y() <= q.y() && q.y() < p0.y()) || (p0.y() <= q.y() && q.y() < p1.y()) {
-                let mut d = (q - p0).cross(p1 - p0);
-                if p1.y() > p0.y() {
-                    if d < 0 {
+        let n = pointset.len();
+        let mut p0 = &pointset[n - 1];
+        for p1 in pointset.iter() {
+            if (p1.y_ <= q.y_ && q.y_ < p0.y_) || (p0.y_ <= q.y_ && q.y_ < p1.y_) {
+                let d = (q - p0).cross(&(p1 - p0));
+                if p1.y_ > p0.y_ {
+                    if d < Zero::zero() {
                         c = !c;
                     }
-                } else {  // v1.y() < v0.y()
-                    if d > 0 {
+                } else {
+                    // v1.y_ < v0.y_
+                    if d > Zero::zero() {
                         c = !c;
                     }
                 }
             }
             p0 = p1;
         }
-        return c;
-    }
-
-    /**
-     * @brief Polygon is clockwise
-     *
-     * @tparam T
-     * @param[in] pointset
-     * @return true
-     * @return false
-     */
-    template <typename T> pub fn polygon_is_clockwise(&[Point<T>] pointset) -> bool {
-        let mut it1 = std::min_element(pointset.begin(), pointset.end());
-        let mut it0 = it1 != pointset.begin() ? std::prev(it1) : pointset.end() - 1;
-        let mut it2 = std::next(it1) != pointset.end() ? std::next(it1) : pointset.begin();
-        return (*it1 - *it0).cross(*it2 - *it1) < 0;
+        c
     }
 }
