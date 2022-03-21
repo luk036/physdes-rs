@@ -64,8 +64,8 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     pub fn create_xmono_rpolygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let rightmost = *coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
-        let leftmost = *coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let rightmost = coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let leftmost = coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
         let is_anticlockwise = rightmost.y_ <= leftmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
             coords.iter().partition(|&pt| (pt.y_ <= leftmost.y_))
@@ -80,8 +80,8 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     }
 
     pub fn create_ymono_rpolygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let topmost = *coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let botmost = *coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let topmost = coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let botmost = coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
         let is_anticlockwise = topmost.y_ >= botmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
             coords.iter().partition(|&pt| (pt.x_ >= botmost.x_))

@@ -9,12 +9,14 @@ extern crate interval;
 use interval::ops::*;
 use interval::Interval;
 
-mod rectangle;
-use crate::rectangle::Rect;
+// mod rectangle;
+// use crate::rectangle::Rect;
 
 mod polygon;
 
 mod rpolygon;
+
+mod halton_int;
 
 fn main() {
     let a = Point::<i32>::new(12, 23);
@@ -37,8 +39,8 @@ fn main() {
 
     let x = Interval::<i32>::new(12, 23);
     let y = Interval::<i32>::new(42, 53);
-    let r = Rect::<i32>::new(x, y);
-    println!("{:?}", r);
+    // let r = Rect::<i32>::new(x, y);
+    // println!("{:?}", r);
 
     // let mm = Matrix2::<i32>::new(a, b);
     // println!("{:?}", mm);

@@ -62,8 +62,8 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
      * @brief Create a x-mono Polygon object
      */
     pub fn create_xmono_polygon(coords: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = *coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
-        let min_pt = *coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let max_pt = coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let min_pt = coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
         let d = max_pt - min_pt;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = coords
             .iter()
@@ -79,8 +79,8 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
      * @brief Create a y-mono Polygon object
      */
     pub fn create_ymono_polygon(coords: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = *coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let min_pt = *coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let max_pt = coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let min_pt = coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
         let d = max_pt - min_pt;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = coords
             .iter()
@@ -141,7 +141,6 @@ mod test {
 
     use super::*;
 
-    #[test]
     pub fn test_polygon_xmono() {
         let coords = vec![
             (-2, 2),
