@@ -8,7 +8,7 @@ use num_traits::{Num, Zero};
  * @tparam T
  */
 pub struct Polygon<T> {
-    origin: Point<T>,
+    pub origin: Point<T>,
     vecs: Vec<Vector2<T>>,
 }
 
@@ -61,11 +61,11 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a x-mono Polygon object
      */
-    pub fn create_xmono_polygon(coords: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
-        let min_pt = coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+    pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
+        let max_pt = pointset.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let min_pt = pointset.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
         let d = max_pt - min_pt;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = coords
+        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
             .iter()
             .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
         lst1.sort_by_key(|&a| (a.x_, a.y_));
@@ -78,11 +78,11 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a y-mono Polygon object
      */
-    pub fn create_ymono_polygon(coords: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let min_pt = coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
+    pub fn create_ymono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
+        let max_pt = pointset.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let min_pt = pointset.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
         let d = max_pt - min_pt;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = coords
+        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
             .iter()
             .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
         lst1.sort_by_key(|&a| (a.y_, a.x_));
@@ -141,7 +141,38 @@ mod test {
 
     use super::*;
 
-    pub fn test_polygon_xmono() {
+    #[test]
+    fn test_ymono_polygon() {
+        let coords = vec![
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -3),
+            (3, 3),
+            (-3, -4),
+            (1, 4),
+        ];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32>::new(*x, *y));
+        }
+        let pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
+        for p in pointset.iter() {
+            print!("({}, {}) ", p.x_, p.y_);
+        }
+        let poly = Polygon::<i32>::new(&pointset);
+        assert_eq!(poly.signed_area_x2(), 102);
+    }
+
+    #[test]
+    fn test_xmono_polygon() {
         let coords = vec![
             (-2, 2),
             (0, -1),

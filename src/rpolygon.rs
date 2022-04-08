@@ -8,7 +8,7 @@ use num_traits::Num;
  * @tparam T
  */
 pub struct RPolygon<T> {
-    origin: Point<T>,
+    pub origin: Point<T>,
     vecs: Vec<Vector2<T>>,
 }
 
@@ -63,14 +63,14 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
 }
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
-    pub fn create_xmono_rpolygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let rightmost = coords.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
-        let leftmost = coords.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+    pub fn create_xmono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
+        let rightmost = pointset.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let leftmost = pointset.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
         let is_anticlockwise = rightmost.y_ <= leftmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            coords.iter().partition(|&pt| (pt.y_ <= leftmost.y_))
+            pointset.iter().partition(|&pt| (pt.y_ <= leftmost.y_))
         } else {
-            coords.iter().partition(|&pt| (pt.y_ >= leftmost.y_))
+            pointset.iter().partition(|&pt| (pt.y_ >= leftmost.y_))
         };
         lst1.sort_by_key(|&a| (a.x_, a.y_));
         lst2.sort_by_key(|&a| (a.x_, a.y_));
@@ -79,14 +79,14 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
         (lst1, is_anticlockwise)
     }
 
-    pub fn create_ymono_rpolygon(coords: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let topmost = coords.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let botmost = coords.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
+    pub fn create_ymono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
+        let topmost = pointset.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let botmost = pointset.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
         let is_anticlockwise = topmost.y_ >= botmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            coords.iter().partition(|&pt| (pt.x_ >= botmost.x_))
+            pointset.iter().partition(|&pt| (pt.x_ >= botmost.x_))
         } else {
-            coords.iter().partition(|&pt| (pt.x_ <= botmost.x_))
+            pointset.iter().partition(|&pt| (pt.x_ <= botmost.x_))
         };
         lst1.sort_by_key(|&a| (a.y_, a.x_));
         lst2.sort_by_key(|&a| (a.y_, a.x_));
@@ -136,7 +136,7 @@ mod test {
     use super::*;
 
     #[test]
-    pub fn test_rpolygon_ymono() {
+    pub fn test_ymono_rpolygon() {
         let coords = vec![
             (-2, 2),
             (0, -1),
@@ -165,7 +165,7 @@ mod test {
     }
 
     #[test]
-    pub fn test_rpolygon_xmono() {
+    pub fn test_xmono_rpolygon() {
         let coords = vec![
             (-2, 2),
             (0, -1),
