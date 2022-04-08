@@ -106,7 +106,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
      * each Point is "in" exactly one Polygon.
      * (See p.243 of [O'Rourke (C)] for a discussion of boundary behavior.)
      *
-     * See http://www.faqs.org/faqs/graphics/algorithms-faq/ Subject 2.03
+     * See <http://www.faqs.org/faqs/graphics/algorithms-faq/> Subject 2.03
      *
      * @tparam T
      * @param[in] pointset
