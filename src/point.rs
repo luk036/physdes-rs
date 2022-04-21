@@ -20,14 +20,24 @@ use num_traits::Num;
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 // #[repr(C)]
 pub struct Point<T> {
-    /// Real portion of the vector2 object
+    /// x portion of the Point object
     pub x_: T,
-    /// Imaginary portion of the vector2 object
+    /// y portion of the Point object
     pub y_: T,
 }
 
 impl<T> Point<T> {
     /// Create a new Point
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// 
+    /// let a = Point::new(3, 4);
+    ///
+    /// assert_eq!(a.x_, 3);
+    /// assert_eq!(a.y_, 4);
     #[inline]
     pub const fn new(x_: T, y_: T) -> Self {
         Point { x_, y_ }
@@ -88,6 +98,20 @@ forward_all_binop!(impl Add, add);
 impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
     type Output = Self;
 
+    /// Translate a new Point
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::vector2::Vector2;
+    /// 
+    /// let a = Point::new(3, 4);
+    /// let v = Vector2::new(5, 3);
+    /// let a2 = a + v;
+    ///
+    /// assert_eq!(a2.x_, 8);
+    /// assert_eq!(a2.y_, 7);
     #[inline]
     fn add(self, other: Vector2<T>) -> Self::Output {
         Self::Output::new(self.x_ + other.x_, self.y_ + other.y_)
@@ -100,6 +124,20 @@ forward_all_binop!(impl Sub, sub);
 impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
     type Output = Self;
 
+    /// Translate a new Point
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::vector2::Vector2;
+    /// 
+    /// let a = Point::new(3, 4);
+    /// let v = Vector2::new(5, 3);
+    /// let a2 = a - v;
+    ///
+    /// assert_eq!(a2.x_, -2);
+    /// assert_eq!(a2.y_, 1);
     #[inline]
     fn sub(self, other: Vector2<T>) -> Self::Output {
         Self::Output::new(self.x_ - other.x_, self.y_ - other.y_)
@@ -156,7 +194,20 @@ macro_rules! forward_all_binop2 {
 // arithmetic
 forward_all_binop2!(impl Sub, sub);
 
-// (a, b) + (c, d) == (a + c), (b + d)
+/// Displacement of two Points
+///
+/// # Examples
+///
+/// ```
+/// use physdes::point::Point;
+/// use physdes::vector2::Vector2;
+/// 
+/// let a = Point::new(3, 4);
+/// let b = Point::new(5, 3);
+/// let v = a - b;
+///
+/// assert_eq!(v.x_, -2);
+/// assert_eq!(v.y_, 1);
 impl<T: Clone + Num> Sub for Point<T> {
     type Output = Vector2<T>;
 
@@ -208,6 +259,18 @@ mod opassign {
 impl<T: Clone + Num + Neg<Output = T>> Neg for Point<T> {
     type Output = Self;
 
+    /// Negate a Points
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// 
+    /// let a = Point::new(3, 4);
+    /// let b = -a;
+    ///
+    /// assert_eq!(b.x_, -3);
+    /// assert_eq!(b.y_, -4);
     #[inline]
     fn neg(self) -> Self::Output {
         Self::Output::new(-self.x_, -self.y_)

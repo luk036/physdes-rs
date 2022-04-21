@@ -9,6 +9,7 @@ pub use crate::vector2::Vector2;
 pub use crate::polygon::Polygon;
 pub use crate::rpolygon::RPolygon;
 
+/// TODO: rectangle
 // mod rectangle;
 // use crate::rectangle::Rect;
 
@@ -40,8 +41,8 @@ mod tests {
         // let y = Interval::<i32>::new(42, 53);
         println!("{:?}", x);
 
-        let _x = Interval::<i32>::new(12, 23);
-        let _y = Interval::<i32>::new(42, 53);
+        // let _x = Interval::<i32>::new(12, 23);
+        // let _y = Interval::<i32>::new(42, 53);
         // let r = Rect::<i32>::new(x, y);
         // println!("{:?}", r);
 

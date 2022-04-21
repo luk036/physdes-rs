@@ -19,9 +19,9 @@ use num_traits::{Num, Signed, Zero};
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 // #[repr(C)]
 pub struct Vector2<T> {
-    /// Real portion of the vector2 object
+    /// x portion of the Vector2 object
     pub x_: T,
-    /// Imaginary portion of the vector2 object
+    /// y portion of the Vector2 object
     pub y_: T,
 }
 
