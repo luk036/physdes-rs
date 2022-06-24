@@ -11,8 +11,8 @@ use core::hash;
 use core::ops::{Add, Neg, Sub};
 
 // use core::str::FromStr;
-#[cfg(feature = "std")]
-use std::error::Error;
+// #[cfg(feature = "std")]
+// use std::error::Error;
 
 use super::Vector2;
 use num_traits::Num;

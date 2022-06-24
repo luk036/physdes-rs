@@ -13,7 +13,6 @@ pub use crate::rpolygon::RPolygon;
 // mod rectangle;
 // use crate::rectangle::Rect;
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
