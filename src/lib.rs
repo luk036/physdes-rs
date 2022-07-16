@@ -19,6 +19,7 @@ mod tests {
     extern crate interval;
     use interval::ops::*;
     use interval::Interval;
+    use quickcheck_macros::quickcheck;
 
     #[test]
     pub fn it_works() {
@@ -47,5 +48,12 @@ mod tests {
 
         // let mm = Matrix2::<i32>::new(a, b);
         // println!("{:?}", mm);
+    }
+
+    #[quickcheck]
+    fn check_point(ax: u16, bx: u16) -> bool {
+        let a = Point::<i32>::new(ax as i32, 23);
+        let b = Vector2::<i32>::new(bx as i32, 45);
+        a == (a - b) + b
     }
 }
