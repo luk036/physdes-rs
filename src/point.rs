@@ -33,7 +33,7 @@ impl<T> Point<T> {
     ///
     /// ```
     /// use physdes::point::Point;
-    /// 
+    ///
     /// let a = Point::new(3, 4);
     ///
     /// assert_eq!(a.x_, 3);
@@ -105,7 +105,7 @@ impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
     /// ```
     /// use physdes::point::Point;
     /// use physdes::vector2::Vector2;
-    /// 
+    ///
     /// let a = Point::new(3, 4);
     /// let v = Vector2::new(5, 3);
     /// let a2 = a + v;
@@ -131,7 +131,7 @@ impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
     /// ```
     /// use physdes::point::Point;
     /// use physdes::vector2::Vector2;
-    /// 
+    ///
     /// let a = Point::new(3, 4);
     /// let v = Vector2::new(5, 3);
     /// let a2 = a - v;
@@ -201,7 +201,7 @@ forward_all_binop2!(impl Sub, sub);
 /// ```
 /// use physdes::point::Point;
 /// use physdes::vector2::Vector2;
-/// 
+///
 /// let a = Point::new(3, 4);
 /// let b = Point::new(5, 3);
 /// let v = a - b;
@@ -265,7 +265,7 @@ impl<T: Clone + Num + Neg<Output = T>> Neg for Point<T> {
     ///
     /// ```
     /// use physdes::point::Point;
-    /// 
+    ///
     /// let a = Point::new(3, 4);
     /// let b = -a;
     ///

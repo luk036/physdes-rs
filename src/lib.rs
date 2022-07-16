@@ -1,13 +1,13 @@
-pub mod vector2;
-pub mod point;
 pub mod halton_int;
+pub mod point;
 pub mod polygon;
 pub mod rpolygon;
+pub mod vector2;
 
 pub use crate::point::Point;
-pub use crate::vector2::Vector2;
 pub use crate::polygon::Polygon;
 pub use crate::rpolygon::RPolygon;
+pub use crate::vector2::Vector2;
 
 /// TODO: rectangle
 // mod rectangle;
