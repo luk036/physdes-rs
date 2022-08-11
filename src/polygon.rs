@@ -61,15 +61,35 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a x-mono Polygon object
      */
+    // pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>> 
+    // where
+    //     F: FnMut(&&Point<T>) -> (T, T) + Clone
+    // {
+    //     let max_pt = pointset.iter().max_by_key(f.clone()).unwrap();
+    //     let min_pt = pointset.iter().min_by_key(f.clone()).unwrap();
+    //     let d = max_pt - min_pt;
+    //     let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
+    //         .iter()
+    //         .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
+    //     lst1.sort_by_key(|a| (a.x_, a.y_));
+    //     lst2.sort_by_key(|a| (a.x_, a.y_));
+    //     lst2.reverse();
+    //     lst1.append(&mut lst2);
+    //     lst1
+    // }
+
+    /**
+     * @brief Create a x-mono Polygon object
+     */
     pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = pointset.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
-        let min_pt = pointset.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let max_pt = pointset.iter().max_by_key(|a| (a.x_, a.y_)).unwrap();
+        let min_pt = pointset.iter().min_by_key(|a| (a.x_, a.y_)).unwrap();
         let d = max_pt - min_pt;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
             .iter()
             .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
-        lst1.sort_by_key(|&a| (a.x_, a.y_));
-        lst2.sort_by_key(|&a| (a.x_, a.y_));
+        lst1.sort_by_key(|a| (a.x_, a.y_));
+        lst2.sort_by_key(|a| (a.x_, a.y_));
         lst2.reverse();
         lst1.append(&mut lst2);
         lst1
