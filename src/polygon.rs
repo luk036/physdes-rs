@@ -61,59 +61,41 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a x-mono Polygon object
      */
-    // pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>> 
-    // where
-    //     F: FnMut(&&Point<T>) -> (T, T) + Clone
-    // {
-    //     let max_pt = pointset.iter().max_by_key(f.clone()).unwrap();
-    //     let min_pt = pointset.iter().min_by_key(f.clone()).unwrap();
-    //     let d = max_pt - min_pt;
-    //     let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
-    //         .iter()
-    //         .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
-    //     lst1.sort_by_key(|a| (a.x_, a.y_));
-    //     lst2.sort_by_key(|a| (a.x_, a.y_));
-    //     lst2.reverse();
-    //     lst1.append(&mut lst2);
-    //     lst1
-    // }
+    pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>> 
+    where
+        F: Fn(&&Point<T>) -> (T, T)
+    {
+        let max_pt = pointset.iter().max_by_key(&f).unwrap();
+        let min_pt = pointset.iter().min_by_key(&f).unwrap();
+        let d = max_pt - min_pt;
+        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
+            .iter()
+            .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
+        lst1.sort_by_key(|a| (&f)(&a));
+        lst2.sort_by_key(|a| (&f)(&a));
+        lst2.reverse();
+        lst1.append(&mut lst2);
+        lst1
+    }
 
     /**
      * @brief Create a x-mono Polygon object
      */
+    #[inline]
     pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = pointset.iter().max_by_key(|a| (a.x_, a.y_)).unwrap();
-        let min_pt = pointset.iter().min_by_key(|a| (a.x_, a.y_)).unwrap();
-        let d = max_pt - min_pt;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
-            .iter()
-            .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
-        lst1.sort_by_key(|a| (a.x_, a.y_));
-        lst2.sort_by_key(|a| (a.x_, a.y_));
-        lst2.reverse();
-        lst1.append(&mut lst2);
-        lst1
+        Self::create_mono_polygon(pointset, |a| (a.x_, a.y_))
     }
 
     /**
-     * @brief Create a y-mono Polygon object
+     * @brief Create a x-mono Polygon object
      */
+    #[inline]
     pub fn create_ymono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
-        let max_pt = pointset.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let min_pt = pointset.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let d = max_pt - min_pt;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
-            .iter()
-            .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
-        lst1.sort_by_key(|&a| (a.y_, a.x_));
-        lst2.sort_by_key(|&a| (a.y_, a.x_));
-        lst2.reverse();
-        lst1.append(&mut lst2);
-        lst1
+        Self::create_mono_polygon(pointset, |a| (a.y_, a.x_))
     }
 
     /**
-     * @brief determine if a Point is within a Polygon
+     * @brief Determine if a Point is within a Polygon
      *
      * The code below is from Wm. Randolph Franklin <wrf@ecse.rpi.edu>
      * (see URL below) with some minor modifications for integer. It returns

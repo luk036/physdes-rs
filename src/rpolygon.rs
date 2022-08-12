@@ -64,32 +64,32 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     pub fn create_xmono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let rightmost = pointset.iter().max_by_key(|&a| (a.x_, a.y_)).unwrap();
-        let leftmost = pointset.iter().min_by_key(|&a| (a.x_, a.y_)).unwrap();
+        let rightmost = pointset.iter().max_by_key(|a| (a.x_, a.y_)).unwrap();
+        let leftmost = pointset.iter().min_by_key(|a| (a.x_, a.y_)).unwrap();
         let is_anticlockwise = rightmost.y_ <= leftmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            pointset.iter().partition(|&pt| (pt.y_ <= leftmost.y_))
+            pointset.iter().partition(|pt| (pt.y_ <= leftmost.y_))
         } else {
-            pointset.iter().partition(|&pt| (pt.y_ >= leftmost.y_))
+            pointset.iter().partition(|pt| (pt.y_ >= leftmost.y_))
         };
-        lst1.sort_by_key(|&a| (a.x_, a.y_));
-        lst2.sort_by_key(|&a| (a.x_, a.y_));
+        lst1.sort_by_key(|a| (a.x_, a.y_));
+        lst2.sort_by_key(|a| (a.x_, a.y_));
         lst2.reverse();
         lst1.append(&mut lst2);
         (lst1, is_anticlockwise)
     }
 
     pub fn create_ymono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let topmost = pointset.iter().max_by_key(|&a| (a.y_, a.x_)).unwrap();
-        let botmost = pointset.iter().min_by_key(|&a| (a.y_, a.x_)).unwrap();
+        let topmost = pointset.iter().max_by_key(|a| (a.y_, a.x_)).unwrap();
+        let botmost = pointset.iter().min_by_key(|a| (a.y_, a.x_)).unwrap();
         let is_anticlockwise = topmost.y_ >= botmost.y_;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            pointset.iter().partition(|&pt| (pt.x_ >= botmost.x_))
+            pointset.iter().partition(|pt| (pt.x_ >= botmost.x_))
         } else {
-            pointset.iter().partition(|&pt| (pt.x_ <= botmost.x_))
+            pointset.iter().partition(|pt| (pt.x_ <= botmost.x_))
         };
-        lst1.sort_by_key(|&a| (a.y_, a.x_));
-        lst2.sort_by_key(|&a| (a.y_, a.x_));
+        lst1.sort_by_key(|a| (a.y_, a.x_));
+        lst2.sort_by_key(|a| (a.y_, a.x_));
         lst2.reverse();
         lst1.append(&mut lst2);
         (lst1, is_anticlockwise)
