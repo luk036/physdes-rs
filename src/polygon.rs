@@ -61,9 +61,9 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /**
      * @brief Create a x-mono Polygon object
      */
-    pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>> 
+    pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>>
     where
-        F: Fn(&&Point<T>) -> (T, T)
+        F: Fn(&&Point<T>) -> (T, T),
     {
         let max_pt = pointset.iter().max_by_key(&f).unwrap();
         let min_pt = pointset.iter().min_by_key(&f).unwrap();
