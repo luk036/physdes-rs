@@ -71,8 +71,8 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
             .iter()
             .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
-        lst1.sort_by_key(|a| (&f)(&a));
-        lst2.sort_by_key(|a| (&f)(&a));
+        lst1.sort_by_key(|a| f(&a));
+        lst2.sort_by_key(|a| f(&a));
         lst2.reverse();
         lst1.append(&mut lst2);
         lst1
