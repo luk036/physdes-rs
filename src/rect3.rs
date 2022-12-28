@@ -22,16 +22,16 @@ use num_traits::Num;
 // #[repr(C)]
 pub struct Rect<T> {
     /// Real portion of the vector2 object
-    pub x_: Interval<T>,
+    pub xcoord: Interval<T>,
     /// Imaginary portion of the vector2 object
-    pub y_: Interval<T>,
+    pub ycoord: Interval<T>,
 }
 
 impl<T> Rect<T> {
     /// Create a new Rect
     #[inline]
-    pub const fn new(x_: Interval<T>, y_: Interval<T>) -> Self {
-        Rect { x_, y_ }
+    pub const fn new(xcoord: Interval<T>, ycoord: Interval<T>) -> Self {
+        Rect { xcoord, ycoord }
     }
 }
 
@@ -91,7 +91,7 @@ impl<T: Clone + Num + Width + std::ops::Add<Output = T>> Add<Vector2<T>> for Rec
 
     #[inline]
     fn add(self, other: Vector2<T>) -> Self::Output {
-        Self::Output::new(self.x_ + other.x_, self.y_ + other.y_)
+        Self::Output::new(self.xcoord + other.xcoord, self.ycoord + other.ycoord)
     }
 }
 
@@ -103,7 +103,7 @@ impl<T: Clone + Num + Width + std::ops::Sub<Output = T>> Sub<Vector2<T>> for Rec
 
     #[inline]
     fn sub(self, other: Vector2<T>) -> Self::Output {
-        Self::Output::new(self.x_ - other.x_, self.y_ - other.y_)
+        Self::Output::new(self.xcoord - other.xcoord, self.ycoord - other.ycoord)
     }
 }
 
@@ -120,15 +120,15 @@ mod opassign {
 
     impl<T: Clone + NumAssign> AddAssign<Vector2<T>> for Rect<T> {
         fn add_assign(&mut self, other: Vector2<T>) {
-            self.x_ += other.x_;
-            self.y_ += other.y_;
+            self.xcoord += other.xcoord;
+            self.ycoord += other.ycoord;
         }
     }
 
     impl<T: Clone + NumAssign> SubAssign<Vector2<T>> for Rect<T> {
         fn sub_assign(&mut self, other: Vector2<T>) {
-            self.x_ -= other.x_;
-            self.y_ -= other.y_;
+            self.xcoord -= other.xcoord;
+            self.ycoord -= other.ycoord;
         }
     }
 
@@ -152,7 +152,7 @@ impl<T: Clone + Num + Neg<Output = T>> Neg for Rect<T> {
 
     #[inline]
     fn neg(self) -> Self::Output {
-        Self::Output::new(-self.x_, -self.y_)
+        Self::Output::new(-self.xcoord, -self.ycoord)
     }
 }
 

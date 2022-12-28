@@ -83,7 +83,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
      */
     #[inline]
     pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
-        Self::create_mono_polygon(pointset, |a| (a.x_, a.y_))
+        Self::create_mono_polygon(pointset, |a| (a.xcoord, a.ycoord))
     }
 
     /**
@@ -91,7 +91,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
      */
     #[inline]
     pub fn create_ymono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
-        Self::create_mono_polygon(pointset, |a| (a.y_, a.x_))
+        Self::create_mono_polygon(pointset, |a| (a.ycoord, a.xcoord))
     }
 
     /**
@@ -118,14 +118,16 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
         let mut p0 = &pointset[n - 1];
         let mut c = false;
         for p1 in pointset.iter() {
-            if (p1.y_ <= q.y_ && q.y_ < p0.y_) || (p0.y_ <= q.y_ && q.y_ < p1.y_) {
+            if (p1.ycoord <= q.ycoord && q.ycoord < p0.ycoord)
+                || (p0.ycoord <= q.ycoord && q.ycoord < p1.ycoord)
+            {
                 let d = (q - p0).cross(&(p1 - p0));
-                if p1.y_ > p0.y_ {
+                if p1.ycoord > p0.ycoord {
                     if d < Zero::zero() {
                         c = !c;
                     }
                 } else {
-                    // v1.y_ < v0.y_
+                    // v1.ycoord < v0.ycoord
                     if d > Zero::zero() {
                         c = !c;
                     }
@@ -167,7 +169,7 @@ mod test {
         }
         let pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
         for p in pointset.iter() {
-            print!("({}, {}) ", p.x_, p.y_);
+            print!("({}, {}) ", p.xcoord, p.ycoord);
         }
         let poly = Polygon::<i32>::new(&pointset);
         assert_eq!(poly.signed_area_x2(), 102);
@@ -197,7 +199,7 @@ mod test {
         }
         let pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
         for p in pointset.iter() {
-            print!("({}, {}) ", p.x_, p.y_);
+            print!("({}, {}) ", p.xcoord, p.ycoord);
         }
         let poly = Polygon::<i32>::new(&pointset);
         assert_eq!(poly.signed_area_x2(), 111);

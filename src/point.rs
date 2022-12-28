@@ -21,9 +21,9 @@ use num_traits::Num;
 // #[repr(C)]
 pub struct Point<T> {
     /// x portion of the Point object
-    pub x_: T,
+    pub xcoord: T,
     /// y portion of the Point object
-    pub y_: T,
+    pub ycoord: T,
 }
 
 impl<T> Point<T> {
@@ -36,11 +36,11 @@ impl<T> Point<T> {
     ///
     /// let a = Point::new(3, 4);
     ///
-    /// assert_eq!(a.x_, 3);
-    /// assert_eq!(a.y_, 4);
+    /// assert_eq!(a.xcoord, 3);
+    /// assert_eq!(a.ycoord, 4);
     #[inline]
-    pub const fn new(x_: T, y_: T) -> Self {
-        Point { x_, y_ }
+    pub const fn new(xcoord: T, ycoord: T) -> Self {
+        Point { xcoord, ycoord }
     }
 }
 
@@ -110,11 +110,11 @@ impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
     /// let v = Vector2::new(5, 3);
     /// let a2 = a + v;
     ///
-    /// assert_eq!(a2.x_, 8);
-    /// assert_eq!(a2.y_, 7);
+    /// assert_eq!(a2.xcoord, 8);
+    /// assert_eq!(a2.ycoord, 7);
     #[inline]
     fn add(self, other: Vector2<T>) -> Self::Output {
-        Self::Output::new(self.x_ + other.x_, self.y_ + other.y_)
+        Self::Output::new(self.xcoord + other.x_, self.ycoord + other.y_)
     }
 }
 
@@ -136,11 +136,11 @@ impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
     /// let v = Vector2::new(5, 3);
     /// let a2 = a - v;
     ///
-    /// assert_eq!(a2.x_, -2);
-    /// assert_eq!(a2.y_, 1);
+    /// assert_eq!(a2.xcoord, -2);
+    /// assert_eq!(a2.ycoord, 1);
     #[inline]
     fn sub(self, other: Vector2<T>) -> Self::Output {
-        Self::Output::new(self.x_ - other.x_, self.y_ - other.y_)
+        Self::Output::new(self.xcoord - other.x_, self.ycoord - other.y_)
     }
 }
 
@@ -213,7 +213,7 @@ impl<T: Clone + Num> Sub for Point<T> {
 
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
-        Self::Output::new(self.x_ - other.x_, self.y_ - other.y_)
+        Self::Output::new(self.xcoord - other.xcoord, self.ycoord - other.ycoord)
     }
 }
 
@@ -229,15 +229,15 @@ mod opassign {
 
     impl<T: Clone + NumAssign> AddAssign<Vector2<T>> for Point<T> {
         fn add_assign(&mut self, other: Vector2<T>) {
-            self.x_ += other.x_;
-            self.y_ += other.y_;
+            self.xcoord += other.x_;
+            self.ycoord += other.y_;
         }
     }
 
     impl<T: Clone + NumAssign> SubAssign<Vector2<T>> for Point<T> {
         fn sub_assign(&mut self, other: Vector2<T>) {
-            self.x_ -= other.x_;
-            self.y_ -= other.y_;
+            self.xcoord -= other.x_;
+            self.ycoord -= other.y_;
         }
     }
 
@@ -269,11 +269,11 @@ impl<T: Clone + Num + Neg<Output = T>> Neg for Point<T> {
     /// let a = Point::new(3, 4);
     /// let b = -a;
     ///
-    /// assert_eq!(b.x_, -3);
-    /// assert_eq!(b.y_, -4);
+    /// assert_eq!(b.xcoord, -3);
+    /// assert_eq!(b.ycoord, -4);
     #[inline]
     fn neg(self) -> Self::Output {
-        Self::Output::new(-self.x_, -self.y_)
+        Self::Output::new(-self.xcoord, -self.ycoord)
     }
 }
 
@@ -302,13 +302,13 @@ mod test {
     use super::{hash, Point, Vector2};
     use core::i32;
 
-    pub const _0_0p: Point<i32> = Point { x_: 0, y_: 0 };
-    pub const _1_0p: Point<i32> = Point { x_: 1, y_: 0 };
-    pub const _1_1p: Point<i32> = Point { x_: 1, y_: 1 };
-    pub const _0_1p: Point<i32> = Point { x_: 0, y_: 1 };
-    pub const _neg1_1p: Point<i32> = Point { x_: -1, y_: 1 };
+    pub const _0_0p: Point<i32> = Point { xcoord: 0, ycoord: 0 };
+    pub const _1_0p: Point<i32> = Point { xcoord: 1, ycoord: 0 };
+    pub const _1_1p: Point<i32> = Point { xcoord: 1, ycoord: 1 };
+    pub const _0_1p: Point<i32> = Point { xcoord: 0, ycoord: 1 };
+    pub const _neg1_1p: Point<i32> = Point { xcoord: -1, ycoord: 1 };
     // pub const all_consts: [Point<i32>; 4] = [_0_0p, _1_0p, _1_1p, _neg1_1p];
-    pub const _4_2p: Point<i32> = Point { x_: 4, y_: 2 };
+    pub const _4_2p: Point<i32> = Point { xcoord: 4, ycoord: 2 };
 
     #[test]
     fn test_consts() {

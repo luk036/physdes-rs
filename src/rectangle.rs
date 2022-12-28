@@ -77,10 +77,10 @@ where
         if self.is_empty() && other.is_empty() {
             true
         } else {
-            self.x_.lb == other.x_.lb
-                && self.x_.ub == other.x_.ub
-                && self.y_.lb == other.y_.lb
-                && self.y_.ub == other.y_.ub
+            self.xcoord.lb == other.xcoord.lb
+                && self.xcoord.ub == other.xcoord.ub
+                && self.ycoord.lb == other.ycoord.lb
+                && self.ycoord.ub == other.ycoord.ub
         }
     }
 }
@@ -90,10 +90,10 @@ where
     Bound: Clone,
 {
     fn low(&self) -> Point<Bound> {
-        Point::<Bound>::new(self.x_.lb.clone(), self.x_.lb.clone())
+        Point::<Bound>::new(self.xcoord.lb.clone(), self.xcoord.lb.clone())
     }
     fn up(&self) -> Point<Bound> {
-        Point::<Bound>::new(self.x_.ub.clone(), self.x_.ub.clone())
+        Point::<Bound>::new(self.xcoord.ub.clone(), self.xcoord.ub.clone())
     }
 }
 
@@ -148,8 +148,8 @@ where
 {
     fn singleton(pt: Point<Bound>) -> Rect<Bound> {
         Rect::new(
-            Interval::<Bound>::singleton(pt.x_),
-            Interval::<Bound>::singleton(pt.y_),
+            Interval::<Bound>::singleton(pt.xcoord),
+            Interval::<Bound>::singleton(pt.ycoord),
         )
     }
 }
