@@ -63,56 +63,40 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
 }
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
-    pub fn create_xmono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let rightmost = pointset
-            .iter()
-            .max_by_key(|a| (a.xcoord, a.ycoord))
-            .unwrap();
-        let leftmost = pointset
-            .iter()
-            .min_by_key(|a| (a.xcoord, a.ycoord))
-            .unwrap();
-        let is_anticlockwise = rightmost.ycoord <= leftmost.ycoord;
+    pub fn create_mono_rpolygon<F>(pointset: &[Point<T>], f: F) -> (Vec<Point<T>>, bool)
+    where
+        F: Fn(&&Point<T>) -> (T, T),
+    {
+        // Use x-mono as model
+        let rightmost = pointset.iter().max_by_key(&f).unwrap();
+        let leftmost = pointset.iter().min_by_key(&f).unwrap();
+        let is_anticlockwise = f(&rightmost).1 <= f(&leftmost).1;
         let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            pointset
-                .iter()
-                .partition(|pt| (pt.ycoord <= leftmost.ycoord))
+            pointset.iter().partition(|pt| (f(&pt).1 <= f(&leftmost).1))
         } else {
-            pointset
-                .iter()
-                .partition(|pt| (pt.ycoord >= leftmost.ycoord))
+            pointset.iter().partition(|pt| (f(&pt).1 >= f(&leftmost).1))
         };
-        lst1.sort_by_key(|a| (a.xcoord, a.ycoord));
-        lst2.sort_by_key(|a| (a.xcoord, a.ycoord));
+        lst1.sort_by_key(|a| f(&a));
+        lst2.sort_by_key(|a| f(&a));
         lst2.reverse();
         lst1.append(&mut lst2);
-        (lst1, is_anticlockwise)
+        (lst1, is_anticlockwise) // is_clockwise if y-mono
     }
 
+    /**
+     * @brief Create a x-mono RPolygon object
+     */
+    #[inline]
+    pub fn create_xmono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
+        Self::create_mono_rpolygon(pointset, |a| (a.xcoord, a.ycoord))
+    }
+
+    /**
+     * @brief Create a y-mono RPolygon object
+     */
+    #[inline]
     pub fn create_ymono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
-        let topmost = pointset
-            .iter()
-            .max_by_key(|a| (a.ycoord, a.xcoord))
-            .unwrap();
-        let botmost = pointset
-            .iter()
-            .min_by_key(|a| (a.ycoord, a.xcoord))
-            .unwrap();
-        let is_anticlockwise = topmost.ycoord >= botmost.ycoord;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
-            pointset
-                .iter()
-                .partition(|pt| (pt.xcoord >= botmost.xcoord))
-        } else {
-            pointset
-                .iter()
-                .partition(|pt| (pt.xcoord <= botmost.xcoord))
-        };
-        lst1.sort_by_key(|a| (a.ycoord, a.xcoord));
-        lst2.sort_by_key(|a| (a.ycoord, a.xcoord));
-        lst2.reverse();
-        lst1.append(&mut lst2);
-        (lst1, is_anticlockwise)
+        Self::create_mono_rpolygon(pointset, |a| (a.ycoord, a.xcoord))
     }
 
     /**
@@ -177,12 +161,12 @@ mod test {
         for (x, y) in coords.iter() {
             pointset.push(Point::<i32>::new(*x, *y));
         }
-        let (pointset, is_anticw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
+        let (pointset, is_cw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
         for p in pointset.iter() {
             print!("({}, {}) ", p.xcoord, p.ycoord);
         }
         let poly = RPolygon::<i32>::new(&pointset);
-        assert!(is_anticw);
+        assert!(!is_cw);
         assert_eq!(poly.signed_area(), 45);
     }
 
