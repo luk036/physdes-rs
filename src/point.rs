@@ -302,13 +302,31 @@ mod test {
     use super::{hash, Point, Vector2};
     use core::i32;
 
-    pub const _0_0p: Point<i32> = Point { xcoord: 0, ycoord: 0 };
-    pub const _1_0p: Point<i32> = Point { xcoord: 1, ycoord: 0 };
-    pub const _1_1p: Point<i32> = Point { xcoord: 1, ycoord: 1 };
-    pub const _0_1p: Point<i32> = Point { xcoord: 0, ycoord: 1 };
-    pub const _neg1_1p: Point<i32> = Point { xcoord: -1, ycoord: 1 };
+    pub const _0_0p: Point<i32> = Point {
+        xcoord: 0,
+        ycoord: 0,
+    };
+    pub const _1_0p: Point<i32> = Point {
+        xcoord: 1,
+        ycoord: 0,
+    };
+    pub const _1_1p: Point<i32> = Point {
+        xcoord: 1,
+        ycoord: 1,
+    };
+    pub const _0_1p: Point<i32> = Point {
+        xcoord: 0,
+        ycoord: 1,
+    };
+    pub const _neg1_1p: Point<i32> = Point {
+        xcoord: -1,
+        ycoord: 1,
+    };
     // pub const all_consts: [Point<i32>; 4] = [_0_0p, _1_0p, _1_1p, _neg1_1p];
-    pub const _4_2p: Point<i32> = Point { xcoord: 4, ycoord: 2 };
+    pub const _4_2p: Point<i32> = Point {
+        xcoord: 4,
+        ycoord: 2,
+    };
 
     #[test]
     fn test_consts() {
