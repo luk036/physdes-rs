@@ -75,9 +75,7 @@ impl<T: Clone + Signed> Vector2<T> {
 }
 
 impl<T: Clone + PartialOrd> Vector2<T> {
-    /// Returns the L1 norm `|x_| + |y_|` -- the [Manhattan distance] from the origin.
-    ///
-    /// [Manhattan distance]: https://en.wikipedia.org/wiki/Taxicab_geometry
+    /// Returns the infinity norm `max(|x_| + |y_|)` 
     #[inline]
     pub fn norm_inf(&self) -> T {
         if self.x_ > self.y_ {
