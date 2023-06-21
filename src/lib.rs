@@ -1,4 +1,5 @@
 pub mod halton_int;
+pub mod interval_ai;
 pub mod point;
 pub mod polygon;
 pub mod rpolygon;
