@@ -1,24 +1,14 @@
 // #![no_std]
 
 #[cfg(any(test, feature = "std"))]
-// #[cfg_attr(test, macro_use)]
-// extern crate std;
 
-// use core::fmt;
 #[cfg(test)]
 use core::hash;
-// use core::iter::{Product, Sum};
 use core::ops::{Add, Neg, Sub};
-
-// use core::str::FromStr;
-// #[cfg(feature = "std")]
-// use std::error::Error;
-
 use super::Vector2;
 use num_traits::Num;
 
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
-// #[repr(C)]
 pub struct Point<T> {
     /// x portion of the Point object
     pub xcoord: T,

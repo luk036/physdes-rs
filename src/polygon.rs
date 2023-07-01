@@ -13,11 +13,7 @@ pub struct Polygon<T> {
 }
 
 impl<T: Clone + Num + Copy> Polygon<T> {
-    /**
-     * @brief Construct a new Polygon object
-     *
-     * @param[in] coords
-     */
+    /// Construct a new Polygon object
     pub fn new(coords: &[Point<T>]) -> Self {
         let origin = coords[0];
         let mut vecs = vec![];
@@ -27,6 +23,11 @@ impl<T: Clone + Num + Copy> Polygon<T> {
         Polygon { origin, vecs }
     }
 
+    /// Signed area x 2
+    ///
+    /// # Panics
+    ///
+    /// Panics if .
     pub fn signed_area_x2(&self) -> T {
         let vs = &self.vecs;
         let n = vs.len();
@@ -58,9 +59,7 @@ impl<T: Clone + Num + Copy> Polygon<T> {
 }
 
 impl<T: Clone + Num + Ord + Copy> Polygon<T> {
-    /**
-     * @brief Create a x-mono Polygon object
-     */
+    /// Create a x-mono Polygon object
     pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>>
     where
         F: Fn(&&Point<T>) -> (T, T),
@@ -78,41 +77,29 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
         lst1
     }
 
-    /**
-     * @brief Create a x-mono Polygon object
-     */
+    /// Create a x-mono Polygon object
     #[inline]
     pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
         Self::create_mono_polygon(pointset, |a| (a.xcoord, a.ycoord))
     }
 
-    /**
-     * @brief Create a x-mono Polygon object
-     */
+    /// Create a x-mono Polygon object
     #[inline]
     pub fn create_ymono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
         Self::create_mono_polygon(pointset, |a| (a.ycoord, a.xcoord))
     }
 
-    /**
-     * @brief Determine if a Point is within a Polygon
-     *
-     * The code below is from Wm. Randolph Franklin <wrf@ecse.rpi.edu>
-     * (see URL below) with some minor modifications for integer. It returns
-     * true for strictly interior points, false for strictly exterior, and ub
-     * for points on the boundary.  The boundary behavior is complex but
-     * determined; in particular, for a partition of a region into polygons,
-     * each Point is "in" exactly one Polygon.
-     * (See p.243 of [O'Rourke (C)] for a discussion of boundary behavior.)
-     *
-     * See <http://www.faqs.org/faqs/graphics/algorithms-faq/> Subject 2.03
-     *
-     * @tparam T
-     * @param[in] coords
-     * @param[in] q
-     * @return true
-     * @return false
-     */
+    /// Determine if a Point is within a Polygon
+    ///
+    /// The code below is from Wm. Randolph Franklin <wrf@ecse.rpi.edu>
+    /// (see URL below) with some minor modifications for integer. It returns
+    /// true for strictly interior points, false for strictly exterior, and ub
+    /// for points on the boundary.  The boundary behavior is complex but
+    /// determined; in particular, for a partition of a region into polygons,
+    /// each Point is "in" exactly one Polygon.
+    /// (See p.243 of [O'Rourke (C)] for a discussion of boundary behavior.)
+    ///
+    /// See <http://www.faqs.org/faqs/graphics/algorithms-faq/> Subject 2.03
     pub fn point_in_polygon(pointset: &[Point<T>], q: &Point<T>) -> bool {
         let n = pointset.len();
         let mut p0 = &pointset[n - 1];
