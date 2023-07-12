@@ -16,6 +16,14 @@ use std::error::Error;
 
 use num_traits::{Num, Signed, Zero};
 
+/// The code defines a generic struct called Vector2 with two fields, x_ and y_.
+/// 
+/// Properties:
+/// 
+/// * `x_`: The `x_` property represents the x-coordinate of the Vector2 object. It is of type `T`,
+/// which means it can be any type specified when creating an instance of the Vector2 struct.
+/// * `y_`: The `y_` property is the y-coordinate of the `Vector2` object. It represents the vertical
+/// position of the vector in a 2D coordinate system.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 // #[repr(C)]
 pub struct Vector2<T> {
@@ -26,7 +34,18 @@ pub struct Vector2<T> {
 }
 
 impl<T> Vector2<T> {
-    /// Create a new Vector2
+    /// The function `new` creates a new Vector2 with the given x and y values.
+    /// 
+    /// Arguments:
+    /// 
+    /// * `x_`: The parameter `x_` represents the x-coordinate of the Vector2.
+    /// * `y_`: The parameter `y_` represents the y-coordinate of the Vector2. It is of type `T`, which
+    /// means it can be any type that is specified when the Vector2 is created.
+    /// 
+    /// Returns:
+    /// 
+    /// The `new` function is returning a new instance of the `Vector2` struct with the provided `x_`
+    /// and `y_` values.
     #[inline]
     pub const fn new(x_: T, y_: T) -> Self {
         Vector2 { x_, y_ }
@@ -34,7 +53,16 @@ impl<T> Vector2<T> {
 }
 
 impl<T: Clone + Num> Vector2<T> {
-    /// Returns the dot product
+    /// The `dot` function calculates the dot product of two vectors.
+    /// 
+    /// Arguments:
+    /// 
+    /// * `other`: The `other` parameter is of the same type as `self`, which means it is an instance of
+    /// the same struct or class that the `dot` method is defined in.
+    /// 
+    /// Returns:
+    /// 
+    /// The dot product of two vectors is being returned.
     #[inline]
     pub fn dot(&self, other: &Self) -> T {
         self.x_.clone() * other.x_.clone() + self.y_.clone() * other.y_.clone()
