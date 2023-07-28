@@ -43,9 +43,9 @@ impl<T: PartialOrd> Contains<T> for Interval<T> {
 /// struct, but you don't actually need to store any values of that type in the struct.
 #[derive(Debug)]
 pub struct Interval<T: PartialOrd> {
-    lb: T,
-    ub: T,
-    _marker: PhantomData<T>,
+    pub lb: T,
+    pub ub: T,
+    pub _marker: PhantomData<T>,
 }
 
 impl<T: PartialOrd> Interval<T> {
@@ -61,6 +61,16 @@ impl<T: PartialOrd> Interval<T> {
     /// Returns:
     ///
     /// The `new` function is returning an instance of the struct `Self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::interval_ai::Interval;
+    /// use std::marker::PhantomData;
+    ///
+    /// assert_eq!(Interval::new(1, 2), Interval { lb: 1, ub: 2, _marker: PhantomData });
+    /// assert_eq!(Interval::new(2, 1), Interval { lb: 2, ub: 1, _marker: PhantomData });
+    /// ```
     pub fn new(lb: T, ub: T) -> Self {
         Self {
             lb,
@@ -81,6 +91,14 @@ impl<T: PartialOrd> PartialOrd for Interval<T> {
     /// Returns:
     ///
     /// an `Option` containing a `std::cmp::Ordering` value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::interval_ai::Interval;
+    /// use std::marker::PhantomData;
+    /// assert_eq!(Interval::new(1, 2).partial_cmp(&Interval::new(2, 3)), Some(std::cmp::Ordering::Less));
+    /// ```
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.lb.partial_cmp(&other.ub)?)
     }
@@ -97,6 +115,13 @@ impl<T: PartialOrd> PartialEq for Interval<T> {
     /// Returns:
     ///
     /// A boolean value is being returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::interval_ai::Interval;
+    /// assert_eq!(Interval::new(1, 2), Interval::new(1, 2));
+    /// ```
     fn eq(&self, other: &Self) -> bool {
         self.lb == other.lb && self.ub == other.ub
     }

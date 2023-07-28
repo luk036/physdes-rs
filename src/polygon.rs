@@ -13,7 +13,7 @@ use num_traits::{Num, Zero};
 /// vector represents the direction and magnitude of a side of the polygon.
 pub struct Polygon<T> {
     pub origin: Point<T>,
-    vecs: Vec<Vector2<T>>,
+    pub vecs: Vec<Vector2<T>>,
 }
 
 impl<T: Clone + Num + Copy> Polygon<T> {
@@ -29,6 +29,24 @@ impl<T: Clone + Num + Copy> Polygon<T> {
     /// Returns:
     ///
     /// The `new` function returns a new instance of the `Polygon` object.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    /// use physdes::vector2::Vector2;
+    ///
+    /// let p1 = Point::new(1, 1);
+    /// let p2 = Point::new(2, 2);
+    /// let p3 = Point::new(3, 3);
+    /// let p4 = Point::new(4, 4);
+    /// let p5 = Point::new(5, 5);
+    /// let poly = Polygon::new(&[p1, p2, p3, p4, p5]);
+    /// assert_eq!(poly.origin, Point::new(1, 1));
+    /// assert_eq!(poly.vecs.len(), 4);
+    /// assert_eq!(poly.vecs[0], Vector2::new(1, 1));
+    /// ```
     pub fn new(coords: &[Point<T>]) -> Self {
         let origin = coords[0];
         let mut vecs = vec![];
@@ -48,6 +66,26 @@ impl<T: Clone + Num + Copy> Polygon<T> {
     /// # Panics
     ///
     /// Panics if n < 2
+    ///
+    /// Returns:
+    ///
+    /// The `new` function returns a new instance of the `Polygon` object.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    /// use physdes::vector2::Vector2;
+    ///
+    /// let p1 = Point::new(1, 1);
+    /// let p2 = Point::new(2, 2);
+    /// let p3 = Point::new(3, 3);
+    /// let p4 = Point::new(4, 4);
+    /// let p5 = Point::new(5, 5);
+    /// let poly = Polygon::new(&[p1, p2, p3, p4, p5]);
+    /// assert_eq!(poly.signed_area_x2(), 0);
+    /// ```
     pub fn signed_area_x2(&self) -> T {
         let vs = &self.vecs;
         let n = vs.len();

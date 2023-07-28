@@ -44,11 +44,8 @@ impl<T> Point<T> {
     ///
     /// ```
     /// use physdes::point::Point;
-    ///
-    /// let a = Point::new(3, 4);
-    ///
-    /// assert_eq!(a.xcoord, 3);
-    /// assert_eq!(a.ycoord, 4);
+    /// assert_eq!(Point::new(3, 4).xcoord, 3);
+    /// assert_eq!(Point::new(3, 4).ycoord, 4);
     #[inline]
     pub const fn new(xcoord: T, ycoord: T) -> Self {
         Point { xcoord, ycoord }
@@ -117,12 +114,8 @@ impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
     /// use physdes::point::Point;
     /// use physdes::vector2::Vector2;
     ///
-    /// let a = Point::new(3, 4);
-    /// let v = Vector2::new(5, 3);
-    /// let a2 = a + v;
-    ///
-    /// assert_eq!(a2.xcoord, 8);
-    /// assert_eq!(a2.ycoord, 7);
+    /// assert_eq!(Point::new(3, 4) + Vector2::new(5, 3), Point::new(8, 7));
+    /// ```
     #[inline]
     fn add(self, other: Vector2<T>) -> Self::Output {
         Self::Output::new(self.xcoord + other.x_, self.ycoord + other.y_)
@@ -142,13 +135,8 @@ impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
     /// ```
     /// use physdes::point::Point;
     /// use physdes::vector2::Vector2;
-    ///
-    /// let a = Point::new(3, 4);
-    /// let v = Vector2::new(5, 3);
-    /// let a2 = a - v;
-    ///
-    /// assert_eq!(a2.xcoord, -2);
-    /// assert_eq!(a2.ycoord, 1);
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(5, 3), Point::new(-2, 1));
+    /// ```
     #[inline]
     fn sub(self, other: Vector2<T>) -> Self::Output {
         Self::Output::new(self.xcoord - other.x_, self.ycoord - other.y_)
@@ -205,23 +193,23 @@ macro_rules! forward_all_binop2 {
 // arithmetic
 forward_all_binop2!(impl Sub, sub);
 
-/// Displacement of two Points
-///
-/// # Examples
-///
-/// ```
-/// use physdes::point::Point;
-/// use physdes::vector2::Vector2;
-///
-/// let a = Point::new(3, 4);
-/// let b = Point::new(5, 3);
-/// let v = a - b;
-///
-/// assert_eq!(v.x_, -2);
-/// assert_eq!(v.y_, 1);
 impl<T: Clone + Num> Sub for Point<T> {
     type Output = Vector2<T>;
 
+    /// Displacement of two Points
+    ///
+    /// Arguments:
+    ///
+    /// * `other`: The `other` parameter is of the same type as `self` and represents the other object
+    /// that you want to subtract from `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Point::new(3, 4) - Point::new(5, 3), Vector2::new(-2, 1));
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
         Self::Output::new(self.xcoord - other.xcoord, self.ycoord - other.ycoord)
@@ -277,11 +265,8 @@ impl<T: Clone + Num + Neg<Output = T>> Neg for Point<T> {
     /// ```
     /// use physdes::point::Point;
     ///
-    /// let a = Point::new(3, 4);
-    /// let b = -a;
-    ///
-    /// assert_eq!(b.xcoord, -3);
-    /// assert_eq!(b.ycoord, -4);
+    /// assert_eq!(-Point::new(3, 4), Point::new(-3, -4));
+    /// assert_eq!(-Point::new(0, 0), Point::new(0, 0));
     #[inline]
     fn neg(self) -> Self::Output {
         Self::Output::new(-self.xcoord, -self.ycoord)
