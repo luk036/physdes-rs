@@ -17,9 +17,9 @@ use std::error::Error;
 use num_traits::{Num, Signed, Zero};
 
 /// The code defines a generic struct called Vector2 with two fields, x_ and y_.
-/// 
+///
 /// Properties:
-/// 
+///
 /// * `x_`: The `x_` property represents the x-coordinate of the Vector2 object. It is of type `T`,
 /// which means it can be any type specified when creating an instance of the Vector2 struct.
 /// * `y_`: The `y_` property is the y-coordinate of the `Vector2` object. It represents the vertical
@@ -35,17 +35,26 @@ pub struct Vector2<T> {
 
 impl<T> Vector2<T> {
     /// The function `new` creates a new Vector2 with the given x and y values.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `x_`: The parameter `x_` represents the x-coordinate of the Vector2.
     /// * `y_`: The parameter `y_` represents the y-coordinate of the Vector2. It is of type `T`, which
     /// means it can be any type that is specified when the Vector2 is created.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `new` function is returning a new instance of the `Vector2` struct with the provided `x_`
     /// and `y_` values.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2), Vector2 { x_: 1, y_: 2 });
+    /// assert_eq!(Vector2::new(3, 4), Vector2 { x_: 3, y_: 4 });
+    /// ```
     #[inline]
     pub const fn new(x_: T, y_: T) -> Self {
         Vector2 { x_, y_ }
@@ -54,38 +63,119 @@ impl<T> Vector2<T> {
 
 impl<T: Clone + Num> Vector2<T> {
     /// The `dot` function calculates the dot product of two vectors.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is of the same type as `self`, which means it is an instance of
     /// the same struct or class that the `dot` method is defined in.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The dot product of two vectors is being returned.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).dot(&Vector2::new(3, 4)), 11);
+    /// assert_eq!(Vector2::new(3, 4).dot(&Vector2::new(1, 2)), 11);
+    /// ```
     #[inline]
     pub fn dot(&self, other: &Self) -> T {
         self.x_.clone() * other.x_.clone() + self.y_.clone() * other.y_.clone()
     }
 
+    /// The `cross` function calculates the cross product of two vectors.
+    ///
+    /// Arguments:
+    ///
+    /// * `other`: The `other` parameter is of type `Self`, which means it is the same type as the
+    /// current object.
+    ///
+    /// Returns:
+    ///
+    /// The cross product of two vectors is being returned.
     /// Returns the cross product
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).cross(&Vector2::new(3, 4)), -2);
+    /// assert_eq!(Vector2::new(3, 4).cross(&Vector2::new(1, 2)), 2);
+    /// ```
     #[inline]
     pub fn cross(&self, other: &Self) -> T {
         self.x_.clone() * other.y_.clone() - self.y_.clone() * other.x_.clone()
     }
 
+    /// The `norm_sqr` function calculates the square of the norm of a vector.
+    ///
+    /// Returns:
+    ///
+    /// The `norm_sqr` function returns the squared norm of the object on which it is called.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).norm_sqr(), 5);
+    /// assert_eq!(Vector2::new(3, 4).norm_sqr(), 25);
+    /// ```
     #[inline]
     pub fn norm_sqr(&self) -> T {
         self.dot(self)
     }
 
+    /// The `scale` function multiplies the vector by a scalar value.
+    ///
+    /// Arguments:
+    ///
+    /// * `t`: The parameter `t` is a scalar value that will be used to multiply each component of
+    /// `self`.
+    ///
+    /// Returns:
+    ///
+    /// The `scale` method returns a new instance of the same type as `self`.
     /// Multiplies `self` by the scalar `t`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).scale(3), Vector2::new(3, 6));
+    /// assert_eq!(Vector2::new(3, 4).scale(2), Vector2::new(6, 8));
+    /// ```
     #[inline]
     pub fn scale(&self, t: T) -> Self {
         Self::new(self.x_.clone() * t.clone(), self.y_.clone() * t)
     }
 
+    /// The `unscale` function divides the coordinates of a vector by a scalar value.
+    ///
+    /// Arguments:
+    ///
+    /// * `t`: The parameter `t` is a scalar value that is used to divide the `self` object. It is of
+    /// type `T`, which is a generic type parameter. The division operation is performed on the `x_` and
+    /// `y_` fields of the `self` object.
+    ///
+    /// Returns:
+    ///
+    /// The `unscale` method returns a new instance of the same type as `self`.
     /// Divides `self` by the scalar `t`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(3, 6).unscale(3), Vector2::new(1, 2));
+    /// assert_eq!(Vector2::new(6, 8).unscale(2), Vector2::new(3, 4));
+    /// ```
     #[inline]
     pub fn unscale(&self, t: T) -> Self {
         Self::new(self.x_.clone() / t.clone(), self.y_.clone() / t)
@@ -93,9 +183,23 @@ impl<T: Clone + Num> Vector2<T> {
 }
 
 impl<T: Clone + Signed> Vector2<T> {
-    /// Returns the L1 norm `|x_| + |y_|` -- the [Manhattan distance] from the origin.
+    /// The `l1_norm` function calculates the Manhattan distance from the origin.
     ///
     /// [Manhattan distance]: https://en.wikipedia.org/wiki/Taxicab_geometry
+    ///
+    /// Returns:
+    ///
+    /// The L1 norm, which is the Manhattan distance from the origin.
+    /// Returns the L1 norm `|x_| + |y_|` -- the [Manhattan distance] from the origin.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).l1_norm(), 3);
+    /// assert_eq!(Vector2::new(3, 4).l1_norm(), 7);
+    /// ```
     #[inline]
     pub fn l1_norm(&self) -> T {
         self.x_.abs() + self.y_.abs()
@@ -103,7 +207,21 @@ impl<T: Clone + Signed> Vector2<T> {
 }
 
 impl<T: Clone + PartialOrd> Vector2<T> {
-    /// Returns the infinity norm `max(|x_| + |y_|)` 
+    /// The `norm_inf` function returns the maximum absolute value between `x_` and `y_`.
+    ///
+    /// Returns:
+    ///
+    /// The `norm_inf` function returns the maximum value between `|x_|` and `|y_|`.
+    /// Returns the infinity norm `max(|x_| + |y_|)`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).norm_inf(), 2);
+    /// assert_eq!(Vector2::new(3, 4).norm_inf(), 4);
+    /// ```
     #[inline]
     pub fn norm_inf(&self) -> T {
         if self.x_ > self.y_ {
@@ -119,6 +237,11 @@ macro_rules! forward_xf_xf_binop {
         impl<'a, 'b, T: Clone + Num> $imp<&'b Vector2<T>> for &'a Vector2<T> {
             type Output = Vector2<T>;
 
+            /// The function clones the input arguments and calls the specified method on them.
+            ///
+            /// Arguments:
+            ///
+            /// * `other`: A reference to another Vector2 object of the same type as self.
             #[inline]
             fn $method(self, other: &Vector2<T>) -> Self::Output {
                 self.clone().$method(other.clone())
@@ -168,6 +291,22 @@ forward_all_binop!(impl Add, add);
 impl<T: Clone + Num> Add<Vector2<T>> for Vector2<T> {
     type Output = Self;
 
+    /// The function `add` takes two values of the same type and returns their sum.
+    ///
+    /// Arguments:
+    ///
+    /// * `other`: The `other` parameter is of the same type as `self` and represents the other object
+    /// that you want to add to `self`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    /// use std::ops::Add;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).add(Vector2::new(3, 4)), Vector2::new(4, 6));
+    /// assert_eq!(Vector2::new(3, 4).add(Vector2::new(1, 2)), Vector2::new(4, 6));
+    /// ```
     #[inline]
     fn add(self, other: Self) -> Self::Output {
         Self::Output::new(self.x_ + other.x_, self.y_ + other.y_)
@@ -180,6 +319,22 @@ forward_all_binop!(impl Sub, sub);
 impl<T: Clone + Num> Sub<Vector2<T>> for Vector2<T> {
     type Output = Self;
 
+    /// The function subtracts the coordinates of two points and returns a new point.
+    ///
+    /// Arguments:
+    ///
+    /// * `other`: The `other` parameter is of the same type as `self` and represents the other value
+    /// that you want to subtract from `self`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    /// use std::ops::Sub;
+    ///
+    /// assert_eq!(Vector2::new(1, 2).sub(Vector2::new(3, 4)), Vector2::new(-2, -2));
+    /// assert_eq!(Vector2::new(3, 4).sub(Vector2::new(1, 2)), Vector2::new(2, 2));
+    /// ```
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
         Self::Output::new(self.x_ - other.x_, self.y_ - other.y_)
@@ -196,6 +351,27 @@ mod opassign {
     use crate::Vector2;
 
     impl<T: Clone + NumAssign> AddAssign for Vector2<T> {
+        /// The function `add_assign` adds the values of `other.x_` and `other.y_` to `self.x_` and
+        /// `self.y_` respectively.
+        ///
+        /// Arguments:
+        ///
+        /// * `other`: The "other" parameter is of type Self, which means it is a reference to another
+        /// instance of the same struct or class that the method is defined in. In this case, it
+        /// represents another instance of the struct or class that has the same fields or properties as
+        /// self.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use physdes::vector2::Vector2;
+        /// use std::ops::AddAssign;
+        ///
+        /// let mut v = Vector2::new(1, 2);
+        /// let v2 = Vector2::new(3, 4);
+        /// v.add_assign(v2);
+        /// assert_eq!(v, Vector2::new(4, 6));
+        /// ```
         fn add_assign(&mut self, other: Self) {
             self.x_ += other.x_;
             self.y_ += other.y_;
@@ -203,6 +379,25 @@ mod opassign {
     }
 
     impl<T: Clone + NumAssign> SubAssign for Vector2<T> {
+        /// The function subtracts the values of another object from the values of the current object.
+        ///
+        /// Arguments:
+        ///
+        /// * `other`: The parameter "other" is of type Self, which means it is a reference to another
+        /// instance of the same struct or class that the method is defined in. In this case, it is a
+        /// reference to another instance of the struct or class that has the same fields as self (x_
+        /// and y
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use physdes::vector2::Vector2;
+        /// use std::ops::SubAssign;
+        /// let mut v = Vector2::new(1, 2);
+        /// let v2 = Vector2::new(3, 4);
+        /// v.sub_assign(v2);
+        /// assert_eq!(v, Vector2::new(-2, -2));
+        /// ```
         fn sub_assign(&mut self, other: Self) {
             self.x_ -= other.x_;
             self.y_ -= other.y_;
@@ -210,6 +405,23 @@ mod opassign {
     }
 
     impl<T: Clone + NumAssign> MulAssign<T> for Vector2<T> {
+        /// The function multiplies the values of self.x_ and self.y_ by the value of other.
+        ///
+        /// Arguments:
+        ///
+        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
+        /// implements the `Clone` trait.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use physdes::vector2::Vector2;
+        /// use std::ops::MulAssign;
+        ///
+        /// let mut v = Vector2::new(1, 2);
+        /// v.mul_assign(3);
+        /// assert_eq!(v, Vector2::new(3, 6));
+        /// ```
         fn mul_assign(&mut self, other: T) {
             self.x_ *= other.clone();
             self.y_ *= other;
@@ -217,6 +429,23 @@ mod opassign {
     }
 
     impl<T: Clone + NumAssign> DivAssign<T> for Vector2<T> {
+        /// The function divides the values of self.x_ and self.y_ by the value of other.
+        ///
+        /// Arguments:
+        ///
+        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
+        /// implements the `Clone` trait.
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use physdes::vector2::Vector2;
+        /// use std::ops::DivAssign;
+        ///
+        /// let mut v = Vector2::new(3, 6);
+        /// v.div_assign(3);
+        /// assert_eq!(v, Vector2::new(1, 2));
+        /// ```
         fn div_assign(&mut self, other: T) {
             self.x_ /= other.clone();
             self.y_ /= other;
@@ -254,6 +483,18 @@ mod opassign {
 impl<T: Clone + Num + Neg<Output = T>> Neg for Vector2<T> {
     type Output = Self;
 
+    /// The `neg` function returns a new instance of the same type with the negated values of `x_` and
+    /// `y_`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    /// use std::ops::Neg;
+    ///
+    /// let v = Vector2::new(1, 2);
+    /// assert_eq!(-v, Vector2::new(-1, -2));
+    /// ```
     #[inline]
     fn neg(self) -> Self::Output {
         Self::Output::new(-self.x_, -self.y_)

@@ -108,9 +108,9 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
 
     /// The function `create_xmono_rpolygon` creates a monotone RPolygon object using a given point set,
     /// with the x-coordinate as the primary sorting criterion.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: A slice of Point objects
     #[inline]
     pub fn create_xmono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
@@ -119,9 +119,9 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
 
     /// The function `create_ymono_rpolygon` creates a y-monotone RPolygon object from a given point
     /// set.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: A slice of Point objects, where each Point object has two fields: ycoord and
     /// xcoord.
     #[inline]
@@ -140,16 +140,16 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// (See p.243 of [O'Rourke (C)] for a discussion of boundary behavior.)
     ///
     /// See <http://www.faqs.org/faqs/graphics/algorithms-faq/> Subject 2.03
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: A slice of points representing the vertices of the polygon. Each point has x and y
     /// coordinates.
     /// * `q`: The parameter `q` represents the point that we want to determine if it is within the
     /// polygon or not.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The function `point_in_polygon` returns a boolean value. It returns `true` if the given point
     /// `q` is strictly inside the polygon defined by the `pointset` array, `false` if the point is
     /// strictly outside the polygon, and `ub` (undefined behavior) if the point lies on the boundary of

@@ -1,17 +1,16 @@
 // #![no_std]
 
+use super::Vector2;
 #[cfg(any(test, feature = "std"))]
-
 #[cfg(test)]
 use core::hash;
 use core::ops::{Add, Neg, Sub};
-use super::Vector2;
 use num_traits::Num;
 
 /// The code defines a generic Point struct with x and y coordinates.
-/// 
+///
 /// Properties:
-/// 
+///
 /// * `xcoord`: The `xcoord` property represents the x-coordinate of a point in a two-dimensional space.
 /// It is a generic type `T`, which means it can be any type that implements the necessary traits for
 /// the `Point` struct.
@@ -28,16 +27,16 @@ pub struct Point<T> {
 
 impl<T> Point<T> {
     /// The `new` function creates a new `Point` with the given x and y coordinates.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `xcoord`: The `xcoord` parameter represents the x-coordinate of the point. It is of type `T`,
     /// which means it can be any type that implements the necessary traits for mathematical operations.
     /// * `ycoord`: The `ycoord` parameter represents the y-coordinate of the point. It is used to
     /// specify the vertical position of the point in a two-dimensional coordinate system.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `new` function returns a new instance of the `Point` struct with the specified `xcoord` and
     /// `ycoord` values.
     ///

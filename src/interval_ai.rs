@@ -29,9 +29,9 @@ impl<T: PartialOrd> Contains<T> for Interval<T> {
 
 /// The `Interval` struct represents a range of values with a lower bound (`lb`) and an upper bound
 /// (`ub`).
-/// 
+///
 /// Properties:
-/// 
+///
 /// * `lb`: The `lb` property represents the lower bound of the interval. It is of type `T`, which is a
 /// generic type that must implement the `PartialOrd` trait. This means that the type `T` must be able
 /// to be compared for ordering.
@@ -50,16 +50,16 @@ pub struct Interval<T: PartialOrd> {
 
 impl<T: PartialOrd> Interval<T> {
     /// The function `new` creates a new instance of a struct with given lower and upper bounds.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `lb`: The `lb` parameter represents the lower bound value. It is of type `T`, which means it
     /// can be any type that implements the necessary traits for the struct.
     /// * `ub`: The `ub` parameter represents the upper bound value. It is of type `T`, which means it
     /// can be any type that implements the necessary traits for the struct.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `new` function is returning an instance of the struct `Self`.
     pub fn new(lb: T, ub: T) -> Self {
         Self {
@@ -73,13 +73,13 @@ impl<T: PartialOrd> Interval<T> {
 impl<T: PartialOrd> PartialOrd for Interval<T> {
     /// The function `partial_cmp` compares the lower bound of `self` with the upper bound of `other`
     /// and returns the result as an `Option` of `Ordering`.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to another object of the same type as `self`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// an `Option` containing a `std::cmp::Ordering` value.
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.lb.partial_cmp(&other.ub)?)
@@ -88,14 +88,14 @@ impl<T: PartialOrd> PartialOrd for Interval<T> {
 
 impl<T: PartialOrd> PartialEq for Interval<T> {
     /// The function checks if two objects have equal values for their "lb" and "ub" fields.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to another object of the same type as `Self`. In
     /// this case, `Self` refers to the type of the object implementing the `eq` method.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// A boolean value is being returned.
     fn eq(&self, other: &Self) -> bool {
         self.lb == other.lb && self.ub == other.ub

@@ -4,9 +4,9 @@ use num_traits::{Num, Zero};
 
 /// The `Polygon` struct represents a polygon with a generic type `T` and contains an origin point and a
 /// vector of 2D vectors.
-/// 
+///
 /// Properties:
-/// 
+///
 /// * `origin`: The origin property represents the starting point or the reference point of the polygon.
 /// It is of type Point<T>, where T is the generic type parameter of the Polygon struct.
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the polygon. Each
@@ -19,15 +19,15 @@ pub struct Polygon<T> {
 impl<T: Clone + Num + Copy> Polygon<T> {
     /// The `new` function constructs a new `Polygon` object by calculating the vectors between each
     /// coordinate and the origin.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `coords`: An array slice of Point<T> objects, representing the coordinates of the polygon. The
     /// first element of the slice is considered the origin of the polygon, and the remaining elements
     /// are treated as vectors relative to the origin.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `new` function returns a new instance of the `Polygon` object.
     pub fn new(coords: &[Point<T>]) -> Self {
         let origin = coords[0];
@@ -39,9 +39,9 @@ impl<T: Clone + Num + Copy> Polygon<T> {
     }
 
     /// The `signed_area_x2` function calculates the signed area multiplied by 2 of a polygon.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The function `signed_area_x2` returns the signed area multiplied by 2.
     /// Signed area x 2
     ///
@@ -60,18 +60,18 @@ impl<T: Clone + Num + Copy> Polygon<T> {
     }
 
     /// The function `lb` returns a `Point<T>`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// a value of type `Point<T>`.
     pub fn lb(&self) -> Point<T> {
         unimplemented!()
     }
 
     /// The function `ub` returns a `Point<T>`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// a value of type `Point<T>`.
     pub fn ub(&self) -> Point<T> {
         unimplemented!()
@@ -81,16 +81,16 @@ impl<T: Clone + Num + Copy> Polygon<T> {
 impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// The function `create_mono_polygon` takes a set of points and a function, and returns a sorted
     /// list of points that form a monotonic polygon.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: pointset is a slice of Point<T> objects, representing a set of points in a 2D
     /// space.
     /// * `f`: The parameter `f` is a closure that takes a reference to a `Point<T>` and returns a tuple
     /// `(T, T)`. It is used to determine the ordering of the points in the polygon.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The function `create_mono_polygon` returns a `Vec<Point<T>>`, which is a vector of points.
     /// Create a x-mono Polygon object
     pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>>
@@ -112,14 +112,14 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
 
     /// The function `create_xmono_polygon` creates a monotone polygon object using a given point set,
     /// with the x-coordinate as the primary sorting criterion.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: A slice of Point objects, where each Point object has xcoord and ycoord
     /// properties.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The function `create_xmono_polygon` returns a vector of `Point<T>`.
     #[inline]
     pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
@@ -127,14 +127,14 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     }
 
     /// The function creates a y-monotone polygon object using a given point set.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: A slice of Point objects, where each Point object has two fields: ycoord and
     /// xcoord.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The function `create_ymono_polygon` returns a vector of `Point<T>` objects.
     #[inline]
     pub fn create_ymono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
@@ -152,16 +152,16 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// (See p.243 of [O'Rourke (C)] for a discussion of boundary behavior.)
     ///
     /// See <http://www.faqs.org/faqs/graphics/algorithms-faq/> Subject 2.03
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `pointset`: A slice of points representing the vertices of the polygon. Each point has x and y
     /// coordinates.
     /// * `q`: The parameter `q` represents the point that we want to determine if it is within the
     /// polygon or not.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The function `point_in_polygon` returns a boolean value. It returns `true` if the given point
     /// `q` is strictly inside the polygon defined by the `pointset` array, `false` if the point is
     /// strictly outside the polygon, and `ub` (undefined behavior) if the point lies on the boundary of
