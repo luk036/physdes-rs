@@ -4,6 +4,6 @@
   <img src="./rectilinear-shapes-for-vlsi-physical-desgin.svg"/>
 </p>
 
-# phydes-rs
+# 🏼 phydes-rs
 
-𓊍 Physical Design in Rust
+> Physical Design in Rust
