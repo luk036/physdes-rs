@@ -100,7 +100,7 @@ impl<T: PartialOrd> PartialOrd for Interval<T> {
     /// assert_eq!(Interval::new(1, 2).partial_cmp(&Interval::new(2, 3)), Some(std::cmp::Ordering::Less));
     /// ```
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.lb.partial_cmp(&other.ub)?)
+        self.lb.partial_cmp(&other.ub)
     }
 }
 
@@ -154,6 +154,9 @@ mod tests {
         assert_ne!(a, b);
         assert_ne!(b, a);
         assert!(overlap(&a, &a));
+        assert!(overlap(&b, &b));
+        assert!(!contain(&a, &a));
+        assert!(!contain(&b, &b));
         // assert!(a.overlaps(&b));
         // assert!(b.overlaps(&a));
     }

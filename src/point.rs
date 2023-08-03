@@ -46,6 +46,7 @@ impl<T> Point<T> {
     /// use physdes::point::Point;
     /// assert_eq!(Point::new(3, 4).xcoord, 3);
     /// assert_eq!(Point::new(3, 4).ycoord, 4);
+    /// ```
     #[inline]
     pub const fn new(xcoord: T, ycoord: T) -> Self {
         Point { xcoord, ycoord }
@@ -115,6 +116,11 @@ impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
     /// use physdes::vector2::Vector2;
     ///
     /// assert_eq!(Point::new(3, 4) + Vector2::new(5, 3), Point::new(8, 7));
+    /// assert_eq!(Point::new(3, 4) + Vector2::new(-5, -3), Point::new(-2, 1));
+    /// assert_eq!(Point::new(3, 4) + Vector2::new(5, -3), Point::new(8, 1));
+    /// assert_eq!(Point::new(3, 4) + Vector2::new(-5, 3), Point::new(-2, 7));
+    /// assert_eq!(Point::new(3, 4) + Vector2::new(0, 0), Point::new(3, 4));
+    /// assert_eq!(Point::new(3, 4) + Vector2::new(0, 5), Point::new(3, 9));
     /// ```
     #[inline]
     fn add(self, other: Vector2<T>) -> Self::Output {
@@ -136,6 +142,12 @@ impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
     /// use physdes::point::Point;
     /// use physdes::vector2::Vector2;
     /// assert_eq!(Point::new(3, 4) - Vector2::new(5, 3), Point::new(-2, 1));
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(-5, -3), Point::new(8, 7));
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(5, -3), Point::new(-2, 7));
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(-5, 3), Point::new(8, 1));
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(0, 0), Point::new(3, 4));
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(0, 5), Point::new(3, -1));
+    /// assert_eq!(Point::new(3, 4) - Vector2::new(5, 0), Point::new(-2, 4));
     /// ```
     #[inline]
     fn sub(self, other: Vector2<T>) -> Self::Output {
@@ -210,6 +222,10 @@ impl<T: Clone + Num> Sub for Point<T> {
     /// use physdes::vector2::Vector2;
     ///
     /// assert_eq!(Point::new(3, 4) - Point::new(5, 3), Vector2::new(-2, 1));
+    /// assert_eq!(Point::new(3, 4) - Point::new(-5, -3), Vector2::new(8, 7));
+    /// assert_eq!(Point::new(3, 4) - Point::new(5, -3), Vector2::new(-2, 7));
+    /// assert_eq!(Point::new(3, 4) - Point::new(-5, 3), Vector2::new(8, 1));
+    /// assert_eq!(Point::new(3, 4) - Point::new(0, 0), Vector2::new(3, 4));
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
         Self::Output::new(self.xcoord - other.xcoord, self.ycoord - other.ycoord)

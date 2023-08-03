@@ -2,8 +2,12 @@
 name = "physdes-rs"
 version = "0.1.0"
 edition = "2021"
+description = "Physical Design in Rust"
+repository = "https://github.com/luk036/physdes-rs"
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [lib]
 name = "physdes"
 path = "src/lib.rs"

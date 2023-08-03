@@ -1,2 +1,3 @@
 /target
-/.trunk
+.cargo-ok
+.DS_Store
