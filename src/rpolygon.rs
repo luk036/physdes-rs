@@ -179,7 +179,7 @@ mod test {
 
     #[test]
     pub fn test_ymono_rpolygon() {
-        let coords = vec![
+        let coords = [
             (-2, 2),
             (0, -1),
             (-5, 1),
@@ -208,7 +208,7 @@ mod test {
 
     #[test]
     pub fn test_xmono_rpolygon() {
-        let coords = vec![
+        let coords = [
             (-2, 2),
             (0, -1),
             (-5, 1),
