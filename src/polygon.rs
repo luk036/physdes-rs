@@ -238,7 +238,7 @@ mod test {
 
     #[test]
     fn test_ymono_polygon() {
-        let coords = vec![
+        let coords = [
             (-2, 2),
             (0, -1),
             (-5, 1),
@@ -268,7 +268,7 @@ mod test {
 
     #[test]
     fn test_xmono_polygon() {
-        let coords = vec![
+        let coords = [
             (-2, 2),
             (0, -1),
             (-5, 1),
