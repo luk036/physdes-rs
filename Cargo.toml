@@ -1,6 +1,6 @@
 [package]
 name = "physdes-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Physical Design in Rust"
 repository = "https://github.com/luk036/physdes-rs"
