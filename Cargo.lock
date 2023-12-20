@@ -73,9 +73,9 @@ dependencies = [
 
 [[package]]
 name = "intervallum"
-version = "1.4.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8ccecd834666f695ecec3ff0d5fc32e32c91abea91a28fd0aceb4b35a82cee1"
+checksum = "18bfda24d3930aa647f90044d5ef87d0c8120f13b86b2d60e8aade66e656e659"
 dependencies = [
  "bit-set",
  "gcollections",
@@ -180,7 +180,7 @@ dependencies = [
 
 [[package]]
 name = "physdes-rs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "intervallum",
  "num",
