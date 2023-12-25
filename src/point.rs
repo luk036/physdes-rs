@@ -370,4 +370,52 @@ mod test {
         assert_eq!(a, a + v - v);
         assert_eq!(b, b - v + v);
     }
+
+    #[test]
+    fn test_sub() {
+        let a = Point::new(0i32, 0i32);
+        let b = Point::new(1i32, 0i32);
+        let v = Vector2::new(5i32, 6i32);
+        assert_eq!(a, a - v + v);
+        assert_eq!(b, b + v - v);
+    }
+
+    #[test]
+    fn test_neg() {
+        let a = Point::new(0i32, 0i32);
+        let b = Point::new(1i32, 0i32);
+        let c = Point::new(0i32, 1i32);
+        assert_eq!(a, -(-a));
+        assert_eq!(b, -(-b));
+        assert_eq!(c, -(-c));
+    }
+    
+    #[test]
+    fn test_add_assign() {
+        let mut a = Point::new(1i32, 0i32);
+        let b = Point::new(6i32, 6i32);
+        let v = Vector2::new(5i32, 6i32);
+        a += v;
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn test_sub_assign() {
+        let mut a = Point::new(1i32, 0i32);
+        let b = Point::new(-4i32, -6i32);
+        let v = Vector2::new(5i32, 6i32);
+        a -= v;
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn test_neg_assign() {
+        let mut a = Point::new(1i32, 0i32);
+        let b = Point::new(-1i32, 0i32);
+        let c = Point::new(1i32, 0i32);
+        a = -a;
+        assert_eq!(a, b);
+        a = -a;
+        assert_eq!(a, c);
+    }
 }

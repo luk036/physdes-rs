@@ -688,4 +688,41 @@ mod test {
         assert!(hash(&b) != hash(&c));
         assert!(hash(&c) != hash(&a));
     }
+
+    #[test]
+    fn test_zero() {
+        assert_eq!(_0_0v, Vector2::zero());
+    }
+
+    #[test]
+    fn test_is_zero() {
+        assert!(Vector2::<i32>::zero().is_zero());
+        assert!(!_1_1v.is_zero());
+    }
+
+    #[test]
+    fn test_set_zero() {
+        let mut v = _1_1v;
+        v.set_zero();
+        assert!(v.is_zero());
+    }
+
+    #[test]
+    fn test_neg() {
+        assert_eq!(-(-_1_1v), _1_1v);
+    }
+
+    #[test]
+    fn test_scalar_arithmetic() {
+        assert_eq!(_1_1v * 0.5, _05_05v);
+        assert_eq!(_1_1v / 2.0, _05_05v);
+        assert_eq!(_4_2v % 2.0, _0_0v);
+        assert_eq!(0.5 * _1_1v, _05_05v);
+    }
+
+    #[test]
+    fn test_scalar_arithmetic_ref() {
+        assert_eq!(_1_1v * &0.5, _05_05v);
+        assert_eq!(&0.5 * _1_1v, _05_05v);
+    }    
 }

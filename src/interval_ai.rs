@@ -1,26 +1,41 @@
 use std::cmp::PartialOrd;
 use std::marker::PhantomData;
 
+/// The `trait Overlaps<T>` defines a method `overlaps` that checks if two objects of type `T` overlap
+/// with each other. The `overlaps` method takes a reference to another object of type `T` as a
+/// parameter and returns a boolean value indicating whether the two objects overlap or not. This trait
+/// can be implemented for any type that needs to support the `overlaps` functionality.
 trait Overlaps<T> {
     fn overlaps(&self, other: &T) -> bool;
 }
 
+/// The `trait Contains<T>` defines a method `contains` that checks if an object of type `T` is
+/// contained within another object. The `contains` method takes a reference to another object of type
+/// `T` as a parameter and returns a boolean value indicating whether the object is contained within the
+/// other object or not. This trait can be implemented for any type that needs to support the `contains`
+/// functionality.
 trait Contains<T> {
     fn contains(&self, other: &T) -> bool;
 }
 
+/// The `impl<T: PartialOrd> Overlaps<Interval<T>> for Interval<T>` block is implementing the `Overlaps`
+/// trait for the `Interval<T>` struct.
 impl<T: PartialOrd> Overlaps<Interval<T>> for Interval<T> {
     fn overlaps(&self, other: &Interval<T>) -> bool {
         !(self < other || other < self)
     }
 }
 
+/// The `impl<T: PartialOrd> Contains<Interval<T>> for Interval<T>` block is implementing the `Contains`
+/// trait for the `Interval<T>` struct.
 impl<T: PartialOrd> Contains<Interval<T>> for Interval<T> {
     fn contains(&self, other: &Interval<T>) -> bool {
         self.lb <= other.lb && other.ub <= self.ub
     }
 }
 
+/// The `impl<T: PartialOrd> Contains<T> for Interval<T>` block is implementing the `Contains` trait for
+/// the `Interval<T>` struct.
 impl<T: PartialOrd> Contains<T> for Interval<T> {
     fn contains(&self, other: &T) -> bool {
         self.lb <= *other && *other <= self.ub
