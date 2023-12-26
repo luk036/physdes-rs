@@ -738,10 +738,61 @@ mod test {
     #[test]
     fn test_norm_sqr() {
         assert_eq!(_1_1v.norm_sqr(), 2.0);
+        assert_eq!(_0_1v.norm_sqr(), 1.0);
+        assert_eq!(_neg1_1v.norm_sqr(), 2.0);
+        assert_eq!(_05_05v.norm_sqr(), 0.5);
+        assert_eq!(_1_0v.norm_sqr(), 1.0);
+        assert_eq!(_0_0v.norm_sqr(), 0.0);
+        assert_eq!(_4_2v.norm_sqr(), 20.0);
     }
 
     #[test]
     fn test_l1_norm() {
         assert_eq!(_1_1v.l1_norm(), 2.0);
+        assert_eq!(_0_1v.l1_norm(), 1.0);
+        assert_eq!(_neg1_1v.l1_norm(), 2.0);
+        assert_eq!(_05_05v.l1_norm(), 1.0);
+        assert_eq!(_1_0v.l1_norm(), 1.0);
+        assert_eq!(_0_0v.l1_norm(), 0.0);
+        assert_eq!(_4_2v.l1_norm(), 6.0);
+    }
+
+    #[test]
+    fn test_norm_inf() {
+        assert_eq!(_1_1v.norm_inf(), 1.0);
+        assert_eq!(_0_1v.norm_inf(), 1.0);
+        assert_eq!(_neg1_1v.norm_inf(), 1.0);
+        assert_eq!(_05_05v.norm_inf(), 0.5);
+        assert_eq!(_1_0v.norm_inf(), 1.0);
+        assert_eq!(_0_0v.norm_inf(), 0.0);
+        assert_eq!(_4_2v.norm_inf(), 4.0);
+    }
+
+    #[test]
+    fn test_add_assign() {
+        let mut a = _0_1v;
+        a += _1_0v;
+        assert_eq!(a, _1_1v);
+    }
+
+    #[test]
+    fn test_sub_assign() {
+        let mut a = _1_1v;
+        a -= _1_1v;
+        assert_eq!(a, _0_0v);
+    }
+
+    #[test]
+    fn test_mul_assign() {
+        let mut a = _05_05v;
+        a *= 2.0;
+        assert_eq!(a, _1_1v);
+    }
+
+    #[test]
+    fn test_div_assign() {
+        let mut a = _1_1v;
+        a /= 2.0;
+        assert_eq!(a, _05_05v);
     }
 }
