@@ -234,4 +234,29 @@ mod test {
         assert!(!is_anticw);
         assert_eq!(poly.signed_area(), -53);
     }
+
+    #[test]
+    pub fn test_point_in_rpolygon() {
+        let coords = [
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -4),
+            (1, 4),
+        ];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32>::new(*x, *y));
+        }
+        let q = Point::<i32>::new(0, -3);
+        // let poly = RPolygon::<i32>::new(&pointset);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(&pointset, &q));
+    }
 }

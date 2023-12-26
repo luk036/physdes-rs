@@ -389,7 +389,7 @@ mod test {
         assert_eq!(b, -(-b));
         assert_eq!(c, -(-c));
     }
-    
+
     #[test]
     fn test_add_assign() {
         let mut a = Point::new(1i32, 0i32);

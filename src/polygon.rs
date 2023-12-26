@@ -295,4 +295,32 @@ mod test {
         let poly = Polygon::<i32>::new(&pointset);
         assert_eq!(poly.signed_area_x2(), 111);
     }
+
+    #[test]
+    fn test_point_in_polygon() {
+        let coords = [
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -3),
+            (3, 3),
+            (-3, -4),
+            (1, 4),
+        ];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32>::new(*x, *y));
+        }
+        let pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
+        // let poly = Polygon::<i32>::new(&pointset);
+        let q = Point::<i32>::new(0, -1);
+        assert!(Polygon::<i32>::point_in_polygon(&pointset, &q));
+    }
 }

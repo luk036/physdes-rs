@@ -175,4 +175,12 @@ mod tests {
         // assert!(a.overlaps(&b));
         // assert!(b.overlaps(&a));
     }
+
+    // #[test]
+    // fn test_overlap() {
+    //     let a = Interval::new(4, 8);
+    //     let b = Interval::new(5, 6);
+    //     assert!(overlap(&a, &b));
+    //     assert!(overlap(&b, &a));
+    // }
 }
