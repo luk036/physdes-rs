@@ -93,11 +93,6 @@ impl<T: Clone + Num> Vector2<T> {
     /// * `other`: The `other` parameter is of type `Self`, which means it is the same type as the
     /// current object.
     ///
-    /// Returns:
-    ///
-    /// The cross product of two vectors is being returned.
-    /// Returns the cross product
-    ///
     /// # Example
     ///
     /// ```
@@ -724,5 +719,29 @@ mod test {
     fn test_scalar_arithmetic_ref() {
         assert_eq!(_1_1v * &0.5, _05_05v);
         assert_eq!(&0.5 * _1_1v, _05_05v);
+    }
+
+    #[test]
+    fn test_dot() {
+        assert_eq!(_1_1v.dot(&_1_1v), 2.0);
+        assert_eq!(_1_1v.dot(&_neg1_1v), 0.0);
+        assert_eq!(_1_1v.dot(&_0_1v), 1.0);
+    }
+
+    #[test]
+    fn test_cross() {
+        assert_eq!(_1_1v.cross(&_1_1v), 0.0);
+        assert_eq!(_1_1v.cross(&_neg1_1v), 2.0);
+        assert_eq!(_1_1v.cross(&_0_1v), 1.0);
+    }
+
+    #[test]
+    fn test_norm_sqr() {
+        assert_eq!(_1_1v.norm_sqr(), 2.0);
+    }
+
+    #[test]
+    fn test_l1_norm() {
+        assert_eq!(_1_1v.l1_norm(), 2.0);
     }
 }
