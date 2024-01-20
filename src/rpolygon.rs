@@ -17,7 +17,7 @@ pub struct RPolygon<T> {
     vecs: Vec<Vector2<T>>,
 }
 
-impl<T: Clone + Num + Copy> RPolygon<T> {
+impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     /// The `new` function constructs a new `RPolygon` object by calculating the origin and vectors
     /// based on the given coordinates.
     ///
@@ -32,11 +32,13 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
     ///
     /// The `new` function is returning an instance of the `RPolygon` struct.
     pub fn new(coords: &[Point<T>]) -> Self {
-        let origin = coords[0];
-        let mut vecs = vec![];
-        for pt in coords.iter().skip(1) {
-            vecs.push(pt - origin);
-        }
+        // let origin = coords[0];
+        // let mut vecs = vec![];
+        // for pt in coords.iter().skip(1) {
+        //     vecs.push(pt - origin);
+        // }
+        let (&origin, coords) = coords.split_first().unwrap();
+        let vecs = coords.iter().map(|pt| pt - origin).collect();
         RPolygon { origin, vecs }
     }
 
@@ -47,11 +49,11 @@ impl<T: Clone + Num + Copy> RPolygon<T> {
     /// The function `signed_area` returns a value of type `T`.
     pub fn signed_area(&self) -> T {
         // assert!(self.vecs.len() >= 1);
-        let vs = &self.vecs;
-        let n = vs.len();
-        let mut res = vs[0].x_ * vs[0].y_;
-        for i in 1..n {
-            res = res + vs[i].x_ * (vs[i].y_ - vs[i - 1].y_);
+        let vecs = &self.vecs;
+        let n = vecs.len();
+        let mut res = vecs[0].x_ * vecs[0].y_;
+        for (vec0, vec1) in vecs[..n-1].iter().zip(vecs[1..].iter()) {
+            res += vec1.x_ * (vec1.y_ - vec0.y_);
         }
         res
     }

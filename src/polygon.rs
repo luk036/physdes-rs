@@ -16,7 +16,7 @@ pub struct Polygon<T> {
     pub vecs: Vec<Vector2<T>>,
 }
 
-impl<T: Clone + Num + Copy> Polygon<T> {
+impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     /// The `new` function constructs a new `Polygon` object by calculating the vectors between each
     /// coordinate and the origin.
     ///
@@ -48,11 +48,13 @@ impl<T: Clone + Num + Copy> Polygon<T> {
     /// assert_eq!(poly.vecs[0], Vector2::new(1, 1));
     /// ```
     pub fn new(coords: &[Point<T>]) -> Self {
-        let origin = coords[0];
-        let mut vecs = vec![];
-        for pt in coords.iter().skip(1) {
-            vecs.push(pt - origin);
-        }
+        // let origin = coords[0];
+        // let mut vecs = vec![];
+        // for pt in coords.iter().skip(1) {
+        //     vecs.push(pt - origin);
+        // }
+        let (&origin, coords) = coords.split_first().unwrap();
+        let vecs = coords.iter().map(|pt| pt - origin).collect();
         Polygon { origin, vecs }
     }
 
@@ -87,12 +89,12 @@ impl<T: Clone + Num + Copy> Polygon<T> {
     /// assert_eq!(poly.signed_area_x2(), 0);
     /// ```
     pub fn signed_area_x2(&self) -> T {
-        let vs = &self.vecs;
-        let n = vs.len();
+        let vecs = &self.vecs;
+        let n = vecs.len();
         assert!(n >= 2);
-        let mut res = vs[0].x_ * vs[1].y_ - vs[n - 1].x_ * vs[n - 2].y_;
-        for i in 1..n - 1 {
-            res = res + vs[i].x_ * (vs[i + 1].y_ - vs[i - 1].y_);
+        let mut res = vecs[0].x_ * vecs[1].y_ - vecs[n - 1].x_ * vecs[n - 2].y_;
+        for ((vm1, vi0), vp1) in vecs[..n-2].iter().zip(vecs[1..n-1].iter()).zip(vecs[2..].iter()) {
+            res += vi0.x_ * (vp1.y_ - vm1.y_);
         }
         res
     }
