@@ -50,10 +50,16 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     pub fn signed_area(&self) -> T {
         // assert!(self.vecs.len() >= 1);
         let vecs = &self.vecs;
-        let n = vecs.len();
-        let mut res = vecs[0].x_ * vecs[0].y_;
-        for (vec0, vec1) in vecs[..n-1].iter().zip(vecs[1..].iter()) {
+        // let n = vecs.len();
+        // let mut res = vecs[0].x_ * vecs[0].y_;
+        // for (vec0, vec1) in vecs[..n-1].iter().zip(vecs[1..].iter()) {
+        //     res += vec1.x_ * (vec1.y_ - vec0.y_);
+        // }
+        let (mut vec0, vecs) = vecs.split_first().unwrap();
+        let mut res = vec0.x_ * vec0.y_;
+        for vec1 in vecs.iter() {
             res += vec1.x_ * (vec1.y_ - vec0.y_);
+            vec0 = vec1;
         }
         res
     }
