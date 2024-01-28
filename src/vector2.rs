@@ -717,8 +717,8 @@ mod test {
 
     #[test]
     fn test_scalar_arithmetic_ref() {
-        assert_eq!(_1_1v * &0.5, _05_05v);
-        assert_eq!(&0.5 * _1_1v, _05_05v);
+        assert_eq!(_1_1v * 0.5, _05_05v);
+        assert_eq!(0.5 * _1_1v, _05_05v);
     }
 
     #[test]
