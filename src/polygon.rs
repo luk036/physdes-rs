@@ -90,18 +90,14 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     /// ```
     pub fn signed_area_x2(&self) -> T {
         let vecs = &self.vecs;
-        // let n = vecs.len();
-        // assert!(n >= 2);
-        // let mut res = vecs[0].x_ * vecs[1].y_ - vecs[n - 1].x_ * vecs[n - 2].y_;
-        // for ((vm1, vi0), vp1) in vecs[..n-2].iter().zip(vecs[1..n-1].iter()).zip(vecs[2..].iter()) {
-        //     res += vi0.x_ * (vp1.y_ - vm1.y_);
-        // }
-
-        let (mut vec0, vecs) = vecs.split_first().unwrap();
-        let (mut vec1, vecs) = vecs.split_first().unwrap();
+        // let (mut vec0, vecs) = vecs.split_first().unwrap();
+        // let (mut vec1, vecs) = vecs.split_first().unwrap();
         let n = vecs.len();
+        let mut itr = vecs.iter();
+        let mut vec0 = itr.next().unwrap();
+        let mut vec1 = itr.next().unwrap();
         let mut res = vec0.x_ * vec1.y_ - vecs[n - 1].x_ * vecs[n - 2].y_;
-        for vec2 in vecs.iter() {
+        for vec2 in itr {
             res += vec1.x_ * (vec2.y_ - vec0.y_);
             vec0 = vec1;
             vec1 = vec2;
