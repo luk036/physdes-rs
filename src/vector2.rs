@@ -11,8 +11,8 @@ use core::hash;
 use core::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 // use core::str::FromStr;
-#[cfg(feature = "std")]
-use std::error::Error;
+// #[cfg(feature = "std")]
+// use std::error::Error;
 
 use num_traits::{Num, Signed, Zero};
 
@@ -106,24 +106,10 @@ impl<T: Clone + Num> Vector2<T> {
         self.x_.clone() * other.y_.clone() - self.y_.clone() * other.x_.clone()
     }
 
-    /// The `norm_sqr` function calculates the square of the norm of a vector.
-    ///
-    /// Returns:
-    ///
-    /// The `norm_sqr` function returns the squared norm of the object on which it is called.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use physdes::vector2::Vector2;
-    ///
-    /// assert_eq!(Vector2::new(1, 2).norm_sqr(), 5);
-    /// assert_eq!(Vector2::new(3, 4).norm_sqr(), 25);
-    /// ```
-    #[inline]
-    pub fn norm_sqr(&self) -> T {
-        self.dot(self)
-    }
+    // #[inline]
+    // pub fn norm_sqr(&self) -> T {
+    //     self.dot(self)
+    // }
 
     /// The `scale` function multiplies the vector by a scalar value.
     ///
@@ -651,6 +637,28 @@ mod test {
     pub const all_consts: [Vector2<f64>; 5] = [_0_0v, _1_0v, _1_1v, _neg1_1v, _05_05v];
     pub const _4_2v: Vector2<f64> = Vector2 { x_: 4.0, y_: 2.0 };
 
+    pub const _0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _0_0v };
+
+    // vector of vectors
+    pub const _0_0_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _0_0v };
+    pub const _1_0_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_0v, y_: _0_0v };
+    pub const _1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_1v, y_: _0_0v };
+    pub const _0_1_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_1v, y_: _0_0v };
+    pub const _neg1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _neg1_1v, y_: _0_0v };
+    pub const _05_05_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _05_05v, y_: _0_0v };
+    pub const _0_0_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _1_0v };
+    pub const _1_0_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_0v, y_: _1_0v };
+    pub const _1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_1v, y_: _1_0v };
+    pub const _0_1_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_1v, y_: _1_0v };
+    pub const _neg1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _neg1_1v, y_: _1_0v };
+    pub const _05_05_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _05_05v, y_: _1_0v };
+    pub const _0_0_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _0_1v };
+    pub const _1_0_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_0v, y_: _0_1v };
+    pub const _1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_1v, y_: _0_1v };
+    pub const _0_1_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_1v, y_: _0_1v };
+    pub const _neg1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _neg1_1v, y_: _0_1v };
+    pub const _05_05_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _05_05v, y_: _0_1v };
+
     #[test]
     fn test_consts() {
         // check our constants are what Vector2::new creates
@@ -735,16 +743,16 @@ mod test {
         assert_eq!(_1_1v.cross(&_0_1v), 1.0);
     }
 
-    #[test]
-    fn test_norm_sqr() {
-        assert_eq!(_1_1v.norm_sqr(), 2.0);
-        assert_eq!(_0_1v.norm_sqr(), 1.0);
-        assert_eq!(_neg1_1v.norm_sqr(), 2.0);
-        assert_eq!(_05_05v.norm_sqr(), 0.5);
-        assert_eq!(_1_0v.norm_sqr(), 1.0);
-        assert_eq!(_0_0v.norm_sqr(), 0.0);
-        assert_eq!(_4_2v.norm_sqr(), 20.0);
-    }
+    // #[test]
+    // fn test_norm_sqr() {
+    //     assert_eq!(_1_1v.norm_sqr(), 2.0);
+    //     assert_eq!(_0_1v.norm_sqr(), 1.0);
+    //     assert_eq!(_neg1_1v.norm_sqr(), 2.0);
+    //     assert_eq!(_05_05v.norm_sqr(), 0.5);
+    //     assert_eq!(_1_0v.norm_sqr(), 1.0);
+    //     assert_eq!(_0_0v.norm_sqr(), 0.0);
+    //     assert_eq!(_4_2v.norm_sqr(), 20.0);
+    // }
 
     #[test]
     fn test_l1_norm() {
@@ -795,4 +803,36 @@ mod test {
         a /= 2.0;
         assert_eq!(a, _05_05v);
     }
+
+    #[test]
+    fn test_consts_vv() {
+        // check our constants are what Vector2::new creates
+        fn test(c: Vector2<Vector2<f64>>, w: f64, x: f64, y: f64, z: f64) {
+            assert_eq!(c, Vector2::new(Vector2::new(w, x), Vector2::new(y, z)));
+        }
+
+        test(_0_0vv, 0.0, 0.0, 0.0, 0.0);
+        test(_0_0_0_0vv, 0.0, 0.0, 0.0, 0.0);
+        test(_1_0_0_0vv, 1.0, 0.0, 0.0, 0.0);
+        test(_1_1_0_0vv, 1.0, 1.0, 0.0, 0.0);
+        test(_0_1_0_0vv, 0.0, 1.0, 0.0, 0.0);
+        test(_neg1_1_0_0vv, -1.0, 1.0, 0.0, 0.0);
+        test(_05_05_0_0vv, 0.5, 0.5, 0.0, 0.0);
+        test(_0_0_1_0vv, 0.0, 0.0, 1.0, 0.0);
+        test(_1_0_1_0vv, 1.0, 0.0, 1.0, 0.0);
+        test(_1_1_1_0vv, 1.0, 1.0, 1.0, 0.0);
+        test(_0_1_1_0vv, 0.0, 1.0, 1.0, 0.0);
+        test(_neg1_1_1_0vv, -1.0, 1.0, 1.0, 0.0);
+        test(_05_05_1_0vv, 0.5, 0.5, 1.0, 0.0);
+    }
+
+    // #[test]
+    // fn test_scale_unscale_vv() {
+    //     assert_eq!(_05_05_0_0vv.scale(2.0), _1_1_0_0vv);
+    //     assert_eq!(_1_1_0_0vv.unscale(2.0), _05_05_0_0vv);
+    //     for &c in all_consts_vv.iter() {
+    //         assert_eq!(c.scale(2.0).unscale(2.0), c);
+    //     }
+    // }
+
 }
