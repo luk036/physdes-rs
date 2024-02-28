@@ -8,7 +8,7 @@ use num_traits::{Num, Zero};
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the polygon.
-/// It is of type Point<T>, where T is the generic type parameter of the Polygon struct.
+/// It is of type `Point<T>`, where T is the generic type parameter of the Polygon struct.
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the polygon. Each
 /// vector represents the direction and magnitude of a side of the polygon.
 pub struct Polygon<T> {
@@ -22,7 +22,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     ///
     /// Arguments:
     ///
-    /// * `coords`: An array slice of Point<T> objects, representing the coordinates of the polygon. The
+    /// * `coords`: An array slice of `Point<T>` objects, representing the coordinates of the polygon. The
     /// first element of the slice is considered the origin of the polygon, and the remaining elements
     /// are treated as vectors relative to the origin.
     ///
@@ -130,7 +130,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     ///
     /// Arguments:
     ///
-    /// * `pointset`: pointset is a slice of Point<T> objects, representing a set of points in a 2D
+    /// * `pointset`: pointset is a slice of `Point<T>` objects, representing a set of points in a 2D
     /// space.
     /// * `f`: The parameter `f` is a closure that takes a reference to a `Point<T>` and returns a tuple
     /// `(T, T)`. It is used to determine the ordering of the points in the polygon.

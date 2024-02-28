@@ -8,7 +8,7 @@ use num_traits::Num;
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the
-/// rectilinear polygon. It is of type Point<T>, where T is the type of the coordinates of the point
+/// rectilinear polygon. It is of type `Point<T>`, where T is the type of the coordinates of the point
 /// (e.g., integer or floating-point).
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the rectilinear
 /// polygon.
@@ -63,7 +63,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     /**
      * @brief
      *
-     * @return Point<T>
+     * @return `Point<T>`
      */
     pub fn lb(&self) -> Point<T> {
         unimplemented!()
@@ -72,7 +72,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     /**
      * @brief
      *
-     * @return Point<T>
+     * @return `Point<T>`
      */
     pub fn ub(&self) -> Point<T> {
         unimplemented!()
