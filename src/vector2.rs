@@ -637,27 +637,84 @@ mod test {
     pub const all_consts: [Vector2<f64>; 5] = [_0_0v, _1_0v, _1_1v, _neg1_1v, _05_05v];
     pub const _4_2v: Vector2<f64> = Vector2 { x_: 4.0, y_: 2.0 };
 
-    pub const _0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _0_0v };
+    pub const _0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_0v,
+        y_: _0_0v,
+    };
 
     // vector of vectors
-    pub const _0_0_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _0_0v };
-    pub const _1_0_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_0v, y_: _0_0v };
-    pub const _1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_1v, y_: _0_0v };
-    pub const _0_1_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_1v, y_: _0_0v };
-    pub const _neg1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _neg1_1v, y_: _0_0v };
-    pub const _05_05_0_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _05_05v, y_: _0_0v };
-    pub const _0_0_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _1_0v };
-    pub const _1_0_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_0v, y_: _1_0v };
-    pub const _1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_1v, y_: _1_0v };
-    pub const _0_1_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_1v, y_: _1_0v };
-    pub const _neg1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _neg1_1v, y_: _1_0v };
-    pub const _05_05_1_0vv: Vector2<Vector2<f64>> = Vector2 { x_: _05_05v, y_: _1_0v };
-    pub const _0_0_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_0v, y_: _0_1v };
-    pub const _1_0_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_0v, y_: _0_1v };
-    pub const _1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _1_1v, y_: _0_1v };
-    pub const _0_1_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _0_1v, y_: _0_1v };
-    pub const _neg1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _neg1_1v, y_: _0_1v };
-    pub const _05_05_0_1vv: Vector2<Vector2<f64>> = Vector2 { x_: _05_05v, y_: _0_1v };
+    pub const _0_0_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_0v,
+        y_: _0_0v,
+    };
+    pub const _1_0_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _1_0v,
+        y_: _0_0v,
+    };
+    pub const _1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _1_1v,
+        y_: _0_0v,
+    };
+    pub const _0_1_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_1v,
+        y_: _0_0v,
+    };
+    pub const _neg1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _neg1_1v,
+        y_: _0_0v,
+    };
+    pub const _05_05_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _05_05v,
+        y_: _0_0v,
+    };
+    pub const _0_0_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_0v,
+        y_: _1_0v,
+    };
+    pub const _1_0_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _1_0v,
+        y_: _1_0v,
+    };
+    pub const _1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _1_1v,
+        y_: _1_0v,
+    };
+    pub const _0_1_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_1v,
+        y_: _1_0v,
+    };
+    pub const _neg1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _neg1_1v,
+        y_: _1_0v,
+    };
+    pub const _05_05_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _05_05v,
+        y_: _1_0v,
+    };
+    pub const _0_0_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_0v,
+        y_: _0_1v,
+    };
+    pub const _1_0_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _1_0v,
+        y_: _0_1v,
+    };
+    pub const _1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _1_1v,
+        y_: _0_1v,
+    };
+    pub const _0_1_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _0_1v,
+        y_: _0_1v,
+    };
+    pub const _neg1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _neg1_1v,
+        y_: _0_1v,
+    };
+    pub const _05_05_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+        x_: _05_05v,
+        y_: _0_1v,
+    };
 
     #[test]
     fn test_consts() {
@@ -834,5 +891,4 @@ mod test {
     //         assert_eq!(c.scale(2.0).unscale(2.0), c);
     //     }
     // }
-
 }
