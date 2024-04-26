@@ -1,4 +1,4 @@
-# physdes-rs
+# 🏼 physdes-rs
 
 [![Crates.io](https://img.shields.io/crates/v/physdes-rs.svg)](https://crates.io/crates/physdes-rs)
 [![Docs.rs](https://docs.rs/physdes-rs/badge.svg)](https://docs.rs/physdes-rs)
