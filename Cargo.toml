@@ -14,7 +14,7 @@ path = "src/lib.rs"
 
 [dependencies]
 num = { version = "0.4.2" }
-num-traits = { version = "0.2.18" }
+num-traits = { version = "0.2.19" }
 intervallum = { version = "1.4.1" }
 # lds-rs = { path = "lds-rs" }
 
