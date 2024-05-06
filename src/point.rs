@@ -6,6 +6,7 @@ use super::Vector2;
 use core::hash;
 use core::ops::{Add, Neg, Sub};
 use num_traits::Num;
+use crate::generic::Overlap;
 
 /// The code defines a generic Point struct with x and y coordinates.
 ///
@@ -50,6 +51,30 @@ impl<T> Point<T> {
     #[inline]
     pub const fn new(xcoord: T, ycoord: T) -> Self {
         Point { xcoord, ycoord }
+    }
+}
+
+impl<T> Overlap<Point<T>> for Point<T>
+where T: Overlap<T>
+{
+    fn overlaps(&self, other: &Point<T>) -> bool {
+        self.xcoord.overlaps(&other.xcoord) && self.ycoord.overlaps(&other.ycoord)        
+    }
+}
+
+impl<T> Overlap<T> for Point<T>
+where T: Overlap<T>
+{
+    fn overlaps(&self, other: &T) -> bool {
+        self.xcoord.overlaps(&other) && self.ycoord.overlaps(&other)        
+    }
+}
+
+impl<T> Overlap<Point<T>> for T
+where T: Overlap<T>
+{
+    fn overlaps(&self, other: &Point<T>) -> bool {
+        other.overlaps(self)
     }
 }
 
@@ -312,6 +337,7 @@ mod test {
     #![allow(non_upper_case_globals)]
 
     use super::{hash, Point, Vector2};
+    use crate::generic::Overlap;
     use core::i32;
 
     pub const _0_0p: Point<i32> = Point {
@@ -360,6 +386,13 @@ mod test {
         assert!(hash(&a) != hash(&b));
         assert!(hash(&b) != hash(&c));
         assert!(hash(&c) != hash(&a));
+    }
+
+    #[test]
+    fn test_overlap() {
+        let a = Point::new(0i32, 0i32);
+        let b = Point::new(1i32, 0i32);
+        assert!(!a.overlaps(&b));
     }
 
     #[test]
