@@ -7,4 +7,3 @@ impl Overlap<i32> for i32 {
         self == other
     }
 }
-

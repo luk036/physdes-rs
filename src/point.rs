@@ -1,12 +1,12 @@
 // #![no_std]
 
 use super::Vector2;
+use crate::generic::Overlap;
 #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
 use core::ops::{Add, Neg, Sub};
 use num_traits::Num;
-use crate::generic::Overlap;
 
 /// The code defines a generic Point struct with x and y coordinates.
 ///
@@ -55,23 +55,26 @@ impl<T> Point<T> {
 }
 
 impl<T> Overlap<Point<T>> for Point<T>
-where T: Overlap<T>
+where
+    T: Overlap<T>,
 {
     fn overlaps(&self, other: &Point<T>) -> bool {
-        self.xcoord.overlaps(&other.xcoord) && self.ycoord.overlaps(&other.ycoord)        
+        self.xcoord.overlaps(&other.xcoord) && self.ycoord.overlaps(&other.ycoord)
     }
 }
 
 impl<T> Overlap<T> for Point<T>
-where T: Overlap<T>
+where
+    T: Overlap<T>,
 {
     fn overlaps(&self, other: &T) -> bool {
-        self.xcoord.overlaps(&other) && self.ycoord.overlaps(&other)        
+        self.xcoord.overlaps(other) && self.ycoord.overlaps(other)
     }
 }
 
 impl<T> Overlap<Point<T>> for T
-where T: Overlap<T>
+where
+    T: Overlap<T>,
 {
     fn overlaps(&self, other: &Point<T>) -> bool {
         other.overlaps(self)

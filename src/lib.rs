@@ -1,10 +1,10 @@
 // pub mod halton_int;
+pub mod generic;
 pub mod interval;
 pub mod point;
 pub mod polygon;
 pub mod rpolygon;
 pub mod vector2;
-pub mod generic;
 
 pub use crate::point::Point;
 pub use crate::polygon::Polygon;
