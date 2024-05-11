@@ -8,13 +8,13 @@ use num_traits::Num;
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the
-/// rectilinear polygon. It is of type `Point<T>`, where T is the type of the coordinates of the point
+/// rectilinear polygon. It is of type `Point<T, T>`, where T is the type of the coordinates of the point
 /// (e.g., integer or floating-point).
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the rectilinear
 /// polygon.
 pub struct RPolygon<T> {
-    pub origin: Point<T>,
-    vecs: Vec<Vector2<T>>,
+    pub origin: Point<T, T>,
+    vecs: Vec<Vector2<T, T>>,
 }
 
 impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
@@ -23,7 +23,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     ///
     /// Arguments:
     ///
-    /// * `coords`: The `coords` parameter is an array of `Point<T>` objects. It represents the
+    /// * `coords`: The `coords` parameter is an array of `Point<T, T>` objects. It represents the
     /// coordinates of the points that define the polygon. The first element of the array (`coords[0]`)
     /// is considered as the origin of the polygon, and the remaining elements represent the vectors
     /// from the origin to the
@@ -31,7 +31,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     /// Returns:
     ///
     /// The `new` function is returning an instance of the `RPolygon` struct.
-    pub fn new(coords: &[Point<T>]) -> Self {
+    pub fn new(coords: &[Point<T, T>]) -> Self {
         // let origin = coords[0];
         // let mut vecs = vec![];
         // for pt in coords.iter().skip(1) {
@@ -63,18 +63,18 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> RPolygon<T> {
     /**
      * @brief
      *
-     * @return `Point<T>`
+     * @return `Point<T, T>`
      */
-    pub fn lb(&self) -> Point<T> {
+    pub fn lb(&self) -> Point<T, T> {
         unimplemented!()
     }
 
     /**
      * @brief
      *
-     * @return `Point<T>`
+     * @return `Point<T, T>`
      */
-    pub fn ub(&self) -> Point<T> {
+    pub fn ub(&self) -> Point<T, T> {
         unimplemented!()
     }
 }
@@ -85,20 +85,20 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     ///
     /// Arguments:
     ///
-    /// * `pointset`: `pointset` is a slice of `Point<T>` elements. It represents a set of points in a
+    /// * `pointset`: `pointset` is a slice of `Point<T, T>` elements. It represents a set of points in a
     /// two-dimensional space.
-    /// * `f`: The parameter `f` is a closure that takes a reference to a reference of a `Point<T>` and
+    /// * `f`: The parameter `f` is a closure that takes a reference to a reference of a `Point<T, T>` and
     /// returns a tuple of two values of type `T`. The closure is used to determine the ordering of the
     /// points in the `pointset`. The first value of the tuple represents the x-coordinate
-    pub fn create_mono_rpolygon<F>(pointset: &[Point<T>], f: F) -> (Vec<Point<T>>, bool)
+    pub fn create_mono_rpolygon<F>(pointset: &[Point<T, T>], f: F) -> (Vec<Point<T, T>>, bool)
     where
-        F: Fn(&&Point<T>) -> (T, T),
+        F: Fn(&&Point<T, T>) -> (T, T),
     {
         // Use x-mono as model
         let rightmost = pointset.iter().max_by_key(&f).unwrap();
         let leftmost = pointset.iter().min_by_key(&f).unwrap();
         let is_anticlockwise = f(&rightmost).1 <= f(&leftmost).1;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = if is_anticlockwise {
+        let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = if is_anticlockwise {
             pointset.iter().partition(|pt| (f(pt).1 <= f(&leftmost).1))
         } else {
             pointset.iter().partition(|pt| (f(pt).1 >= f(&leftmost).1))
@@ -117,7 +117,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     ///
     /// * `pointset`: A slice of Point objects
     #[inline]
-    pub fn create_xmono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
+    pub fn create_xmono_rpolygon(pointset: &[Point<T, T>]) -> (Vec<Point<T, T>>, bool) {
         Self::create_mono_rpolygon(pointset, |a| (a.xcoord, a.ycoord))
     }
 
@@ -129,7 +129,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// * `pointset`: A slice of Point objects, where each Point object has two fields: ycoord and
     /// xcoord.
     #[inline]
-    pub fn create_ymono_rpolygon(pointset: &[Point<T>]) -> (Vec<Point<T>>, bool) {
+    pub fn create_ymono_rpolygon(pointset: &[Point<T, T>]) -> (Vec<Point<T, T>>, bool) {
         Self::create_mono_rpolygon(pointset, |a| (a.ycoord, a.xcoord))
     }
 
@@ -158,7 +158,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// `q` is strictly inside the polygon defined by the `pointset` array, `false` if the point is
     /// strictly outside the polygon, and `ub` (undefined behavior) if the point lies on the boundary of
     /// the polygon.
-    pub fn point_in_rpolygon(pointset: &[Point<T>], q: &Point<T>) -> bool {
+    pub fn point_in_rpolygon(pointset: &[Point<T, T>], q: &Point<T, T>) -> bool {
         let mut res = false;
         let n = pointset.len();
         let mut p0 = &pointset[n - 1];
@@ -199,7 +199,7 @@ mod test {
         ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32>::new(*x, *y));
+            pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let (pointset, is_cw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
         for p in pointset.iter() {
@@ -228,7 +228,7 @@ mod test {
         ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32>::new(*x, *y));
+            pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let (pointset, is_anticw) = RPolygon::<i32>::create_xmono_rpolygon(&pointset);
         for p in pointset.iter() {
@@ -257,9 +257,9 @@ mod test {
         ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32>::new(*x, *y));
+            pointset.push(Point::<i32, i32>::new(*x, *y));
         }
-        let q = Point::<i32>::new(0, -3);
+        let q = Point::<i32, i32>::new(0, -3);
         // let poly = RPolygon::<i32>::new(&pointset);
         assert!(!RPolygon::<i32>::point_in_rpolygon(&pointset, &q));
     }

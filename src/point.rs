@@ -1,7 +1,7 @@
 // #![no_std]
 
 use super::Vector2;
-use crate::generic::Overlap;
+use crate::generic::{Overlap, Contain, MinDist};
 #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
@@ -19,14 +19,14 @@ use num_traits::Num;
 /// It is a generic type `T`, which means it can be any type that implements the necessary traits for
 /// the `Point` struct.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
-pub struct Point<T> {
+pub struct Point<T1, T2> {
     /// x portion of the Point object
-    pub xcoord: T,
+    pub xcoord: T1,
     /// y portion of the Point object
-    pub ycoord: T,
+    pub ycoord: T2,
 }
 
-impl<T> Point<T> {
+impl<T1, T2> Point<T1, T2> {
     /// The `new` function creates a new `Point` with the given x and y coordinates.
     ///
     /// Arguments:
@@ -49,45 +49,73 @@ impl<T> Point<T> {
     /// assert_eq!(Point::new(3, 4).ycoord, 4);
     /// ```
     #[inline]
-    pub const fn new(xcoord: T, ycoord: T) -> Self {
+    pub const fn new(xcoord: T1, ycoord: T2) -> Self {
         Point { xcoord, ycoord }
     }
+
+    // pub fn flip(&self) -> Point<T2, T1> {
+    //     Point {
+    //         xcoord: self.ycoord,
+    //         ycoord: self.xcoord,
+    //     }
+    // }
 }
 
-impl<T> Overlap<Point<T>> for Point<T>
+// impl<T, U> Overlap<U> for Point<T1, T2>
+// where
+//     U: Overlap<T1, T2>,
+// {
+//     fn overlaps(&self, other: &U) -> bool {
+//         other.overlaps(&self.xcoord) && other.overlaps(&self.ycoord)
+//     }
+// }
+
+// impl<T, U> Contain<U> for Point<T1, T2>
+// where
+//     T: Contain<U>,
+// {
+//     fn contains(&self, other: &U) -> bool {
+//         self.xcoord.contains(other) && self.ycoord.contains(other)
+//     }
+// }
+
+impl<T1, T2, U1, U2> Overlap<Point<U1, U2>> for Point<T1, T2>
 where
-    T: Overlap<T>,
+    T1: Overlap<U1>,
+    T2: Overlap<U2>,
 {
-    fn overlaps(&self, other: &Point<T>) -> bool {
+    fn overlaps(&self, other: &Point<U1, U2>) -> bool {
         self.xcoord.overlaps(&other.xcoord) && self.ycoord.overlaps(&other.ycoord)
     }
 }
 
-impl<T> Overlap<T> for Point<T>
+impl<T1, T2, U1, U2> Contain<Point<U1, U2>> for Point<T1, T2>
 where
-    T: Overlap<T>,
+    T1: Contain<U1>,
+    T2: Contain<U2>,
 {
-    fn overlaps(&self, other: &T) -> bool {
-        self.xcoord.overlaps(other) && self.ycoord.overlaps(other)
+    fn contains(&self, other: &Point<U1, U2>) -> bool {
+        self.xcoord.contains(&other.xcoord) && self.ycoord.contains(&other.ycoord)
     }
 }
 
-impl<T> Overlap<Point<T>> for T
+impl<T1, T2, U1, U2> MinDist<Point<U1, U2>> for Point<T1, T2>
 where
-    T: Overlap<T>,
+    T1: MinDist<U1>,
+    T2: MinDist<U2>,
 {
-    fn overlaps(&self, other: &Point<T>) -> bool {
-        other.overlaps(self)
+    fn min_dist(&self, other: &Point<U1, U2>) -> u32 {
+        self.xcoord.min_dist(&other.xcoord) + self.ycoord.min_dist(&other.ycoord)
     }
 }
 
 macro_rules! forward_xf_xf_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T: Clone + Num> $imp<&'b Vector2<T>> for &'a Point<T> {
-            type Output = Point<T>;
+        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>> for &'a Point<T1, T2> {
+            type Output = Point<T1, T2>;
 
             #[inline]
-            fn $method(self, other: &Vector2<T>) -> Self::Output {
+            fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
                 self.clone().$method(other.clone())
             }
         }
@@ -96,11 +124,11 @@ macro_rules! forward_xf_xf_binop {
 
 macro_rules! forward_xf_val_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, T: Clone + Num> $imp<Vector2<T>> for &'a Point<T> {
-            type Output = Point<T>;
+        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<Vector2<T1, T2>> for &'a Point<T1, T2> {
+            type Output = Point<T1, T2>;
 
             #[inline]
-            fn $method(self, other: Vector2<T>) -> Self::Output {
+            fn $method(self, other: Vector2<T1, T2>) -> Self::Output {
                 self.clone().$method(other)
             }
         }
@@ -109,11 +137,11 @@ macro_rules! forward_xf_val_binop {
 
 macro_rules! forward_val_xf_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, T: Clone + Num> $imp<&'a Vector2<T>> for Point<T> {
-            type Output = Point<T>;
+        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<&'a Vector2<T1, T2>> for Point<T1, T2> {
+            type Output = Point<T1, T2>;
 
             #[inline]
-            fn $method(self, other: &Vector2<T>) -> Self::Output {
+            fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
                 self.$method(other.clone())
             }
         }
@@ -132,7 +160,7 @@ macro_rules! forward_all_binop {
 forward_all_binop!(impl Add, add);
 
 // (a, b) + (c, d) == (a + c), (b + d)
-impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
+impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Point<T1, T2> {
     type Output = Self;
 
     /// Translate a new Point
@@ -151,7 +179,7 @@ impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
     /// assert_eq!(Point::new(3, 4) + Vector2::new(0, 5), Point::new(3, 9));
     /// ```
     #[inline]
-    fn add(self, other: Vector2<T>) -> Self::Output {
+    fn add(self, other: Vector2<T1, T2>) -> Self::Output {
         Self::Output::new(self.xcoord + other.x_, self.ycoord + other.y_)
     }
 }
@@ -159,7 +187,7 @@ impl<T: Clone + Num> Add<Vector2<T>> for Point<T> {
 forward_all_binop!(impl Sub, sub);
 
 // (a, b) - (c, d) == (a - c), (b - d)
-impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
+impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Point<T1, T2> {
     type Output = Self;
 
     /// Translate a new Point
@@ -178,18 +206,18 @@ impl<T: Clone + Num> Sub<Vector2<T>> for Point<T> {
     /// assert_eq!(Point::new(3, 4) - Vector2::new(5, 0), Point::new(-2, 4));
     /// ```
     #[inline]
-    fn sub(self, other: Vector2<T>) -> Self::Output {
+    fn sub(self, other: Vector2<T1, T2>) -> Self::Output {
         Self::Output::new(self.xcoord - other.x_, self.ycoord - other.y_)
     }
 }
 
 macro_rules! forward_xf_xf_binop2 {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T: Clone + Num> $imp<&'b Point<T>> for &'a Point<T> {
-            type Output = Vector2<T>;
+        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Point<T1, T2>> for &'a Point<T1, T2> {
+            type Output = Vector2<T1, T2>;
 
             #[inline]
-            fn $method(self, other: &Point<T>) -> Self::Output {
+            fn $method(self, other: &Point<T1, T2>) -> Self::Output {
                 self.clone().$method(other.clone())
             }
         }
@@ -198,11 +226,11 @@ macro_rules! forward_xf_xf_binop2 {
 
 macro_rules! forward_xf_val_binop2 {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, T: Clone + Num> $imp<Point<T>> for &'a Point<T> {
-            type Output = Vector2<T>;
+        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<Point<T1, T2>> for &'a Point<T1, T2> {
+            type Output = Vector2<T1, T2>;
 
             #[inline]
-            fn $method(self, other: Point<T>) -> Self::Output {
+            fn $method(self, other: Point<T1, T2>) -> Self::Output {
                 self.clone().$method(other)
             }
         }
@@ -211,11 +239,11 @@ macro_rules! forward_xf_val_binop2 {
 
 macro_rules! forward_val_xf_binop2 {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, T: Clone + Num> $imp<&'a Point<T>> for Point<T> {
-            type Output = Vector2<T>;
+        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<&'a Point<T1, T2>> for Point<T1, T2> {
+            type Output = Vector2<T1, T2>;
 
             #[inline]
-            fn $method(self, other: &Point<T>) -> Self::Output {
+            fn $method(self, other: &Point<T1, T2>) -> Self::Output {
                 self.$method(other.clone())
             }
         }
@@ -233,8 +261,8 @@ macro_rules! forward_all_binop2 {
 // arithmetic
 forward_all_binop2!(impl Sub, sub);
 
-impl<T: Clone + Num> Sub for Point<T> {
-    type Output = Vector2<T>;
+impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
+    type Output = Vector2<T1, T2>;
 
     /// Displacement of two Points
     ///
@@ -270,15 +298,15 @@ mod opassign {
     use crate::Point;
     use crate::Vector2;
 
-    impl<T: Clone + NumAssign> AddAssign<Vector2<T>> for Point<T> {
-        fn add_assign(&mut self, other: Vector2<T>) {
+    impl<T1: Clone + NumAssign, T2: Clone + NumAssign> AddAssign<Vector2<T1, T2>> for Point<T1, T2> {
+        fn add_assign(&mut self, other: Vector2<T1, T2>) {
             self.xcoord += other.x_;
             self.ycoord += other.y_;
         }
     }
 
-    impl<T: Clone + NumAssign> SubAssign<Vector2<T>> for Point<T> {
-        fn sub_assign(&mut self, other: Vector2<T>) {
+    impl<T1: Clone + NumAssign, T2: Clone + NumAssign> SubAssign<Vector2<T1, T2>> for Point<T1, T2> {
+        fn sub_assign(&mut self, other: Vector2<T1, T2>) {
             self.xcoord -= other.x_;
             self.ycoord -= other.y_;
         }
@@ -286,9 +314,9 @@ mod opassign {
 
     macro_rules! forward_op_assign {
         (impl $imp:ident, $method:ident) => {
-            impl<'a, T: Clone + NumAssign> $imp<&'a Vector2<T>> for Point<T> {
+            impl<'a, T1: Clone + NumAssign, T2: Clone + NumAssign> $imp<&'a Vector2<T1, T2>> for Point<T1, T2> {
                 #[inline]
-                fn $method(&mut self, other: &Vector2<T>) {
+                fn $method(&mut self, other: &Vector2<T1, T2>) {
                     self.$method(other.clone())
                 }
             }
@@ -299,7 +327,7 @@ mod opassign {
     forward_op_assign!(impl SubAssign, sub_assign);
 }
 
-impl<T: Clone + Num + Neg<Output = T>> Neg for Point<T> {
+impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for Point<T1, T2> {
     type Output = Self;
 
     /// Negate a Points
@@ -317,8 +345,8 @@ impl<T: Clone + Num + Neg<Output = T>> Neg for Point<T> {
     }
 }
 
-impl<'a, T: Clone + Num + Neg<Output = T>> Neg for &'a Point<T> {
-    type Output = Point<T>;
+impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for &'a Point<T1, T2> {
+    type Output = Point<T1, T2>;
 
     #[inline]
     fn neg(self) -> Self::Output {
@@ -339,32 +367,32 @@ fn hash<T: hash::Hash>(x: &T) -> u64 {
 mod test {
     #![allow(non_upper_case_globals)]
 
-    use super::{hash, Point, Vector2};
+    use super::*;
     use crate::generic::Overlap;
     use core::i32;
 
-    pub const _0_0p: Point<i32> = Point {
+    pub const _0_0p: Point<i32, i32> = Point {
         xcoord: 0,
         ycoord: 0,
     };
-    pub const _1_0p: Point<i32> = Point {
+    pub const _1_0p: Point<i32, i32> = Point {
         xcoord: 1,
         ycoord: 0,
     };
-    pub const _1_1p: Point<i32> = Point {
+    pub const _1_1p: Point<i32, i32> = Point {
         xcoord: 1,
         ycoord: 1,
     };
-    pub const _0_1p: Point<i32> = Point {
+    pub const _0_1p: Point<i32, i32> = Point {
         xcoord: 0,
         ycoord: 1,
     };
-    pub const _neg1_1p: Point<i32> = Point {
+    pub const _neg1_1p: Point<i32, i32> = Point {
         xcoord: -1,
         ycoord: 1,
     };
-    // pub const all_consts: [Point<i32>; 4] = [_0_0p, _1_0p, _1_1p, _neg1_1p];
-    pub const _4_2p: Point<i32> = Point {
+    // pub const all_consts: [Point<i32, i32>; 4] = [_0_0p, _1_0p, _1_1p, _neg1_1p];
+    pub const _4_2p: Point<i32, i32> = Point {
         xcoord: 4,
         ycoord: 2,
     };
@@ -372,7 +400,7 @@ mod test {
     #[test]
     fn test_consts() {
         // check our constants are what Point::new creates
-        fn test(c: Point<i32>, r: i32, i: i32) {
+        fn test(c: Point<i32, i32>, r: i32, i: i32) {
             assert_eq!(c, Point::new(r, i));
         }
         test(_0_0p, 0, 0);
@@ -396,6 +424,20 @@ mod test {
         let a = Point::new(0i32, 0i32);
         let b = Point::new(1i32, 0i32);
         assert!(!a.overlaps(&b));
+    }
+
+    #[test]
+    fn test_contain() {
+        let a = Point::new(0i32, 0i32);
+        let b = Point::new(1i32, 0i32);
+        assert!(!a.contains(&b));
+    }
+
+    #[test]
+    fn test_min_dist() {
+        let a = Point::new(3i32, 5i32);
+        let b = Point::new(6i32, 4i32);
+        assert_eq!(a.min_dist(&b), 4);
     }
 
     #[test]

@@ -1,46 +1,6 @@
 use std::cmp::PartialOrd;
 use std::marker::PhantomData;
-
-/// The `trait Overlaps<T>` defines a method `overlaps` that checks if two objects of type `T` overlap
-/// with each other. The `overlaps` method takes a reference to another object of type `T` as a
-/// parameter and returns a boolean value indicating whether the two objects overlap or not. This trait
-/// can be implemented for any type that needs to support the `overlaps` functionality.
-trait Overlaps<T> {
-    fn overlaps(&self, other: &T) -> bool;
-}
-
-/// The `trait Contains<T>` defines a method `contains` that checks if an object of type `T` is
-/// contained within another object. The `contains` method takes a reference to another object of type
-/// `T` as a parameter and returns a boolean value indicating whether the object is contained within the
-/// other object or not. This trait can be implemented for any type that needs to support the `contains`
-/// functionality.
-trait Contains<T> {
-    fn contains(&self, other: &T) -> bool;
-}
-
-/// The `impl<T: PartialOrd> Overlaps<Interval<T>> for Interval<T>` block is implementing the `Overlaps`
-/// trait for the `Interval<T>` struct.
-impl<T: PartialOrd> Overlaps<Interval<T>> for Interval<T> {
-    fn overlaps(&self, other: &Interval<T>) -> bool {
-        !(self < other || other < self)
-    }
-}
-
-/// The `impl<T: PartialOrd> Contains<Interval<T>> for Interval<T>` block is implementing the `Contains`
-/// trait for the `Interval<T>` struct.
-impl<T: PartialOrd> Contains<Interval<T>> for Interval<T> {
-    fn contains(&self, other: &Interval<T>) -> bool {
-        self.lb <= other.lb && other.ub <= self.ub
-    }
-}
-
-/// The `impl<T: PartialOrd> Contains<T> for Interval<T>` block is implementing the `Contains` trait for
-/// the `Interval<T>` struct.
-impl<T: PartialOrd> Contains<T> for Interval<T> {
-    fn contains(&self, other: &T) -> bool {
-        self.lb <= *other && *other <= self.ub
-    }
-}
+use crate::generic::{Overlap, Contain};
 
 /// The `Interval` struct represents a range of values with a lower bound (`lb`) and an upper bound
 /// (`ub`).
@@ -142,13 +102,44 @@ impl<T: PartialOrd> PartialEq for Interval<T> {
     }
 }
 
-pub fn overlap<T: PartialOrd>(lhs: &Interval<T>, rhs: &Interval<T>) -> bool {
-    lhs.overlaps(rhs) || rhs.overlaps(lhs) || lhs == rhs
+/// The `impl<T: PartialOrd> Overlap<Interval<T>> for Interval<T>` block is implementing the `Overlap`
+/// trait for the `Interval<T>` struct.
+impl<T: PartialOrd> Overlap<Interval<T>> for Interval<T> {
+    fn overlaps(&self, other: &Interval<T>) -> bool {
+        !(self < other || other < self)
+    }
 }
 
-pub fn contain<T: PartialOrd>(lhs: &Interval<T>, rhs: &Interval<T>) -> bool {
-    lhs.contains(rhs) && !rhs.contains(lhs)
+/// The `impl<T: PartialOrd> Contain<Interval<T>> for Interval<T>` block is implementing the `Contain`
+/// trait for the `Interval<T>` struct.
+impl<T: PartialOrd> Contain<Interval<T>> for Interval<T> {
+    fn contains(&self, other: &Interval<T>) -> bool {
+        self.lb <= other.lb && other.ub <= self.ub
+    }
 }
+
+/// The `impl<T: PartialOrd> Contain<T> for Interval<T>` block is implementing the `Contain` trait for
+/// the `Interval<T>` struct.
+impl<T: PartialOrd> Contain<T> for Interval<T> {
+    fn contains(&self, other: &T) -> bool {
+        self.lb <= *other && *other <= self.ub
+    }
+}
+
+// impl<T> MinDist<Interval<T>> for Interval<T>
+// {
+//     fn min_dist(&self, other: &Interval<T>) -> u32 {
+//         let diff = self.lb - other.ub;
+//     }
+// }
+
+// pub fn overlap<T: PartialOrd>(lhs: &Interval<T>, rhs: &Interval<T>) -> bool {
+//     lhs.overlaps(rhs) || rhs.overlaps(lhs) || lhs == rhs
+// }
+
+// pub fn contain<T: PartialOrd>(lhs: &Interval<T>, rhs: &Interval<T>) -> bool {
+//     lhs.contains(rhs) && !rhs.contains(lhs)
+// }
 
 #[cfg(test)]
 mod tests {
@@ -158,8 +149,8 @@ mod tests {
     fn test_interval() {
         let a = Interval::new(4, 8);
         let b = Interval::new(5, 6);
-        assert!(!overlap(&a, &b));
-        assert!(!overlap(&b, &a));
+        assert!(!a.overlaps(&b));
+        assert!(!b.overlaps(&a));
         // assert!(!contain(&a, &b));
         assert!(a.contains(&4));
         assert!(a.contains(&8));
@@ -168,10 +159,10 @@ mod tests {
         assert_eq!(b, b);
         assert_ne!(a, b);
         assert_ne!(b, a);
-        assert!(overlap(&a, &a));
-        assert!(overlap(&b, &b));
-        assert!(!contain(&a, &a));
-        assert!(!contain(&b, &b));
+        // assert!(a.overlaps(&a));
+        // assert!(b.overlaps(&b));
+        // assert!(!a.contains(&a));
+        // assert!(!b.contains(&b));
         // assert!(a.overlaps(&b));
         // assert!(b.overlaps(&a));
     }

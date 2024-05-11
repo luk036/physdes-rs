@@ -8,12 +8,12 @@ use num_traits::{Num, Zero};
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the polygon.
-/// It is of type `Point<T>`, where T is the generic type parameter of the Polygon struct.
+/// It is of type `Point<T, T>`, where T is the generic type parameter of the Polygon struct.
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the polygon. Each
 /// vector represents the direction and magnitude of a side of the polygon.
 pub struct Polygon<T> {
-    pub origin: Point<T>,
-    pub vecs: Vec<Vector2<T>>,
+    pub origin: Point<T, T>,
+    pub vecs: Vec<Vector2<T, T>>,
 }
 
 impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
@@ -22,7 +22,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     ///
     /// Arguments:
     ///
-    /// * `coords`: An array slice of `Point<T>` objects, representing the coordinates of the polygon. The
+    /// * `coords`: An array slice of `Point<T, T>` objects, representing the coordinates of the polygon. The
     /// first element of the slice is considered the origin of the polygon, and the remaining elements
     /// are treated as vectors relative to the origin.
     ///
@@ -47,7 +47,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     /// assert_eq!(poly.vecs.len(), 4);
     /// assert_eq!(poly.vecs[0], Vector2::new(1, 1));
     /// ```
-    pub fn new(coords: &[Point<T>]) -> Self {
+    pub fn new(coords: &[Point<T, T>]) -> Self {
         // let origin = coords[0];
         // let mut vecs = vec![];
         // for pt in coords.iter().skip(1) {
@@ -105,21 +105,21 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
         res
     }
 
-    /// The function `lb` returns a `Point<T>`.
+    /// The function `lb` returns a `Point<T, T>`.
     ///
     /// Returns:
     ///
-    /// a value of type `Point<T>`.
-    pub fn lb(&self) -> Point<T> {
+    /// a value of type `Point<T, T>`.
+    pub fn lb(&self) -> Point<T, T> {
         unimplemented!()
     }
 
-    /// The function `ub` returns a `Point<T>`.
+    /// The function `ub` returns a `Point<T, T>`.
     ///
     /// Returns:
     ///
-    /// a value of type `Point<T>`.
-    pub fn ub(&self) -> Point<T> {
+    /// a value of type `Point<T, T>`.
+    pub fn ub(&self) -> Point<T, T> {
         unimplemented!()
     }
 }
@@ -130,23 +130,23 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     ///
     /// Arguments:
     ///
-    /// * `pointset`: pointset is a slice of `Point<T>` objects, representing a set of points in a 2D
+    /// * `pointset`: pointset is a slice of `Point<T, T>` objects, representing a set of points in a 2D
     /// space.
-    /// * `f`: The parameter `f` is a closure that takes a reference to a `Point<T>` and returns a tuple
+    /// * `f`: The parameter `f` is a closure that takes a reference to a `Point<T, T>` and returns a tuple
     /// `(T, T)`. It is used to determine the ordering of the points in the polygon.
     ///
     /// Returns:
     ///
-    /// The function `create_mono_polygon` returns a `Vec<Point<T>>`, which is a vector of points.
+    /// The function `create_mono_polygon` returns a `Vec<Point<T, T>>`, which is a vector of points.
     /// Create a x-mono Polygon object
-    pub fn create_mono_polygon<F>(pointset: &[Point<T>], f: F) -> Vec<Point<T>>
+    pub fn create_mono_polygon<F>(pointset: &[Point<T, T>], f: F) -> Vec<Point<T, T>>
     where
-        F: Fn(&&Point<T>) -> (T, T),
+        F: Fn(&&Point<T, T>) -> (T, T),
     {
         let max_pt = pointset.iter().max_by_key(&f).unwrap();
         let min_pt = pointset.iter().min_by_key(&f).unwrap();
         let d = max_pt - min_pt;
-        let (mut lst1, mut lst2): (Vec<Point<T>>, Vec<Point<T>>) = pointset
+        let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = pointset
             .iter()
             .partition(|&a| d.cross(&(a - min_pt)) <= Zero::zero());
         lst1.sort_by_key(|a| f(&a));
@@ -166,9 +166,9 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     ///
     /// Returns:
     ///
-    /// The function `create_xmono_polygon` returns a vector of `Point<T>`.
+    /// The function `create_xmono_polygon` returns a vector of `Point<T, T>`.
     #[inline]
-    pub fn create_xmono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
+    pub fn create_xmono_polygon(pointset: &[Point<T, T>]) -> Vec<Point<T, T>> {
         Self::create_mono_polygon(pointset, |a| (a.xcoord, a.ycoord))
     }
 
@@ -181,9 +181,9 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     ///
     /// Returns:
     ///
-    /// The function `create_ymono_polygon` returns a vector of `Point<T>` objects.
+    /// The function `create_ymono_polygon` returns a vector of `Point<T, T>` objects.
     #[inline]
-    pub fn create_ymono_polygon(pointset: &[Point<T>]) -> Vec<Point<T>> {
+    pub fn create_ymono_polygon(pointset: &[Point<T, T>]) -> Vec<Point<T, T>> {
         Self::create_mono_polygon(pointset, |a| (a.ycoord, a.xcoord))
     }
 
@@ -212,7 +212,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// `q` is strictly inside the polygon defined by the `pointset` array, `false` if the point is
     /// strictly outside the polygon, and `ub` (undefined behavior) if the point lies on the boundary of
     /// the polygon.
-    pub fn point_in_polygon(pointset: &[Point<T>], q: &Point<T>) -> bool {
+    pub fn point_in_polygon(pointset: &[Point<T, T>], q: &Point<T, T>) -> bool {
         let n = pointset.len();
         let mut p0 = &pointset[n - 1];
         let mut c = false;
@@ -264,7 +264,7 @@ mod test {
         ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32>::new(*x, *y));
+            pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
         for p in pointset.iter() {
@@ -294,7 +294,7 @@ mod test {
         ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32>::new(*x, *y));
+            pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
         for p in pointset.iter() {
@@ -324,11 +324,11 @@ mod test {
         ];
         let mut pointset = vec![];
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32>::new(*x, *y));
+            pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
         // let poly = Polygon::<i32>::new(&pointset);
-        let q = Point::<i32>::new(0, -1);
+        let q = Point::<i32, i32>::new(0, -1);
         assert!(Polygon::<i32>::point_in_polygon(&pointset, &q));
     }
 }

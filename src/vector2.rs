@@ -26,14 +26,14 @@ use num_traits::{Num, Signed, Zero};
 /// position of the vector in a 2D coordinate system.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 // #[repr(C)]
-pub struct Vector2<T> {
+pub struct Vector2<T1, T2> {
     /// x portion of the Vector2 object
-    pub x_: T,
+    pub x_: T1,
     /// y portion of the Vector2 object
-    pub y_: T,
+    pub y_: T2,
 }
 
-impl<T> Vector2<T> {
+impl<T1, T2> Vector2<T1, T2> {
     /// The function `new` creates a new Vector2 with the given x and y values.
     ///
     /// Arguments:
@@ -56,12 +56,12 @@ impl<T> Vector2<T> {
     /// assert_eq!(Vector2::new(3, 4), Vector2 { x_: 3, y_: 4 });
     /// ```
     #[inline]
-    pub const fn new(x_: T, y_: T) -> Self {
+    pub const fn new(x_: T1, y_: T2) -> Self {
         Vector2 { x_, y_ }
     }
 }
 
-impl<T: Clone + Num> Vector2<T> {
+impl<T1: Clone + Num> Vector2<T1, T1> {
     /// The `dot` function calculates the dot product of two vectors.
     ///
     /// Arguments:
@@ -82,7 +82,7 @@ impl<T: Clone + Num> Vector2<T> {
     /// assert_eq!(Vector2::new(3, 4).dot(&Vector2::new(1, 2)), 11);
     /// ```
     #[inline]
-    pub fn dot(&self, other: &Self) -> T {
+    pub fn dot(&self, other: &Self) -> T1 {
         self.x_.clone() * other.x_.clone() + self.y_.clone() * other.y_.clone()
     }
 
@@ -102,7 +102,7 @@ impl<T: Clone + Num> Vector2<T> {
     /// assert_eq!(Vector2::new(3, 4).cross(&Vector2::new(1, 2)), 2);
     /// ```
     #[inline]
-    pub fn cross(&self, other: &Self) -> T {
+    pub fn cross(&self, other: &Self) -> T1 {
         self.x_.clone() * other.y_.clone() - self.y_.clone() * other.x_.clone()
     }
 
@@ -132,7 +132,7 @@ impl<T: Clone + Num> Vector2<T> {
     /// assert_eq!(Vector2::new(3, 4).scale(2), Vector2::new(6, 8));
     /// ```
     #[inline]
-    pub fn scale(&self, t: T) -> Self {
+    pub fn scale(&self, t: T1) -> Self {
         Self::new(self.x_.clone() * t.clone(), self.y_.clone() * t)
     }
 
@@ -158,12 +158,12 @@ impl<T: Clone + Num> Vector2<T> {
     /// assert_eq!(Vector2::new(6, 8).unscale(2), Vector2::new(3, 4));
     /// ```
     #[inline]
-    pub fn unscale(&self, t: T) -> Self {
+    pub fn unscale(&self, t: T1) -> Self {
         Self::new(self.x_.clone() / t.clone(), self.y_.clone() / t)
     }
 }
 
-impl<T: Clone + Signed> Vector2<T> {
+impl<T1: Clone + Signed> Vector2<T1, T1> {
     /// The `l1_norm` function calculates the Manhattan distance from the origin.
     ///
     /// [Manhattan distance]: https://en.wikipedia.org/wiki/Taxicab_geometry
@@ -182,12 +182,12 @@ impl<T: Clone + Signed> Vector2<T> {
     /// assert_eq!(Vector2::new(3, 4).l1_norm(), 7);
     /// ```
     #[inline]
-    pub fn l1_norm(&self) -> T {
+    pub fn l1_norm(&self) -> T1 {
         self.x_.abs() + self.y_.abs()
     }
 }
 
-impl<T: Clone + PartialOrd> Vector2<T> {
+impl<T1: Clone + PartialOrd> Vector2<T1, T1> {
     /// The `norm_inf` function returns the maximum absolute value between `x_` and `y_`.
     ///
     /// Returns:
@@ -204,7 +204,7 @@ impl<T: Clone + PartialOrd> Vector2<T> {
     /// assert_eq!(Vector2::new(3, 4).norm_inf(), 4);
     /// ```
     #[inline]
-    pub fn norm_inf(&self) -> T {
+    pub fn norm_inf(&self) -> T1 {
         if self.x_ > self.y_ {
             self.x_.clone()
         } else {
@@ -215,8 +215,8 @@ impl<T: Clone + PartialOrd> Vector2<T> {
 
 macro_rules! forward_xf_xf_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T: Clone + Num> $imp<&'b Vector2<T>> for &'a Vector2<T> {
-            type Output = Vector2<T>;
+        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>> for &'a Vector2<T1, T2> {
+            type Output = Vector2<T1, T2>;
 
             /// The function clones the input arguments and calls the specified method on them.
             ///
@@ -224,7 +224,7 @@ macro_rules! forward_xf_xf_binop {
             ///
             /// * `other`: A reference to another Vector2 object of the same type as self.
             #[inline]
-            fn $method(self, other: &Vector2<T>) -> Self::Output {
+            fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
                 self.clone().$method(other.clone())
             }
         }
@@ -233,11 +233,11 @@ macro_rules! forward_xf_xf_binop {
 
 macro_rules! forward_xf_val_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, T: Clone + Num> $imp<Vector2<T>> for &'a Vector2<T> {
-            type Output = Vector2<T>;
+        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<Vector2<T1, T2>> for &'a Vector2<T1, T2> {
+            type Output = Vector2<T1, T2>;
 
             #[inline]
-            fn $method(self, other: Vector2<T>) -> Self::Output {
+            fn $method(self, other: Vector2<T1, T2>) -> Self::Output {
                 self.clone().$method(other)
             }
         }
@@ -246,11 +246,11 @@ macro_rules! forward_xf_val_binop {
 
 macro_rules! forward_val_xf_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, T: Clone + Num> $imp<&'a Vector2<T>> for Vector2<T> {
-            type Output = Vector2<T>;
+        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<&'a Vector2<T1, T2>> for Vector2<T1, T2> {
+            type Output = Vector2<T1, T2>;
 
             #[inline]
-            fn $method(self, other: &Vector2<T>) -> Self::Output {
+            fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
                 self.$method(other.clone())
             }
         }
@@ -269,7 +269,7 @@ macro_rules! forward_all_binop {
 forward_all_binop!(impl Add, add);
 
 // (a, b) + (c, d) == (a + c), (b + d)
-impl<T: Clone + Num> Add<Vector2<T>> for Vector2<T> {
+impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> {
     type Output = Self;
 
     /// The function `add` takes two values of the same type and returns their sum.
@@ -297,7 +297,7 @@ impl<T: Clone + Num> Add<Vector2<T>> for Vector2<T> {
 forward_all_binop!(impl Sub, sub);
 
 // (a, b) - (c, d) == (a - c), (b - d)
-impl<T: Clone + Num> Sub<Vector2<T>> for Vector2<T> {
+impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Vector2<T1, T2> {
     type Output = Self;
 
     /// The function subtracts the coordinates of two points and returns a new point.
@@ -331,7 +331,7 @@ mod opassign {
 
     use crate::Vector2;
 
-    impl<T: Clone + NumAssign> AddAssign for Vector2<T> {
+    impl<T1: Clone + NumAssign, T2: Clone + NumAssign> AddAssign for Vector2<T1, T2> {
         /// The function `add_assign` adds the values of `other.x_` and `other.y_` to `self.x_` and
         /// `self.y_` respectively.
         ///
@@ -359,7 +359,7 @@ mod opassign {
         }
     }
 
-    impl<T: Clone + NumAssign> SubAssign for Vector2<T> {
+    impl<T1: Clone + NumAssign, T2: Clone + NumAssign> SubAssign for Vector2<T1, T2> {
         /// The function subtracts the values of another object from the values of the current object.
         ///
         /// Arguments:
@@ -385,7 +385,7 @@ mod opassign {
         }
     }
 
-    impl<T: Clone + NumAssign> MulAssign<T> for Vector2<T> {
+    impl<T1: Clone + NumAssign> MulAssign<T1> for Vector2<T1, T1> {
         /// The function multiplies the values of self.x_ and self.y_ by the value of other.
         ///
         /// Arguments:
@@ -403,13 +403,13 @@ mod opassign {
         /// v.mul_assign(3);
         /// assert_eq!(v, Vector2::new(3, 6));
         /// ```
-        fn mul_assign(&mut self, other: T) {
+        fn mul_assign(&mut self, other: T1) {
             self.x_ *= other.clone();
             self.y_ *= other;
         }
     }
 
-    impl<T: Clone + NumAssign> DivAssign<T> for Vector2<T> {
+    impl<T1: Clone + NumAssign> DivAssign<T1> for Vector2<T1, T1> {
         /// The function divides the values of self.x_ and self.y_ by the value of other.
         ///
         /// Arguments:
@@ -427,7 +427,7 @@ mod opassign {
         /// v.div_assign(3);
         /// assert_eq!(v, Vector2::new(1, 2));
         /// ```
-        fn div_assign(&mut self, other: T) {
+        fn div_assign(&mut self, other: T1) {
             self.x_ /= other.clone();
             self.y_ /= other;
         }
@@ -435,7 +435,7 @@ mod opassign {
 
     macro_rules! forward_op_assign1 {
         (impl $imp:ident, $method:ident) => {
-            impl<'a, T: Clone + NumAssign> $imp<&'a Vector2<T>> for Vector2<T> {
+            impl<'a, T1: Clone + NumAssign, T2: Clone + NumAssign> $imp<&'a Vector2<T1, T2>> for Vector2<T1, T2> {
                 #[inline]
                 fn $method(&mut self, other: &Self) {
                     self.$method(other.clone())
@@ -446,9 +446,9 @@ mod opassign {
 
     macro_rules! forward_op_assign2 {
         (impl $imp:ident, $method:ident) => {
-            impl<'a, T: Clone + NumAssign> $imp<&'a T> for Vector2<T> {
+            impl<'a, T1: Clone + NumAssign> $imp<&'a T1> for Vector2<T1, T1> {
                 #[inline]
-                fn $method(&mut self, other: &T) {
+                fn $method(&mut self, other: &T1) {
                     self.$method(other.clone())
                 }
             }
@@ -461,7 +461,7 @@ mod opassign {
     forward_op_assign2!(impl DivAssign, div_assign);
 }
 
-impl<T: Clone + Num + Neg<Output = T>> Neg for Vector2<T> {
+impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for Vector2<T1, T2> {
     type Output = Self;
 
     /// The `neg` function returns a new instance of the same type with the negated values of `x_` and
@@ -482,8 +482,8 @@ impl<T: Clone + Num + Neg<Output = T>> Neg for Vector2<T> {
     }
 }
 
-impl<'a, T: Clone + Num + Neg<Output = T>> Neg for &'a Vector2<T> {
-    type Output = Vector2<T>;
+impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for &'a Vector2<T1, T2> {
+    type Output = Vector2<T1, T2>;
 
     #[inline]
     fn neg(self) -> Self::Output {
@@ -493,52 +493,52 @@ impl<'a, T: Clone + Num + Neg<Output = T>> Neg for &'a Vector2<T> {
 
 macro_rules! scalar_arithmetic {
     (@forward $imp:ident::$method:ident for $($scalar:ident),*) => (
-        impl<'a, T: Clone + Num> $imp<&'a T> for Vector2<T> {
-            type Output = Vector2<T>;
+        impl<'a, T1: Clone + Num> $imp<&'a T1> for Vector2<T1, T1> {
+            type Output = Vector2<T1, T1>;
 
             #[inline]
-            fn $method(self, other: &T) -> Self::Output {
+            fn $method(self, other: &T1) -> Self::Output {
                 self.$method(other.clone())
             }
         }
-        impl<'a, T: Clone + Num> $imp<T> for &'a Vector2<T> {
-            type Output = Vector2<T>;
+        impl<'a, T1: Clone + Num> $imp<T1> for &'a Vector2<T1, T1> {
+            type Output = Vector2<T1, T1>;
 
             #[inline]
-            fn $method(self, other: T) -> Self::Output {
+            fn $method(self, other: T1) -> Self::Output {
                 self.clone().$method(other)
             }
         }
-        impl<'a, 'b, T: Clone + Num> $imp<&'a T> for &'b Vector2<T> {
-            type Output = Vector2<T>;
+        impl<'a, 'b, T1: Clone + Num> $imp<&'a T1> for &'b Vector2<T1, T1> {
+            type Output = Vector2<T1, T1>;
 
             #[inline]
-            fn $method(self, other: &T) -> Self::Output {
+            fn $method(self, other: &T1) -> Self::Output {
                 self.clone().$method(other.clone())
             }
         }
         $(
-            impl<'a> $imp<&'a Vector2<$scalar>> for $scalar {
-                type Output = Vector2<$scalar>;
+            impl<'a> $imp<&'a Vector2<$scalar, $scalar>> for $scalar {
+                type Output = Vector2<$scalar, $scalar>;
 
                 #[inline]
-                fn $method(self, other: &Vector2<$scalar>) -> Vector2<$scalar> {
+                fn $method(self, other: &Vector2<$scalar, $scalar>) -> Vector2<$scalar, $scalar> {
                     self.$method(other.clone())
                 }
             }
-            impl<'a> $imp<Vector2<$scalar>> for &'a $scalar {
-                type Output = Vector2<$scalar>;
+            impl<'a> $imp<Vector2<$scalar, $scalar>> for &'a $scalar {
+                type Output = Vector2<$scalar, $scalar>;
 
                 #[inline]
-                fn $method(self, other: Vector2<$scalar>) -> Vector2<$scalar> {
+                fn $method(self, other: Vector2<$scalar, $scalar>) -> Vector2<$scalar, $scalar> {
                     self.clone().$method(other)
                 }
             }
-            impl<'a, 'b> $imp<&'a Vector2<$scalar>> for &'b $scalar {
-                type Output = Vector2<$scalar>;
+            impl<'a, 'b> $imp<&'a Vector2<$scalar, $scalar>> for &'b $scalar {
+                type Output = Vector2<$scalar, $scalar>;
 
                 #[inline]
-                fn $method(self, other: &Vector2<$scalar>) -> Vector2<$scalar> {
+                fn $method(self, other: &Vector2<$scalar, $scalar>) -> Vector2<$scalar, $scalar> {
                     self.clone().$method(other.clone())
                 }
             }
@@ -550,11 +550,11 @@ macro_rules! scalar_arithmetic {
         // scalar_arithmetic!(@forward Rem::rem for $($scalar),*);
 
         $(
-            impl Mul<Vector2<$scalar>> for $scalar {
-                type Output = Vector2<$scalar>;
+            impl Mul<Vector2<$scalar, $scalar>> for $scalar {
+                type Output = Vector2<$scalar, $scalar>;
 
                 #[inline]
-                fn mul(self, other: Vector2<$scalar>) -> Self::Output {
+                fn mul(self, other: Vector2<$scalar, $scalar>) -> Self::Output {
                     Self::Output::new(self * other.x_, self * other.y_)
                 }
             }
@@ -563,29 +563,29 @@ macro_rules! scalar_arithmetic {
     );
 }
 
-impl<T: Clone + Num> Mul<T> for Vector2<T> {
-    type Output = Vector2<T>;
+impl<T1: Clone + Num> Mul<T1> for Vector2<T1, T1> {
+    type Output = Vector2<T1, T1>;
 
     #[inline]
-    fn mul(self, other: T) -> Self::Output {
+    fn mul(self, other: T1) -> Self::Output {
         Self::Output::new(self.x_ * other.clone(), self.y_ * other)
     }
 }
 
-impl<T: Clone + Num> Div<T> for Vector2<T> {
+impl<T1: Clone + Num> Div<T1> for Vector2<T1, T1> {
     type Output = Self;
 
     #[inline]
-    fn div(self, other: T) -> Self::Output {
+    fn div(self, other: T1) -> Self::Output {
         Self::Output::new(self.x_ / other.clone(), self.y_ / other)
     }
 }
 
-impl<T: Clone + Num> Rem<T> for Vector2<T> {
-    type Output = Vector2<T>;
+impl<T1: Clone + Num> Rem<T1> for Vector2<T1, T1> {
+    type Output = Vector2<T1, T1>;
 
     #[inline]
-    fn rem(self, other: T) -> Self::Output {
+    fn rem(self, other: T1) -> Self::Output {
         Self::Output::new(self.x_ % other.clone(), self.y_ % other)
     }
 }
@@ -593,7 +593,7 @@ impl<T: Clone + Num> Rem<T> for Vector2<T> {
 scalar_arithmetic!(usize, u8, u16, u32, u64, u128, isize, i8, i16, i32, i64, i128, f32, f64);
 
 // constants
-impl<T: Clone + Num> Zero for Vector2<T> {
+impl<T1: Clone + Num, T2: Clone + Num> Zero for Vector2<T1, T2> {
     #[inline]
     fn zero() -> Self {
         Self::new(Zero::zero(), Zero::zero())
@@ -628,90 +628,90 @@ mod test {
     use core::f64;
     use num_traits::Zero;
 
-    pub const _0_0v: Vector2<f64> = Vector2 { x_: 0.0, y_: 0.0 };
-    pub const _1_0v: Vector2<f64> = Vector2 { x_: 1.0, y_: 0.0 };
-    pub const _1_1v: Vector2<f64> = Vector2 { x_: 1.0, y_: 1.0 };
-    pub const _0_1v: Vector2<f64> = Vector2 { x_: 0.0, y_: 1.0 };
-    pub const _neg1_1v: Vector2<f64> = Vector2 { x_: -1.0, y_: 1.0 };
-    pub const _05_05v: Vector2<f64> = Vector2 { x_: 0.5, y_: 0.5 };
-    pub const all_consts: [Vector2<f64>; 5] = [_0_0v, _1_0v, _1_1v, _neg1_1v, _05_05v];
-    pub const _4_2v: Vector2<f64> = Vector2 { x_: 4.0, y_: 2.0 };
+    pub const _0_0v: Vector2<f64, f64> = Vector2 { x_: 0.0, y_: 0.0 };
+    pub const _1_0v: Vector2<f64, f64> = Vector2 { x_: 1.0, y_: 0.0 };
+    pub const _1_1v: Vector2<f64, f64> = Vector2 { x_: 1.0, y_: 1.0 };
+    pub const _0_1v: Vector2<f64, f64> = Vector2 { x_: 0.0, y_: 1.0 };
+    pub const _neg1_1v: Vector2<f64, f64> = Vector2 { x_: -1.0, y_: 1.0 };
+    pub const _05_05v: Vector2<f64, f64> = Vector2 { x_: 0.5, y_: 0.5 };
+    pub const all_consts: [Vector2<f64, f64>; 5] = [_0_0v, _1_0v, _1_1v, _neg1_1v, _05_05v];
+    pub const _4_2v: Vector2<f64, f64> = Vector2 { x_: 4.0, y_: 2.0 };
 
-    pub const _0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_0v,
         y_: _0_0v,
     };
 
     // vector of vectors
-    pub const _0_0_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_0_0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_0v,
         y_: _0_0v,
     };
-    pub const _1_0_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _1_0_0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _1_0v,
         y_: _0_0v,
     };
-    pub const _1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _1_1_0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _1_1v,
         y_: _0_0v,
     };
-    pub const _0_1_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_1_0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_1v,
         y_: _0_0v,
     };
-    pub const _neg1_1_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _neg1_1_0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _neg1_1v,
         y_: _0_0v,
     };
-    pub const _05_05_0_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _05_05_0_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _05_05v,
         y_: _0_0v,
     };
-    pub const _0_0_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_0_1_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_0v,
         y_: _1_0v,
     };
-    pub const _1_0_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _1_0_1_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _1_0v,
         y_: _1_0v,
     };
-    pub const _1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _1_1_1_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _1_1v,
         y_: _1_0v,
     };
-    pub const _0_1_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_1_1_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_1v,
         y_: _1_0v,
     };
-    pub const _neg1_1_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _neg1_1_1_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _neg1_1v,
         y_: _1_0v,
     };
-    pub const _05_05_1_0vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _05_05_1_0vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _05_05v,
         y_: _1_0v,
     };
-    pub const _0_0_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_0_0_1vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_0v,
         y_: _0_1v,
     };
-    pub const _1_0_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _1_0_0_1vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _1_0v,
         y_: _0_1v,
     };
-    pub const _1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _1_1_0_1vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _1_1v,
         y_: _0_1v,
     };
-    pub const _0_1_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _0_1_0_1vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _0_1v,
         y_: _0_1v,
     };
-    pub const _neg1_1_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _neg1_1_0_1vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _neg1_1v,
         y_: _0_1v,
     };
-    pub const _05_05_0_1vv: Vector2<Vector2<f64>> = Vector2 {
+    pub const _05_05_0_1vv: Vector2<Vector2<f64, f64>, Vector2<f64, f64>> = Vector2 {
         x_: _05_05v,
         y_: _0_1v,
     };
@@ -719,7 +719,7 @@ mod test {
     #[test]
     fn test_consts() {
         // check our constants are what Vector2::new creates
-        fn test(c: Vector2<f64>, r: f64, i: f64) {
+        fn test(c: Vector2<f64, f64>, r: f64, i: f64) {
             assert_eq!(c, Vector2::new(r, i));
         }
         test(_0_0v, 0.0, 0.0);
@@ -756,7 +756,7 @@ mod test {
 
     #[test]
     fn test_is_zero() {
-        assert!(Vector2::<i32>::zero().is_zero());
+        assert!(Vector2::<i32, i32>::zero().is_zero());
         assert!(!_1_1v.is_zero());
     }
 
@@ -864,7 +864,7 @@ mod test {
     #[test]
     fn test_consts_vv() {
         // check our constants are what Vector2::new creates
-        fn test(c: Vector2<Vector2<f64>>, w: f64, x: f64, y: f64, z: f64) {
+        fn test(c: Vector2<Vector2<f64, f64>, Vector2<f64, f64>>, w: f64, x: f64, y: f64, z: f64) {
             assert_eq!(c, Vector2::new(Vector2::new(w, x), Vector2::new(y, z)));
         }
 
