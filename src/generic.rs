@@ -33,6 +33,6 @@ pub trait MinDist<T> {
 
 impl MinDist<i32> for i32 {
     fn min_dist(&self, other: &i32) -> u32 {
-        (self - other).abs() as u32
+        (self - other).unsigned_abs()
     }
 }

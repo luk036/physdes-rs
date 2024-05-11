@@ -215,7 +215,9 @@ impl<T1: Clone + PartialOrd> Vector2<T1, T1> {
 
 macro_rules! forward_xf_xf_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>> for &'a Vector2<T1, T2> {
+        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>>
+            for &'a Vector2<T1, T2>
+        {
             type Output = Vector2<T1, T2>;
 
             /// The function clones the input arguments and calls the specified method on them.
@@ -435,7 +437,9 @@ mod opassign {
 
     macro_rules! forward_op_assign1 {
         (impl $imp:ident, $method:ident) => {
-            impl<'a, T1: Clone + NumAssign, T2: Clone + NumAssign> $imp<&'a Vector2<T1, T2>> for Vector2<T1, T2> {
+            impl<'a, T1: Clone + NumAssign, T2: Clone + NumAssign> $imp<&'a Vector2<T1, T2>>
+                for Vector2<T1, T2>
+            {
                 #[inline]
                 fn $method(&mut self, other: &Self) {
                     self.$method(other.clone())
@@ -461,7 +465,9 @@ mod opassign {
     forward_op_assign2!(impl DivAssign, div_assign);
 }
 
-impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for Vector2<T1, T2> {
+impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
+    for Vector2<T1, T2>
+{
     type Output = Self;
 
     /// The `neg` function returns a new instance of the same type with the negated values of `x_` and
@@ -482,7 +488,9 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
     }
 }
 
-impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for &'a Vector2<T1, T2> {
+impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
+    for &'a Vector2<T1, T2>
+{
     type Output = Vector2<T1, T2>;
 
     #[inline]

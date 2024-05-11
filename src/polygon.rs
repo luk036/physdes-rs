@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 use super::{Point, Vector2};
 
 use num_traits::{Num, Zero};

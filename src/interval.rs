@@ -1,6 +1,6 @@
+use crate::generic::{Contain, Overlap};
 use std::cmp::PartialOrd;
 use std::marker::PhantomData;
-use crate::generic::{Overlap, Contain};
 
 /// The `Interval` struct represents a range of values with a lower bound (`lb`) and an upper bound
 /// (`ub`).

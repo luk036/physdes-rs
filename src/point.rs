@@ -1,7 +1,7 @@
 // #![no_std]
 
 use super::Vector2;
-use crate::generic::{Overlap, Contain, MinDist};
+use crate::generic::{Contain, MinDist, Overlap};
 #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
@@ -111,7 +111,9 @@ where
 
 macro_rules! forward_xf_xf_binop {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>> for &'a Point<T1, T2> {
+        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>>
+            for &'a Point<T1, T2>
+        {
             type Output = Point<T1, T2>;
 
             #[inline]
@@ -213,7 +215,9 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Point<T1, T2> {
 
 macro_rules! forward_xf_xf_binop2 {
     (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Point<T1, T2>> for &'a Point<T1, T2> {
+        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Point<T1, T2>>
+            for &'a Point<T1, T2>
+        {
             type Output = Vector2<T1, T2>;
 
             #[inline]
@@ -314,7 +318,9 @@ mod opassign {
 
     macro_rules! forward_op_assign {
         (impl $imp:ident, $method:ident) => {
-            impl<'a, T1: Clone + NumAssign, T2: Clone + NumAssign> $imp<&'a Vector2<T1, T2>> for Point<T1, T2> {
+            impl<'a, T1: Clone + NumAssign, T2: Clone + NumAssign> $imp<&'a Vector2<T1, T2>>
+                for Point<T1, T2>
+            {
                 #[inline]
                 fn $method(&mut self, other: &Vector2<T1, T2>) {
                     self.$method(other.clone())
@@ -345,7 +351,9 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
     }
 }
 
-impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for &'a Point<T1, T2> {
+impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
+    for &'a Point<T1, T2>
+{
     type Output = Point<T1, T2>;
 
     #[inline]
