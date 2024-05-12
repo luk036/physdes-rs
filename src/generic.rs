@@ -28,11 +28,21 @@ impl Contain<i32> for i32 {
 }
 
 pub trait MinDist<T> {
-    fn min_dist(&self, other: &T) -> u32;
+    fn min_dist_with(&self, other: &T) -> u32;
 }
 
 impl MinDist<i32> for i32 {
-    fn min_dist(&self, other: &i32) -> u32 {
+    fn min_dist_with(&self, other: &i32) -> u32 {
         (self - other).unsigned_abs()
+    }
+}
+
+pub trait Displacement<T> {
+    fn displace(&self, other: &T) -> T;
+}
+
+impl Displacement<i32> for i32 {
+    fn displace(&self, other: &i32) -> i32 {
+        self - other
     }
 }

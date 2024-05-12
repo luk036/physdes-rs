@@ -1,12 +1,13 @@
 // #![no_std]
 
 use super::Vector2;
-use crate::generic::{Contain, MinDist, Overlap};
+use crate::generic::{Contain, Displacement, MinDist, Overlap};
 #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
 use core::ops::{Add, Neg, Sub};
 use num_traits::Num;
+use std::cmp::Ordering;
 
 /// The code defines a generic Point struct with x and y coordinates.
 ///
@@ -52,13 +53,22 @@ impl<T1, T2> Point<T1, T2> {
     pub const fn new(xcoord: T1, ycoord: T2) -> Self {
         Point { xcoord, ycoord }
     }
+}
 
-    // pub fn flip(&self) -> Point<T2, T1> {
-    //     Point {
-    //         xcoord: self.ycoord,
-    //         ycoord: self.xcoord,
-    //     }
-    // }
+impl<T1: Clone, T2: Clone> Point<T1, T2> {
+        pub fn flip(&self) -> Point<T2, T1> {
+        Point {
+            xcoord: self.ycoord.clone(),
+            ycoord: self.xcoord.clone(),
+        }
+    }
+}
+
+impl<T1: Ord + Copy, T2: Ord + Copy> PartialOrd for Point<T1, T2> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some((self.xcoord, self.ycoord).cmp(&(other.xcoord, other.ycoord)))
+        // Some(self.xcoord.partial_cmp(&other.xcoord).then(self.ycoord.partial_cmp(&other.ycoord)))
+    }
 }
 
 // impl<T, U> Overlap<U> for Point<T1, T2>
@@ -104,8 +114,18 @@ where
     T1: MinDist<U1>,
     T2: MinDist<U2>,
 {
-    fn min_dist(&self, other: &Point<U1, U2>) -> u32 {
-        self.xcoord.min_dist(&other.xcoord) + self.ycoord.min_dist(&other.ycoord)
+    fn min_dist_with(&self, other: &Point<U1, U2>) -> u32 {
+        self.xcoord.min_dist_with(&other.xcoord) + self.ycoord.min_dist_with(&other.ycoord)
+    }
+}
+
+impl<T1, T2> Point<T1, T2>
+where
+    T1: Displacement<T1>,
+    T2: Displacement<T2>,
+{
+    pub fn displace(&self, other: &Point<T1, T2>) -> Vector2<T1, T2> {
+        Vector2::<T1, T2>::new(self.xcoord.displace(&other.xcoord), self.ycoord.displace(&other.ycoord))
     }
 }
 
@@ -377,6 +397,8 @@ mod test {
 
     use super::*;
     use crate::generic::Overlap;
+    use crate::interval::Interval;
+
     use core::i32;
 
     pub const _0_0p: Point<i32, i32> = Point {
@@ -442,10 +464,10 @@ mod test {
     }
 
     #[test]
-    fn test_min_dist() {
+    fn test_min_dist_with() {
         let a = Point::new(3i32, 5i32);
         let b = Point::new(6i32, 4i32);
-        assert_eq!(a.min_dist(&b), 4);
+        assert_eq!(a.min_dist_with(&b), 4);
     }
 
     #[test]
@@ -503,5 +525,69 @@ mod test {
         assert_eq!(a, b);
         a = -a;
         assert_eq!(a, c);
+    }
+
+    #[test]
+    fn test_point() {
+        let a = Point::new(4, 8);
+        let b = Point::new(5, 6);
+        assert!(a < b);
+        assert!(a <= b);
+        assert_ne!(b, a);
+    }
+
+    #[test]
+    fn test_point2() {
+        let a = Point::new(3, 4);
+        let r = Point::new(Interval::new(3, 4), Interval::new(5, 6));  // Rectangle
+        assert!(!r.contains(&a));
+        assert!(r.contains(&Point::new(4, 5)));
+        assert!(!r.overlaps(&a));
+        assert!(r.overlaps(&Point::new(4, 5)));
+        assert!(r.overlaps(&Point::new(4, 6)));
+        // assert_eq!(r.intersection_with(&Point::new(4, 5)), Point::new(Interval::new(4, 4), Interval::new(5, 5)));
+    }
+    
+    #[test]
+    fn test_transform() {
+        let mut a = Point::new(3, 5);
+        let b = Vector2::new(5, 7);
+        assert_eq!(a + b, Point::new(8, 12));
+        assert_eq!(a - b, Point::new(-2, -2));
+        a += b;
+        assert_eq!(a, Point::new(8, 12));
+        a -= b;
+        assert_eq!(a, Point::new(3, 5));        
+        assert_eq!(a.flip(), Point::new(5, 3));
+    }
+
+    #[test]
+    fn test_displacement() {
+        let a = Point::new(3, 5);
+        let b = Point::new(5, 7);
+        let c = Point::new(7, 8);
+        assert_eq!(a.displace(&b), Vector2::new(-2, -2));
+        assert_eq!(a.displace(&c), Vector2::new(-4, -3));
+        assert_eq!(b.displace(&c), Vector2::new(-2, -1));
+    }
+    
+    #[test]
+    fn test_enlarge() {
+        let _a = Point::new(3, 5);
+        // assert_eq!(a.enlarge_with(2), Point::new(Interval::new(1, 5), Interval::new(3, 7)));
+    }
+    
+    #[test]
+    fn test_hull() {
+        let _a = Point::new(3, 5);
+        let _b = Point::new(5, 7);
+        // assert_eq!(a.hull_with(&b), Point::new(Interval::new(3, 5), Interval::new(5, 7)));
+    }
+    
+    #[test]
+    fn test_min_dist_with2() {
+        let a = Point::new(3, 5);
+        let b = Point::new(5, 7);
+        assert_eq!(a.min_dist_with(&b), 4);
     }
 }
