@@ -5,6 +5,7 @@ pub mod point;
 pub mod polygon;
 pub mod rpolygon;
 pub mod vector2;
+pub mod merge_obj;
 
 pub use crate::point::Point;
 pub use crate::polygon::Polygon;
