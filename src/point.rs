@@ -56,7 +56,7 @@ impl<T1, T2> Point<T1, T2> {
 }
 
 impl<T1: Clone, T2: Clone> Point<T1, T2> {
-        pub fn flip(&self) -> Point<T2, T1> {
+    pub fn flip(&self) -> Point<T2, T1> {
         Point {
             xcoord: self.ycoord.clone(),
             ycoord: self.xcoord.clone(),
@@ -125,7 +125,10 @@ where
     T2: Displacement<T2>,
 {
     pub fn displace(&self, other: &Point<T1, T2>) -> Vector2<T1, T2> {
-        Vector2::<T1, T2>::new(self.xcoord.displace(&other.xcoord), self.ycoord.displace(&other.ycoord))
+        Vector2::<T1, T2>::new(
+            self.xcoord.displace(&other.xcoord),
+            self.ycoord.displace(&other.ycoord),
+        )
     }
 }
 
@@ -539,7 +542,7 @@ mod test {
     #[test]
     fn test_point2() {
         let a = Point::new(3, 4);
-        let r = Point::new(Interval::new(3, 4), Interval::new(5, 6));  // Rectangle
+        let r = Point::new(Interval::new(3, 4), Interval::new(5, 6)); // Rectangle
         assert!(!r.contains(&a));
         assert!(r.contains(&Point::new(4, 5)));
         assert!(!r.overlaps(&a));
@@ -547,7 +550,7 @@ mod test {
         assert!(r.overlaps(&Point::new(4, 6)));
         // assert_eq!(r.intersection_with(&Point::new(4, 5)), Point::new(Interval::new(4, 4), Interval::new(5, 5)));
     }
-    
+
     #[test]
     fn test_transform() {
         let mut a = Point::new(3, 5);
@@ -557,7 +560,7 @@ mod test {
         a += b;
         assert_eq!(a, Point::new(8, 12));
         a -= b;
-        assert_eq!(a, Point::new(3, 5));        
+        assert_eq!(a, Point::new(3, 5));
         assert_eq!(a.flip(), Point::new(5, 3));
     }
 
@@ -570,20 +573,20 @@ mod test {
         assert_eq!(a.displace(&c), Vector2::new(-4, -3));
         assert_eq!(b.displace(&c), Vector2::new(-2, -1));
     }
-    
+
     #[test]
     fn test_enlarge() {
         let _a = Point::new(3, 5);
         // assert_eq!(a.enlarge_with(2), Point::new(Interval::new(1, 5), Interval::new(3, 7)));
     }
-    
+
     #[test]
     fn test_hull() {
         let _a = Point::new(3, 5);
         let _b = Point::new(5, 7);
         // assert_eq!(a.hull_with(&b), Point::new(Interval::new(3, 5), Interval::new(5, 7)));
     }
-    
+
     #[test]
     fn test_min_dist_with2() {
         let a = Point::new(3, 5);

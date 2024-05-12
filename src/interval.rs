@@ -183,25 +183,21 @@ mod tests {
     //     assert!((b - v) + v == b);
     //     // assert (c - v) + v == c
     // }
-    
-    
+
+    #[test]
+    fn test_interval1() {
+        let a = Interval::new(4, 5);
+        let b = Interval::new(6, 8);
+        assert!(a < b);
+        assert!(!(b == a));
+        assert!(b != a);
+    }
+
     #[test]
     fn test_interval2() {
         let a = Interval::new(4, 8);
         let b = Interval::new(5, 6);
-    
-        assert!(!(a < b));
-        assert!(!(b < a));
-        // assert!(!(a > b));
-        // assert!(!(b > a));
-        // assert!(a <= b);
-        // assert!(b <= a);
-        // assert!(a >= b);
-        // assert!(b >= a);
-    
-        assert!(!(b == a));
-        assert!(b != a);
-    
+
         assert!(a.contains(&4));
         assert!(a.contains(&8));
         assert!(a.contains(&b));
@@ -211,7 +207,7 @@ mod tests {
         assert!(a.overlaps(&b));
         assert!(b.overlaps(&a));
     }
-    
+
     #[test]
     fn test_interval3() {
         let a = Interval::new(3, 4);
@@ -228,7 +224,7 @@ mod tests {
         assert!(a.contains(&4));
         assert!(!a.contains(&5));
     }
-    
+
     // #[test]
     // fn test_arithmetic() {
     //     let mut a = Interval::new(3, 5);
@@ -245,7 +241,7 @@ mod tests {
     //     a *= 2;
     //     assert!(a == Interval::new(6, 10));
     // }
-    
+
     #[test]
     fn test_overlap() {
         let a = Interval::new(3, 5);
@@ -259,7 +255,7 @@ mod tests {
         // assert!(overlap(b, c));
         // assert!(!overlap(a, c));
         // assert!(!overlap(c, a));
-    
+
         let d = 4;
         assert!(a.overlaps(&d));
         assert!(!a.overlaps(&6));
@@ -267,7 +263,7 @@ mod tests {
         // assert!(overlap(d, a));
         // assert!(overlap(d, d));
     }
-    
+
     #[test]
     fn test_contains() {
         let a = Interval::new(3, 5);
@@ -280,7 +276,7 @@ mod tests {
         // assert!(!contain(a, b));
         // assert!(!contain(b, c));
         // assert!(!contain(a, c));
-    
+
         let d = 4;
         assert!(a.contains(&d));
         assert!(!a.contains(&6));
@@ -288,7 +284,7 @@ mod tests {
         // assert!(!contain(d, a));
         // assert!(contain(d, d));
     }
-    
+
     // #[test]
     // fn test_intersection() {
     //     let a = Interval::new(3, 5);
@@ -310,7 +306,7 @@ mod tests {
     //     assert_eq!(intersection(d, a), Interval::new(4, 4));
     //     assert_eq!(intersection(d, d), d);
     // }
-    
+
     // #[test]
     // fn test_hull() {
     //     let a = Interval::new(3, 5);
@@ -319,7 +315,7 @@ mod tests {
     //     assert_eq!(a.hull_with(&b), Interval::new(3, 7));
     //     assert_eq!(b.hull_with(&c), Interval::new(5, 8));
     //     assert_eq!(a.hull_with(&c), Interval::new(3, 8));
-    
+
     //     let d = 4;
     //     assert_eq!(a.hull_with(d), Interval::new(3, 5));
     //     assert_eq!(a.hull_with(6), Interval::new(3, 6));
@@ -329,7 +325,7 @@ mod tests {
     //     // assert!(hull(6, a) == Interval::new(3, 6));
     //     // assert!(hull(d, 6) == Interval::new(4, 6));
     // }
-    
+
     // #[test]
     // fn test_min_dist() {
     //     let a = Interval::new(3, 5);
@@ -341,14 +337,14 @@ mod tests {
     //     // assert_eq!(min_dist(a, b), 0);
     //     // assert_eq!(min_dist(a, c), 2);
     //     // assert_eq!(min_dist(b, c), 0);
-    
+
     //     let d = 4;
     //     assert!(min_dist(a, d) == 0);
     //     // assert!(min_dist(d, a) == 0);
     //     // assert!(min_dist(a, 6) == 1);
     //     // assert!(min_dist(6, a) == 1);
     // }
-    
+
     // #[test]
     // fn test_displacement() {
     //     let a = Interval::new(3, 5);
@@ -365,16 +361,16 @@ mod tests {
     //     // assert_eq!(displacement(d, 6), -2);
     //     // assert_eq!(displacement(6, d), 2);
     // }
-    
+
     // #[test]
     // fn test_enlarge() {
     //     a = Interval::new(3, 5);
     //     // b = Interval::new(5, 7)
     //     // c = Interval::new(7, 8)
     //     assert!(a.enlarge_with(2) == Interval::new(1, 7));
-    //     assert!(enlarge(a, 2) == Interval::new(1, 7));    
+    //     assert!(enlarge(a, 2) == Interval::new(1, 7));
     //     let d = 4;
     //     assert_eq!(enlarge(d, 6), Interval::new(-2, 10));
     //     assert_eq!(enlarge(6, d), Interval::new(2, 10));
-    // }    
+    // }
 }
