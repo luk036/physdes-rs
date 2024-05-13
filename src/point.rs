@@ -2,13 +2,13 @@
 
 use super::Vector2;
 use crate::generic::{Contain, Displacement, MinDist, Overlap};
-use crate::interval::{Intersect, Hull};
+use crate::interval::{Hull, Intersect};
+use core::cmp::Ordering;
 #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
 use core::ops::{Add, Neg, Sub};
 use num_traits::Num;
-use core::cmp::Ordering;
 
 /// The code defines a generic Point struct with x and y coordinates.
 ///
@@ -122,8 +122,8 @@ where
 
 impl<T1, T2> Displacement<Point<T1, T2>> for Point<T1, T2>
 where
-    T1: Displacement<T1, Output=T1>,
-    T2: Displacement<T2, Output=T2>,
+    T1: Displacement<T1, Output = T1>,
+    T2: Displacement<T2, Output = T2>,
 {
     type Output = Vector2<T1, T2>;
 
@@ -631,7 +631,10 @@ mod test {
     fn test_hull() {
         let a = Point::new(3, 5);
         let b = Point::new(5, 7);
-        assert_eq!(a.hull_with(&b), Point::new(Interval::new(3, 5), Interval::new(5, 7)));
+        assert_eq!(
+            a.hull_with(&b),
+            Point::new(Interval::new(3, 5), Interval::new(5, 7))
+        );
     }
 
     #[test]

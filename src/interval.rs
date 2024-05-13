@@ -1,8 +1,8 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Neg};
+use crate::generic::{Contain, Displacement, MinDist, Overlap};
 use std::cmp::{Eq, PartialEq, PartialOrd};
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use crate::generic::{Contain, Overlap, MinDist, Displacement};
 use std::marker::PhantomData;
+use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// The `Interval` struct represents a range of values with a lower bound (`lb`) and an upper bound
 /// (`ub`).
@@ -307,25 +307,21 @@ impl<T: PartialOrd> Contain<Interval<T>> for T {
 
 impl<T> Displacement<Interval<T>> for Interval<T>
 where
-    T: Displacement<T, Output=T>,
+    T: Displacement<T, Output = T>,
 {
     type Output = Interval<T>;
 
     #[inline]
     fn displace(&self, other: &Interval<T>) -> Self::Output {
-        Self::Output::new(
-            self.lb.displace(&other.lb),
-            self.ub.displace(&other.ub),
-        )
+        Self::Output::new(self.lb.displace(&other.lb), self.ub.displace(&other.ub))
     }
 }
 
-impl MinDist<Interval<i32>> for Interval<i32>
-{
+impl MinDist<Interval<i32>> for Interval<i32> {
     #[inline]
     fn min_dist_with(&self, other: &Interval<i32>) -> u32 {
         if self.ub < other.lb {
-            (other.lb - self.ub) as u32 
+            (other.lb - self.ub) as u32
         } else if other.ub < self.lb {
             (self.lb - other.ub) as u32
         } else {
@@ -334,12 +330,11 @@ impl MinDist<Interval<i32>> for Interval<i32>
     }
 }
 
-impl MinDist<i32> for Interval<i32>
-{
+impl MinDist<i32> for Interval<i32> {
     #[inline]
     fn min_dist_with(&self, other: &i32) -> u32 {
         if self.ub < *other {
-            (*other - self.ub) as u32 
+            (*other - self.ub) as u32
         } else if *other < self.lb {
             (self.lb - *other) as u32
         } else {
@@ -348,12 +343,11 @@ impl MinDist<i32> for Interval<i32>
     }
 }
 
-impl MinDist<Interval<i32>> for i32
-{
+impl MinDist<Interval<i32>> for i32 {
     #[inline]
     fn min_dist_with(&self, other: &Interval<i32>) -> u32 {
         if *self < other.lb {
-            (other.lb - *self) as u32 
+            (other.lb - *self) as u32
         } else if other.ub < *self {
             (*self - other.ub) as u32
         } else {
