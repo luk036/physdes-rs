@@ -2,12 +2,13 @@
 
 use super::Vector2;
 use crate::generic::{Contain, Displacement, MinDist, Overlap};
+use crate::interval::{Intersect, Hull};
 #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
 use core::ops::{Add, Neg, Sub};
 use num_traits::Num;
-use std::cmp::Ordering;
+use core::cmp::Ordering;
 
 /// The code defines a generic Point struct with x and y coordinates.
 ///
@@ -119,15 +120,61 @@ where
     }
 }
 
-impl<T1, T2> Point<T1, T2>
+impl<T1, T2> Displacement<Point<T1, T2>> for Point<T1, T2>
 where
-    T1: Displacement<T1>,
-    T2: Displacement<T2>,
+    T1: Displacement<T1, Output=T1>,
+    T2: Displacement<T2, Output=T2>,
 {
-    pub fn displace(&self, other: &Point<T1, T2>) -> Vector2<T1, T2> {
-        Vector2::<T1, T2>::new(
+    type Output = Vector2<T1, T2>;
+
+    fn displace(&self, other: &Point<T1, T2>) -> Self::Output {
+        Self::Output::new(
             self.xcoord.displace(&other.xcoord),
             self.ycoord.displace(&other.ycoord),
+        )
+    }
+}
+
+// impl<T1, T2> Hull<Point<T1, T2>> for Point<T1, T2>
+// where
+//     T1: Hull<T1, Output=Interval<T1>>,
+//     T2: Hull<T2, Output=Interval<T2>>,
+// {
+//     type Output = Point<Interval<T1>, Interval<T2>>;
+//     fn hull_with(&self, other: &Point<T1, T2>) -> Self::Output {
+//         Self::Output::new(
+//             self.xcoord.hull_with(&other.xcoord),
+//             self.ycoord.hull_with(&other.ycoord),
+//         )
+//     }
+// }
+
+impl<T1, T2> Hull<Point<T1, T2>> for Point<T1, T2>
+where
+    T1: Hull<T1>,
+    T2: Hull<T2>,
+{
+    type Output = Point<T1::Output, T2::Output>;
+
+    fn hull_with(&self, other: &Point<T1, T2>) -> Self::Output {
+        Self::Output::new(
+            self.xcoord.hull_with(&other.xcoord),
+            self.ycoord.hull_with(&other.ycoord),
+        )
+    }
+}
+
+impl<T1, T2> Intersect<Point<T1, T2>> for Point<T1, T2>
+where
+    T1: Intersect<T1>,
+    T2: Intersect<T2>,
+{
+    type Output = Point<T1::Output, T2::Output>;
+
+    fn intersect_with(&self, other: &Point<T1, T2>) -> Self::Output {
+        Self::Output::new(
+            self.xcoord.intersect_with(&other.xcoord),
+            self.ycoord.intersect_with(&other.ycoord),
         )
     }
 }
@@ -582,9 +629,9 @@ mod test {
 
     #[test]
     fn test_hull() {
-        let _a = Point::new(3, 5);
-        let _b = Point::new(5, 7);
-        // assert_eq!(a.hull_with(&b), Point::new(Interval::new(3, 5), Interval::new(5, 7)));
+        let a = Point::new(3, 5);
+        let b = Point::new(5, 7);
+        assert_eq!(a.hull_with(&b), Point::new(Interval::new(3, 5), Interval::new(5, 7)));
     }
 
     #[test]

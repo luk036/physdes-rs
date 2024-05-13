@@ -37,12 +37,16 @@ impl MinDist<i32> for i32 {
     }
 }
 
-pub trait Displacement<T> {
-    fn displace(&self, other: &T) -> T;
+pub trait Displacement<T: ?Sized> {
+    type Output;
+
+    fn displace(&self, other: &T) -> Self::Output;
 }
 
 impl Displacement<i32> for i32 {
-    fn displace(&self, other: &i32) -> i32 {
+    type Output = i32;
+
+    fn displace(&self, other: &i32) -> Self::Output {
         self - other
     }
 }
