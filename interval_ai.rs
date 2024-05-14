@@ -49,7 +49,7 @@ where
         }
     }
 
-    pub fn intersection_with(&self, obj: T) -> Self {
+    pub fn intersect_with(&self, obj: T) -> Self {
         assert!(self.overlaps(&Interval::new(obj, obj)));
         Interval {
             lb: self.lb.max(obj),
@@ -227,9 +227,9 @@ mod tests {
 
         assert!(a.contains(4));
         assert!(a.contains(8));
-        assert_eq!(a.intersection_with(8), Interval::new(8, 8));
+        assert_eq!(a.intersect_with(8), Interval::new(8, 8));
         assert!(a.contains(&b));
-        assert_eq!(a.intersection_with(&b), b);
+        assert_eq!(a.intersect_with(&b), b);
         assert!(!b.contains(&a));
         assert!(a.overlaps(&b));
         assert!(b.overlaps(&a));

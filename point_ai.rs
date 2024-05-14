@@ -34,7 +34,7 @@ impl<T1: std::cmp::PartialOrd, T2: std::cmp::PartialOrd> Point<T1, T2> {
         }
     }
 
-    pub fn intersection_with(&self, other: &Self) -> Self {
+    pub fn intersect_with(&self, other: &Self) -> Self {
         Point {
             xcoord: intersection(&self.xcoord, &other.xcoord),
             ycoord: intersection(&self.ycoord, &other.ycoord),
@@ -194,7 +194,7 @@ mod tests {
         let a = Point::new(3, 4);
         let r = Point::new(Interval::new(3, 4), Interval::new(5, 6));
         assert_eq!(
-            r.intersection_with(&Point::new(4, 5)),
+            r.intersect_with(&Point::new(4, 5)),
             Point::new(Interval::new(4, 4), Interval::new(5, 5))
         );
     }

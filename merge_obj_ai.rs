@@ -12,7 +12,7 @@ impl<T1, T2> Point<T1, T2> {
         Point { xcoord, ycoord }
     }
 
-    fn intersection_with(&self, other: &Point<T1, T2>) -> Point<T1, T2> {
+    fn intersect_with(&self, other: &Point<T1, T2>) -> Point<T1, T2> {
         // TODO: implement intersection logic
         Point::new(self.xcoord, self.ycoord)
     }
@@ -77,8 +77,8 @@ impl<T1, T2> MergeObj<T1, T2> {
         MergeObj::new(xcoord, ycoord)
     }
 
-    fn intersection_with(&self, other: &MergeObj<T1, T2>) -> MergeObj<T1, T2> {
-        let point = self.impl_.intersection_with(&other.impl_);
+    fn intersect_with(&self, other: &MergeObj<T1, T2>) -> MergeObj<T1, T2> {
+        let point = self.impl_.intersect_with(&other.impl_);
         MergeObj::new(point.xcoord, point.ycoord)
     }
 
@@ -178,7 +178,7 @@ fn test_merge_2() {
     assert_eq!(r1, MergeObj::new(Interval(6, 12), Interval(-4, 2)));
     let r2 = b.enlarge_with(4);
     assert_eq!(r2, MergeObj::new(Interval(12, 20), Interval(-6, 2)));
-    let r3 = r1.intersection_with(&r2);
+    let r3 = r1.intersect_with(&r2);
     assert_eq!(r3, MergeObj::new(Interval(12, 12), Interval(-4, 2)));
 }
 

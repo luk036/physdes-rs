@@ -42,8 +42,8 @@ impl<T1: MinDist<T1>, T2: MinDist<T2>> MergeObj<T1, T2> {
     //     MergeObj::new(xcoord, ycoord)
     // }
     //
-    // fn intersection_with(&self, other: &MergeObj<T1, T2>) -> MergeObj<T1, T2> {
-    //     let point = self.impl_.intersection_with(&other.impl_);
+    // fn intersect_with(&self, other: &MergeObj<T1, T2>) -> MergeObj<T1, T2> {
+    //     let point = self.impl_.intersect_with(&other.impl_);
     //     MergeObj::new(point.xcoord, point.ycoord)
     // }
     //
@@ -98,7 +98,7 @@ mod test {
     //     assert_eq!(r1, MergeObj::new(Interval::new(6, 12), Interval::new(-4, 2)));
     //     let r2 = b.enlarge_with(4);
     //     assert_eq!(r2, MergeObj::new(Interval::new(12, 20), Interval::new(-6, 2)));
-    //     let r3 = r1.intersection_with(&r2);
+    //     let r3 = r1.intersect_with(&r2);
     //     assert_eq!(r3, MergeObj::new(Interval::new(12, 12), Interval::new(-4, 2)));
     // }
 }
