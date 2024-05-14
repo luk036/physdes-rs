@@ -11,7 +11,7 @@ pub trait Overlap<T> {
 /// This implementation of the `Overlap` trait for `i32` simply checks if the two values are equal.
 ///
 /// # Examples
-/// 
+///
 /// use your_crate::generic::Overlap;
 ///
 /// let a: i32 = 42;
@@ -20,13 +20,13 @@ pub trait Overlap<T> {
 impl Overlap<i32> for i32 {
     /// The `overlaps` function in Rust checks if two references to `i32` values point to the same
     /// memory location.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `overlaps` function is a reference to an `i32` value.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `overlaps` function is returning a boolean value indicating whether the value of `self` is
     /// equal to the value of `other`.
     #[inline]
@@ -49,7 +49,7 @@ pub trait Contain<T> {
 /// This implementation of the `Contain` trait for `i32` simply compares the two values for equality.
 ///
 /// # Examples
-/// 
+///
 /// use your_crate::generic::Overlap;
 ///
 /// let a: i32 = 42;
@@ -57,14 +57,14 @@ pub trait Contain<T> {
 /// assert!(a.contains(&b));
 impl Contain<i32> for i32 {
     /// The function checks if a given value is equal to another value.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `contains` function is a reference to an `i32` value
     /// that is being compared with `self`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `contains` function is returning a boolean value indicating whether the value of `self` is
     /// equal to the value of the reference `other`.
     #[inline]
@@ -95,7 +95,7 @@ pub trait MinDist<T> {
 /// `i32` value.
 ///
 /// # Examples
-/// 
+///
 /// use your_crate::MinDist;
 ///
 /// let a: i32 = 10;

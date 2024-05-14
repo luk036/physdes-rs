@@ -76,13 +76,13 @@ impl<T1: std::fmt::Display, T2: std::fmt::Display> std::fmt::Display for Point<T
 /// the `xcoord` and `ycoord` fields implement the `Clone` trait.
 ///
 /// # Examples
-/// 
+///
 /// use my_crate::Point;
 ///
 /// let p = Point { xcoord: 1, ycoord: 2 };
 /// let flipped = p.flip();
 /// assert_eq!(flipped, Point { xcoord: 2, ycoord: 1 });
-/// 
+///
 impl<T1: Clone, T2: Clone> Point<T1, T2> {
     #[inline]
     pub fn flip(&self) -> Point<T2, T1> {
@@ -124,27 +124,27 @@ impl<T1: Clone, T2: Clone> Point<T1, T2> {
 /// overlap, using the `Overlap` trait implementation for their respective component types.
 ///
 /// # Example
-/// 
+///
 /// use your_crate::Point;
 ///
 /// let p1 = Point::new(1, 2);
 /// let p2 = Point::new(2, 3);
 /// assert!(p1.overlaps(&p2));
-/// 
+///
 impl<T1, T2, U1, U2> Overlap<Point<U1, U2>> for Point<T1, T2>
 where
     T1: Overlap<U1>,
     T2: Overlap<U2>,
 {
     /// The `overlaps` function checks if two points overlap in both x and y coordinates.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `overlaps` method is a reference to another `Point`
     /// struct with generic types `U1` and `U2`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `overlaps` method is returning a boolean value, which indicates whether the x-coordinate of
     /// the current `Point` instance overlaps with the x-coordinate of the `other` `Point` instance, and
     /// whether the y-coordinate of the current `Point` instance overlaps with the y-coordinate of the
@@ -167,15 +167,15 @@ where
 {
     /// The `contains` function checks if a Point contains another Point by comparing their x and y
     /// coordinates.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to a `Point` struct with generic types `U1` and
     /// `U2`. It represents another point that you want to check for containment within the current
     /// `Point` instance.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `contains` method is returning a boolean value, which indicates whether the `xcoord` and
     /// `ycoord` of the current `Point` instance contain the `xcoord` and `ycoord` of the `other`
     /// `Point` instance respectively.
@@ -196,14 +196,14 @@ where
     T2: MinDist<U2>,
 {
     /// The function calculates the minimum distance between two points in a two-dimensional space.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to a `Point` struct with generic types `U1` and
     /// `U2`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `min_dist_with` method is returning the sum of the minimum distances between the
     /// x-coordinate of `self` and the x-coordinate of `other`, and the y-coordinate of `self` and the
     /// y-coordinate of `other`.
@@ -224,9 +224,9 @@ where
     type Output = Vector2<T1, T2>;
 
     /// The `displace` function calculates the displacement between two points in Rust.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `displace` method is a reference to another `Point`
     /// object with the same generic types `T1` and `T2` as the current `Point` object.
     #[inline]
@@ -237,7 +237,6 @@ where
         )
     }
 }
-
 
 // impl<T1, T2> Hull<Point<T1, T2>> for Point<T1, T2>
 // where
@@ -268,9 +267,9 @@ where
 
     /// The function `hull_with` calculates the hull with another `Point` object by combining their x
     /// and y coordinates.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `hull_with` method is a reference to another `Point`
     /// struct with the same generic types `T1` and `T2` as the current `Point` struct. It is used to
     /// combine the coordinates of the current `Point` with the coordinates
@@ -295,9 +294,9 @@ where
 
     /// The `intersect_with` function takes another `Point` as input and returns a new `Point` with
     /// intersected coordinates.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `intersect_with` method is a reference to another
     /// `Point` struct with the same generic types `T1` and `T2` as the current `Point` struct. It is
     /// used to compare and intersect the `xcoord` and `ycoord`
@@ -355,9 +354,9 @@ macro_rules! forward_val_xf_binop {
 
             /// The function implements a method that performs a specific operation on two Vector2
             /// instances in Rust.
-            /// 
+            ///
             /// Arguments:
-            /// 
+            ///
             /// * `other`: The `other` parameter in the code snippet represents a reference to a
             /// `Vector2` struct with generic types `T1` and `T2`. This parameter is used as the input
             /// for the method being called on `self`.
@@ -538,9 +537,9 @@ mod opassign {
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> AddAssign<Vector2<T1, T2>> for Point<T1, T2> {
         /// The `add_assign` function in Rust adds the x and y coordinates of another Vector2 to the
         /// current Vector2.
-        /// 
+        ///
         /// Arguments:
-        /// 
+        ///
         /// * `other`: The `other` parameter in the `add_assign` function is of type `Vector2<T1, T2>`.
         /// It represents another instance of the `Vector2` struct with potentially different generic
         /// types `T1` and `T2`.
@@ -558,9 +557,9 @@ mod opassign {
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> SubAssign<Vector2<T1, T2>> for Point<T1, T2> {
         /// The function `sub_assign` subtracts the `x_` and `y_` components of another `Vector2` from
         /// the `xcoord` and `ycoord` components of the current `Vector2`.
-        /// 
+        ///
         /// Arguments:
-        /// 
+        ///
         /// * `other`: The `other` parameter in the `sub_assign` function is of type `Vector2<T1, T2>`.
         /// It represents another instance of the `Vector2` struct with potentially different generic
         /// types `T1` and `T2`. This parameter is used to subtract the `x_

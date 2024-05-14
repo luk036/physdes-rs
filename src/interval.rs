@@ -60,9 +60,9 @@ impl<T> Interval<T> {
 
 impl<T: Copy> Interval<T> {
     /// The function `lb` returns the value of the field `lb` from the struct.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `lb` method is returning the value of the `lb` field of the struct or object that the method
     /// is being called on.
     #[inline]
@@ -71,9 +71,9 @@ impl<T: Copy> Interval<T> {
     }
 
     /// This Rust function returns the value of the field `ub`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `ub` field of the struct is being returned.
     #[inline]
     pub fn ub(&self) -> T {
@@ -83,9 +83,9 @@ impl<T: Copy> Interval<T> {
 
 impl<T: PartialOrd> Interval<T> {
     /// The function `is_invalid` checks if the lower bound is greater than the upper bound.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `is_invalid` function is returning a boolean value based on the comparison `self.lb >
     /// self.ub`. If `self.lb` is greater than `self.ub`, it will return `true`, indicating that the
     /// values are invalid. Otherwise, it will return `false`.
@@ -98,9 +98,9 @@ impl<T: PartialOrd> Interval<T> {
 impl<T: Copy + Sub<Output = T>> Interval<T> {
     /// The `length` function calculates the difference between the upper bound (`ub`) and lower bound
     /// (`lb`) of a value.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `length` method is returning the difference between the `ub` (upper bound) and `lb` (lower
     /// bound) values of the struct instance.
     #[inline]
@@ -115,14 +115,14 @@ where
 {
     /// The function `fmt` in Rust is used to format a struct by writing its lower bound and upper bound
     /// values in square brackets.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `f`: The `f` parameter in the `fmt` function is a mutable reference to a `Formatter` struct.
     /// This `Formatter` struct is used for formatting and writing output.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `fmt` method is returning a `FmtResult`, which is an alias for `Result<(), Error>`.
     #[inline]
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
@@ -153,9 +153,9 @@ where
 {
     /// The `add_assign` function in Rust adds a value to both the lower and upper bounds of a data
     /// structure.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `rhs`: The `rhs` parameter in the `add_assign` function represents the right-hand side operand
     /// that will be added to the `lb` and `ub` fields of the struct or object on which the method is
     /// called.
@@ -174,9 +174,9 @@ where
 
     /// The `add` function in Rust adds a value to both the lower and upper bounds of an `Interval`
     /// struct.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `rhs`: The `rhs` parameter in the `add` function represents the right-hand side operand that
     /// will be added to the current `Interval` instance.
     #[inline]
@@ -194,9 +194,9 @@ where
     T: Copy + SubAssign<T>,
 {
     /// The `sub_assign` function subtracts a value from both the lower and upper bounds of a variable.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `rhs`: `rhs` is a parameter of type `T` that is passed by value to the `sub_assign` function.
     /// It is used to subtract its value from both `self.lb` and `self.ub` in the function
     /// implementation.
@@ -214,9 +214,9 @@ where
     type Output = Interval<T>;
 
     /// The function subtracts a value from both the lower and upper bounds of an interval.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `rhs`: The `rhs` parameter in the code snippet represents the right-hand side operand that
     /// will be subtracted from the interval's lower bound (`lb`) and upper bound (`ub`) values.
     #[inline]
@@ -235,9 +235,9 @@ where
 {
     /// The `mul_assign` function in Rust multiplies both the lower and upper bounds of a range by a
     /// given value.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `rhs`: The `rhs` parameter in the `mul_assign` function represents the value that will be
     /// multiplied with the `lb` and `ub` fields of the struct or object on which the method is called.
     #[inline]
@@ -254,9 +254,9 @@ where
     type Output = Interval<T>;
 
     /// The `mul` function in Rust defines multiplication for an `Interval` type.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `rhs`: The `rhs` parameter in the `mul` function represents the right-hand side operand that
     /// will be multiplied with the `Interval` instance on which the method is called.
     #[inline]
@@ -284,14 +284,14 @@ impl Enlarge<i32> for i32 {
 
     /// The `enlarge_with` function takes an integer `alpha` and returns an `Interval` struct with lower
     /// bound as `self - alpha` and upper bound as `self + alpha`.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `alpha`: The `alpha` parameter in the `enlarge_with` function represents the amount by which
     /// the interval should be enlarged. It is an `i32` type, which means it is an integer value.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// An `Interval<i32>` struct is being returned.
     #[inline]
     fn enlarge_with(&self, alpha: i32) -> Interval<i32> {
@@ -311,15 +311,15 @@ where
 
     /// The `enlarge_with` function in Rust enlarges an interval by adding a specified value to its
     /// lower bound and subtracting the same value from its upper bound.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `alpha`: The `alpha` parameter in the `enlarge_with` function represents the amount by which
     /// the lower bound (`lb`) and upper bound (`ub`) of an `Interval` struct are adjusted. The lower
     /// bound is decreased by `alpha` and the upper bound is increased by `alpha`, effectively enlarg
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `enlarge_with` method is returning a new `Interval` instance with the lower bound (`lb`)
     /// decreased by `alpha` and the upper bound (`ub`) increased by `alpha`. The `_marker` field is
     /// copied from the original `Interval` instance.
@@ -368,14 +368,14 @@ impl<T: PartialOrd> PartialOrd for Interval<T> {
 /// trait for the `Interval<T>` struct.
 impl<T: PartialOrd> Overlap<Interval<T>> for Interval<T> {
     /// The `overlaps` function in Rust checks if two intervals overlap with each other.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `overlaps` function represents another interval that you
     /// want to check for overlap with the interval on which the method is called.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `overlaps` function is returning a boolean value, which indicates whether the interval
     /// `self` overlaps with the interval `other`. If there is an overlap between the two intervals, the
     /// function will return `true`, otherwise it will return `false`.
@@ -387,14 +387,14 @@ impl<T: PartialOrd> Overlap<Interval<T>> for Interval<T> {
 
 impl<T: PartialOrd> Overlap<T> for Interval<T> {
     /// The `overlaps` function in Rust checks if two values overlap within a range.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to an object of type `T`, which is the same type
     /// as the object that the method `overlaps` is being called on.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `overlaps` function is returning a boolean value, which indicates whether the range
     /// represented by `self` overlaps with the range represented by `other`.
     #[inline]
@@ -405,16 +405,16 @@ impl<T: PartialOrd> Overlap<T> for Interval<T> {
 
 impl<T: PartialOrd> Overlap<Interval<T>> for T {
     /// The `overlaps` function in Rust checks if two intervals overlap with each other.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to an `Interval<T>` struct, which represents
     /// another interval. The `Interval<T>` struct likely contains two fields, `lb` and `ub`,
     /// representing the lower and upper bounds of the interval, respectively. The `overlaps` method is
     /// used to
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `overlaps` function is returning a boolean value. It checks if the current interval (`self`)
     /// overlaps with another interval (`other`) by comparing their lower bounds and upper bounds. If
     /// there is any overlap between the two intervals, it returns `true`, otherwise it returns `false`.
@@ -428,14 +428,14 @@ impl<T: PartialOrd> Overlap<Interval<T>> for T {
 /// trait for the `Interval<T>` struct.
 impl<T: PartialOrd> Contain<Interval<T>> for Interval<T> {
     /// The `contains` function in Rust checks if one interval contains another interval.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to an `Interval<T>` object that is being
     /// compared to the current `Interval<T>` object.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `contains` method is returning a boolean value, which indicates whether the interval `self`
     /// contains the interval `other`. It checks if the lower bound of `self` is less than or equal to
     /// the lower bound of `other`, and if the upper bound of `other` is less than or equal to the upper
@@ -450,16 +450,16 @@ impl<T: PartialOrd> Contain<Interval<T>> for Interval<T> {
 /// the `Interval<T>` struct.
 impl<T: PartialOrd> Contain<T> for Interval<T> {
     /// The function checks if a value is within a specified range.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to a value of type `T`, which is the same type
     /// as the elements stored in the struct or data structure that contains the `contains` method. The
     /// method checks if the value referenced by `other` falls within the range defined by the lower
     /// bound (`
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// A boolean value is being returned, indicating whether the value `other` is within the range
     /// defined by `self.lb` and `self.ub`.
     #[inline]
@@ -471,14 +471,14 @@ impl<T: PartialOrd> Contain<T> for Interval<T> {
 impl<T: PartialOrd> Contain<Interval<T>> for T {
     /// The function `contains` always returns `false` and takes a reference to another `Interval` as
     /// input.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `_other`: The `_other` parameter is a reference to an `Interval` object of the same type `T`
     /// as the current object.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `contains` function is returning a boolean value `false`.
     #[inline]
     fn contains(&self, _other: &Interval<T>) -> bool {
@@ -493,9 +493,9 @@ where
     type Output = Interval<T>;
 
     /// The `displace` function in Rust calculates the displacement between two intervals.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `displace` function represents another `Interval` object
     /// of the same type as `self`. It is used to displace the lower bound and upper bound of the
     /// current `Interval` object (`self`) by the corresponding lower and upper bounds of the `other`
@@ -507,15 +507,15 @@ where
 
 impl MinDist<Interval<i32>> for Interval<i32> {
     /// The `min_dist_with` function calculates the minimum distance between two intervals of integers.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `min_dist_with` function calculates the minimum distance between two intervals.
     /// The `self` interval is represented by the lower bound `lb` and upper bound `ub` of the current
     /// instance, while the `other` interval is passed as a reference to an `Interval<i32>`.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `min_dist_with` function returns the minimum distance between two intervals. It calculates
     /// the distance based on the upper and lower bounds of the intervals. If the upper bound of the
     /// first interval is less than the lower bound of the second interval, it returns the difference
@@ -536,15 +536,15 @@ impl MinDist<Interval<i32>> for Interval<i32> {
 impl MinDist<i32> for Interval<i32> {
     /// This Rust function calculates the minimum distance between a value and a range defined by lower
     /// and upper bounds.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `min_dist_with` function is a reference to an `i32`
     /// value. This parameter is used to calculate the minimum distance between the current instance
     /// (self) and the provided `i32` value.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `min_dist_with` function returns the minimum distance between the value represented by
     /// `self` and the value referenced by `other`. If the value referenced by `other` is greater than
     /// the upper bound (`ub`) of `self`, it returns the difference between `other` and `ub`. If the
@@ -563,15 +563,15 @@ impl MinDist<i32> for Interval<i32> {
 
 impl MinDist<Interval<i32>> for i32 {
     /// This Rust function calculates the minimum distance between two intervals of integers.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `min_dist_with` function calculates the minimum distance between two intervals.
     /// The `self` interval is compared with the `other` interval to determine the minimum distance
     /// between them.
-    /// 
+    ///
     /// Returns:
-    /// 
+    ///
     /// The `min_dist_with` function returns the minimum distance between two intervals. If the lower
     /// bound of `self` is less than the lower bound of `other`, it returns the difference between the
     /// lower bounds as a `u32`. If the upper bound of `other` is less than the upper bound of `self`,
@@ -602,9 +602,9 @@ impl Hull<i32> for i32 {
     type Output = Interval<i32>;
 
     /// The function `hull_with` calculates the lower and upper bounds between two values.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `hull_with` function is a reference to an `i32` type.
     /// This parameter is used to calculate the lower bound (`lb`) and upper bound (`ub`) values for the
     /// output struct.
@@ -626,9 +626,9 @@ where
 
     /// The `hull_with` function calculates the hull (bounding interval) of two intervals by taking the
     /// minimum lower bound and maximum upper bound.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: `other` is a reference to an `Interval<T>` object that is being passed as a parameter
     /// to the `hull_with` method.
     #[inline]
@@ -648,9 +648,9 @@ where
     type Output = Interval<T>;
 
     /// The `hull_with` function calculates the hull (minimum and maximum values) between two values.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to a value of type `T`, which is the same type
     /// as the values stored in the struct implementing the `hull_with` method. In this method, the
     /// `other` value is used to update the lower bound (`lb`) and upper bound (`
@@ -671,9 +671,9 @@ where
     type Output = Interval<T>;
 
     /// The `hull_with` function in Rust calculates the convex hull of two intervals.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `hull_with` function is a reference to an `Interval<T>`
     /// object.
     #[inline]
@@ -697,9 +697,9 @@ impl Intersect<i32> for i32 {
 
     /// The `intersect_with` function calculates the intersection of two values by finding the maximum
     /// lower bound and minimum upper bound.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `intersect_with` function is a reference to an `i32`
     /// type. This parameter is used to find the intersection between the current instance (self) and
     /// the provided `i32` value.
@@ -721,9 +721,9 @@ where
 
     /// The `intersect_with` function returns the intersection of two intervals by finding the maximum
     /// lower bound and minimum upper bound between them.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to an `Interval<T>` object, which is used to
     /// intersect with the current `Interval<T>` object. The `intersect_with` method calculates the
     /// intersection of the two intervals and returns a new `Interval<T>` object as the output.
@@ -744,9 +744,9 @@ where
     type Output = Interval<T>;
 
     /// The `intersect_with` function calculates the intersection of two values.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter is a reference to an object of type `T`, which is the same type
     /// as the object on which the `intersect_with` method is being called. The method calculates the
     /// intersection of the object's lower bound (`lb`) and upper bound (`ub`) with the corresponding
@@ -769,9 +769,9 @@ where
 
     /// The `intersect_with` function in Rust swaps the receiver and argument before calling the
     /// `intersect_with` method on the argument.
-    /// 
+    ///
     /// Arguments:
-    /// 
+    ///
     /// * `other`: The `other` parameter in the `intersect_with` function represents another
     /// `Interval<T>` that you want to intersect with the current interval.
     #[inline]
