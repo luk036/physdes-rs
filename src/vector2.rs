@@ -1,6 +1,6 @@
 // #![no_std]
 
-#[cfg(any(test, feature = "std"))]
+// #[cfg(any(test, feature = "std"))]
 // #[cfg_attr(test, macro_use)]
 // extern crate std;
 

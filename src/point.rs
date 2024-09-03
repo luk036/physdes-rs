@@ -4,7 +4,7 @@ use super::Vector2;
 use crate::generic::{Contain, Displacement, MinDist, Overlap};
 use crate::interval::{Hull, Intersect};
 // use core::cmp::Ordering;
-#[cfg(any(test, feature = "std"))]
+// #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
 use core::hash;
 use core::ops::{Add, Neg, Sub};
