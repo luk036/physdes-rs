@@ -10,9 +10,9 @@ use num_traits::{Num, Zero};
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the polygon.
-/// It is of type `Point<T, T>`, where T is the generic type parameter of the Polygon struct.
+///             It is of type `Point<T, T>`, where T is the generic type parameter of the Polygon struct.
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the polygon. Each
-/// vector represents the direction and magnitude of a side of the polygon.
+///             vector represents the direction and magnitude of a side of the polygon.
 pub struct Polygon<T> {
     pub origin: Point<T, T>,
     pub vecs: Vec<Vector2<T, T>>,
@@ -25,8 +25,8 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     /// Arguments:
     ///
     /// * `coords`: An array slice of `Point<T, T>` objects, representing the coordinates of the polygon. The
-    /// first element of the slice is considered the origin of the polygon, and the remaining elements
-    /// are treated as vectors relative to the origin.
+    ///             first element of the slice is considered the origin of the polygon, and the remaining elements
+    ///             are treated as vectors relative to the origin.
     ///
     /// Returns:
     ///
@@ -133,9 +133,9 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: pointset is a slice of `Point<T, T>` objects, representing a set of points in a 2D
-    /// space.
+    ///               space.
     /// * `f`: The parameter `f` is a closure that takes a reference to a `Point<T, T>` and returns a tuple
-    /// `(T, T)`. It is used to determine the ordering of the points in the polygon.
+    ///        `(T, T)`. It is used to determine the ordering of the points in the polygon.
     ///
     /// Returns:
     ///
@@ -164,7 +164,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: A slice of Point objects, where each Point object has xcoord and ycoord
-    /// properties.
+    ///               properties.
     ///
     /// Returns:
     ///
@@ -179,7 +179,7 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: A slice of Point objects, where each Point object has two fields: ycoord and
-    /// xcoord.
+    ///               xcoord.
     ///
     /// Returns:
     ///
@@ -204,9 +204,9 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: A slice of points representing the vertices of the polygon. Each point has x and y
-    /// coordinates.
+    ///               coordinates.
     /// * `q`: The parameter `q` represents the point that we want to determine if it is within the
-    /// polygon or not.
+    ///        polygon or not.
     ///
     /// Returns:
     ///

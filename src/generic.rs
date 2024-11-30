@@ -61,7 +61,7 @@ impl Contain<i32> for i32 {
     /// Arguments:
     ///
     /// * `other`: The `other` parameter in the `contains` function is a reference to an `i32` value
-    /// that is being compared with `self`.
+    ///             that is being compared with `self`.
     ///
     /// Returns:
     ///

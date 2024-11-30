@@ -15,11 +15,11 @@ use num_traits::Num;
 /// Properties:
 ///
 /// * `xcoord`: The `xcoord` property represents the x-coordinate of a point in a two-dimensional space.
-/// It is a generic type `T`, which means it can be any type that implements the necessary traits for
-/// the `Point` struct.
+///             It is a generic type `T`, which means it can be any type that implements the necessary traits for
+///             the `Point` struct.
 /// * `ycoord`: The `ycoord` property represents the y-coordinate of a point in a two-dimensional space.
-/// It is a generic type `T`, which means it can be any type that implements the necessary traits for
-/// the `Point` struct.
+///             It is a generic type `T`, which means it can be any type that implements the necessary traits for
+///             the `Point` struct.
 #[derive(PartialEq, Eq, Copy, PartialOrd, Ord, Clone, Hash, Debug, Default)]
 pub struct Point<T1, T2> {
     /// x portion of the Point object
@@ -34,9 +34,9 @@ impl<T1, T2> Point<T1, T2> {
     /// Arguments:
     ///
     /// * `xcoord`: The `xcoord` parameter represents the x-coordinate of the point. It is of type `T`,
-    /// which means it can be any type that implements the necessary traits for mathematical operations.
+    ///             which means it can be any type that implements the necessary traits for mathematical operations.
     /// * `ycoord`: The `ycoord` parameter represents the y-coordinate of the point. It is used to
-    /// specify the vertical position of the point in a two-dimensional coordinate system.
+    ///             specify the vertical position of the point in a two-dimensional coordinate system.
     ///
     /// Returns:
     ///
@@ -141,7 +141,7 @@ where
     /// Arguments:
     ///
     /// * `other`: The `other` parameter in the `overlaps` method is a reference to another `Point`
-    /// struct with generic types `U1` and `U2`.
+    ///            struct with generic types `U1` and `U2`.
     ///
     /// Returns:
     ///
@@ -171,8 +171,8 @@ where
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is a reference to a `Point` struct with generic types `U1` and
-    /// `U2`. It represents another point that you want to check for containment within the current
-    /// `Point` instance.
+    ///             `U2`. It represents another point that you want to check for containment within the current
+    ///             `Point` instance.
     ///
     /// Returns:
     ///
@@ -200,7 +200,7 @@ where
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is a reference to a `Point` struct with generic types `U1` and
-    /// `U2`.
+    ///             `U2`.
     ///
     /// Returns:
     ///
@@ -228,7 +228,7 @@ where
     /// Arguments:
     ///
     /// * `other`: The `other` parameter in the `displace` method is a reference to another `Point`
-    /// object with the same generic types `T1` and `T2` as the current `Point` object.
+    ///             object with the same generic types `T1` and `T2` as the current `Point` object.
     #[inline]
     fn displace(&self, other: &Point<T1, T2>) -> Self::Output {
         Self::Output::new(
@@ -271,8 +271,8 @@ where
     /// Arguments:
     ///
     /// * `other`: The `other` parameter in the `hull_with` method is a reference to another `Point`
-    /// struct with the same generic types `T1` and `T2` as the current `Point` struct. It is used to
-    /// combine the coordinates of the current `Point` with the coordinates
+    ///             struct with the same generic types `T1` and `T2` as the current `Point` struct. It is used to
+    ///             combine the coordinates of the current `Point` with the coordinates
     #[inline]
     fn hull_with(&self, other: &Point<T1, T2>) -> Self::Output {
         Self::Output::new(
@@ -298,8 +298,8 @@ where
     /// Arguments:
     ///
     /// * `other`: The `other` parameter in the `intersect_with` method is a reference to another
-    /// `Point` struct with the same generic types `T1` and `T2` as the current `Point` struct. It is
-    /// used to compare and intersect the `xcoord` and `ycoord`
+    ///             `Point` struct with the same generic types `T1` and `T2` as the current `Point` struct. It is
+    ///             used to compare and intersect the `xcoord` and `ycoord`
     #[inline]
     fn intersect_with(&self, other: &Point<T1, T2>) -> Self::Output {
         Self::Output::new(
@@ -358,8 +358,8 @@ macro_rules! forward_val_xf_binop {
             /// Arguments:
             ///
             /// * `other`: The `other` parameter in the code snippet represents a reference to a
-            /// `Vector2` struct with generic types `T1` and `T2`. This parameter is used as the input
-            /// for the method being called on `self`.
+            ///             `Vector2` struct with generic types `T1` and `T2`. This parameter is used as the input
+            ///             for the method being called on `self`.
             #[inline]
             fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
                 self.$method(other.clone())
@@ -500,7 +500,7 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is of the same type as `self` and represents the other object
-    /// that you want to subtract from `self`.
+    ///             that you want to subtract from `self`.
     ///
     /// # Examples
     ///
@@ -541,8 +541,8 @@ mod opassign {
         /// Arguments:
         ///
         /// * `other`: The `other` parameter in the `add_assign` function is of type `Vector2<T1, T2>`.
-        /// It represents another instance of the `Vector2` struct with potentially different generic
-        /// types `T1` and `T2`.
+        ///             It represents another instance of the `Vector2` struct with potentially different generic
+        ///             types `T1` and `T2`.
         #[inline]
         fn add_assign(&mut self, other: Vector2<T1, T2>) {
             self.xcoord += other.x_;
@@ -561,8 +561,8 @@ mod opassign {
         /// Arguments:
         ///
         /// * `other`: The `other` parameter in the `sub_assign` function is of type `Vector2<T1, T2>`.
-        /// It represents another instance of the `Vector2` struct with potentially different generic
-        /// types `T1` and `T2`. This parameter is used to subtract the `x_
+        ///             It represents another instance of the `Vector2` struct with potentially different generic
+        ///             types `T1` and `T2`. This parameter is used to subtract the `x_
         #[inline]
         fn sub_assign(&mut self, other: Vector2<T1, T2>) {
             self.xcoord -= other.x_;
@@ -639,8 +639,6 @@ mod test {
     use super::*;
     use crate::generic::Overlap;
     use crate::interval::Interval;
-
-    use core::i32;
 
     pub const _0_0p: Point<i32, i32> = Point {
         xcoord: 0,
