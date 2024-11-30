@@ -12,10 +12,6 @@ pub use crate::polygon::Polygon;
 pub use crate::rpolygon::RPolygon;
 pub use crate::vector2::Vector2;
 
-/// TODO: rectangle
-// mod rectangle;
-// use crate::rectangle::Rect;
-
 #[cfg(test)]
 mod tests {
     use super::*;
