@@ -611,8 +611,8 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 
 /// The above code is implementing the `Neg` trait for a reference to a `Point<T1, T2>` struct in Rust.
 /// The `Neg` trait is used for the negation operation (unary minus) on a value.
-impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
-    for &'a Point<T1, T2>
+impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
+    for &Point<T1, T2>
 {
     type Output = Point<T1, T2>;
 

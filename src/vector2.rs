@@ -488,8 +488,8 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
     }
 }
 
-impl<'a, T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
-    for &'a Vector2<T1, T2>
+impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
+    for &Vector2<T1, T2>
 {
     type Output = Vector2<T1, T2>;
 
