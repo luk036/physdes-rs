@@ -610,11 +610,16 @@ impl Hull<i32> for i32 {
     ///             output struct.
     #[inline]
     fn hull_with(&self, other: &i32) -> Self::Output {
-        Self::Output {
-            lb: (*self).min(*other),
-            ub: (*self).max(*other),
-            _marker: PhantomData,
+        if *self < *other {
+            Interval::new(*self, *other)
+        } else {
+            Interval::new(*other, *self)
         }
+        // Self::Output {
+        //     lb: (*self).min(*other),
+        //     ub: (*self).max(*other),
+        //     _marker: PhantomData,
+        // }
     }
 }
 
