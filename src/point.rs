@@ -832,4 +832,77 @@ mod test {
         let b = Point::new(5, 7);
         assert_eq!(a.min_dist_with(&b), 4);
     }
+
+    #[test]
+    fn test_flip() {
+        let p1 = Point::new(1, 2);
+        assert_eq!(p1.flip(), Point::new(2, 1));
+    }
+
+    #[test]
+    fn test_display() {
+        let p1 = Point::new(1, 2);
+        assert_eq!(format!("{}", p1), "(1, 2)");
+    }
+
+    #[test]
+    fn test_displace_more() {
+        let a = Point::new(3, 5);
+        let b = Point::new(-5, 7);
+        let c = Point::new(7, -8);
+        assert_eq!(a.displace(&b), Vector2::new(8, -2));
+        assert_eq!(a.displace(&c), Vector2::new(-4, 13));
+        assert_eq!(b.displace(&c), Vector2::new(-12, 15));
+    }
+
+    #[test]
+    fn test_hull_more() {
+        let a = Point::new(3, 5);
+        let b = Point::new(5, 7);
+        let c = Point::new(-1, 9);
+        assert_eq!(
+            a.hull_with(&b),
+            Point::new(Interval::new(3, 5), Interval::new(5, 7))
+        );
+        assert_eq!(
+            a.hull_with(&c),
+            Point::new(Interval::new(-1, 3), Interval::new(5, 9))
+        );
+    }
+
+    #[test]
+    fn test_intersect_with() {
+        let p1 = Point::new(Interval::new(0, 5), Interval::new(0, 5));
+        let p2 = Point::new(Interval::new(3, 8), Interval::new(3, 8));
+        let p3 = Point::new(Interval::new(10, 12), Interval::new(10, 12));
+
+        assert_eq!(
+            p1.intersect_with(&p2),
+            Point::new(Interval::new(3, 5), Interval::new(3, 5))
+        );
+        assert_eq!(
+            p1.intersect_with(&p3),
+            Point::new(Interval::new(10, 5), Interval::new(10, 5))
+        );
+    }
+
+    #[test]
+    fn test_overlaps_more() {
+        let p1 = Point::new(Interval::new(0, 5), Interval::new(0, 5));
+        let p2 = Point::new(Interval::new(3, 8), Interval::new(3, 8));
+        let p3 = Point::new(Interval::new(6, 8), Interval::new(6, 8));
+
+        assert!(p1.overlaps(&p2));
+        assert!(!p1.overlaps(&p3));
+    }
+
+    #[test]
+    fn test_contains_more() {
+        let p1 = Point::new(Interval::new(0, 10), Interval::new(0, 10));
+        let p2 = Point::new(Interval::new(3, 8), Interval::new(3, 8));
+        let p3 = Point::new(Interval::new(6, 12), Interval::new(6, 12));
+
+        assert!(p1.contains(&p2));
+        assert!(!p1.contains(&p3));
+    }
 }

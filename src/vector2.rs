@@ -870,6 +870,32 @@ mod test {
     }
 
     #[test]
+    fn test_rem() {
+        assert_eq!(_4_2v % 3.0, Vector2::new(1.0, 2.0));
+    }
+
+    #[test]
+    fn test_sub_more() {
+        assert_eq!(_1_1v - _0_1v, _1_0v);
+        assert_eq!(_0_1v - _1_0v, Vector2::new(-1.0, 1.0));
+    }
+
+    #[test]
+    fn test_add_more() {
+        assert_eq!(_1_0v + _0_1v, _1_1v);
+    }
+
+    #[test]
+    fn test_mul_more() {
+        assert_eq!(_1_1v * 2.0, Vector2::new(2.0, 2.0));
+    }
+
+    #[test]
+    fn test_div_more() {
+        assert_eq!(_1_1v / 2.0, _05_05v);
+    }
+
+    #[test]
     fn test_consts_vv() {
         // check our constants are what Vector2::new creates
         fn test(c: Vector2<Vector2<f64, f64>, Vector2<f64, f64>>, w: f64, x: f64, y: f64, z: f64) {
