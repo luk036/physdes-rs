@@ -18,7 +18,7 @@ pub struct Polygon<T> {
     pub vecs: Vec<Vector2<T, T>>,
 }
 
-impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
+impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> Polygon<T> {
     /// The `new` function constructs a new `Polygon` object by calculating the vectors between each
     /// coordinate and the origin.
     ///
@@ -113,7 +113,18 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     ///
     /// a value of type `Point<T, T>`.
     pub fn lb(&self) -> Point<T, T> {
-        unimplemented!()
+        let mut min_x = self.origin.xcoord;
+        let mut min_y = self.origin.ycoord;
+        for vec in &self.vecs {
+            let p = self.origin + *vec;
+            if p.xcoord < min_x {
+                min_x = p.xcoord;
+            }
+            if p.ycoord < min_y {
+                min_y = p.ycoord;
+            }
+        }
+        Point::new(min_x, min_y)
     }
 
     /// The function `ub` returns a `Point<T, T>`.
@@ -122,7 +133,18 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign> Polygon<T> {
     ///
     /// a value of type `Point<T, T>`.
     pub fn ub(&self) -> Point<T, T> {
-        unimplemented!()
+        let mut max_x = self.origin.xcoord;
+        let mut max_y = self.origin.ycoord;
+        for vec in &self.vecs {
+            let p = self.origin + *vec;
+            if p.xcoord > max_x {
+                max_x = p.xcoord;
+            }
+            if p.ycoord > max_y {
+                max_y = p.ycoord;
+            }
+        }
+        Point::new(max_x, max_y)
     }
 }
 
@@ -332,5 +354,32 @@ mod test {
         // let poly = Polygon::<i32>::new(&pointset);
         let q = Point::<i32, i32>::new(0, -1);
         assert!(Polygon::<i32>::point_in_polygon(&pointset, &q));
+    }
+
+    #[test]
+    fn test_lb_ub() {
+        let coords = [
+            (-2, 2),
+            (0, -1),
+            (-5, 1),
+            (-2, 4),
+            (0, -4),
+            (-4, 3),
+            (-6, -2),
+            (5, 1),
+            (2, 2),
+            (3, -3),
+            (-3, -3),
+            (3, 3),
+            (-3, -4),
+            (1, 4),
+        ];
+        let mut pointset = vec![];
+        for (x, y) in coords.iter() {
+            pointset.push(Point::<i32, i32>::new(*x, *y));
+        }
+        let poly = Polygon::<i32>::new(&pointset);
+        assert_eq!(poly.lb(), Point::new(-6, -4));
+        assert_eq!(poly.ub(), Point::new(5, 4));
     }
 }

@@ -129,3 +129,34 @@ impl Displacement<i32> for i32 {
         self - other
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_overlap() {
+        assert!(1.overlaps(&1));
+        assert!(!1.overlaps(&2));
+    }
+
+    #[test]
+    fn test_contain() {
+        assert!(1.contains(&1));
+        assert!(!1.contains(&2));
+    }
+
+    #[test]
+    fn test_min_dist() {
+        assert_eq!(1.min_dist_with(&1), 0);
+        assert_eq!(1.min_dist_with(&2), 1);
+        assert_eq!(2.min_dist_with(&1), 1);
+    }
+
+    #[test]
+    fn test_displace() {
+        assert_eq!(1.displace(&1), 0);
+        assert_eq!(1.displace(&2), -1);
+        assert_eq!(2.displace(&1), 1);
+    }
+}
