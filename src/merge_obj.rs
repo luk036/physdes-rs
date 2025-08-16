@@ -93,8 +93,8 @@ mod test {
 
     #[test]
     fn test_merge() {
-        let s1 = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
-        let s2 = MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
+        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
+        let s2: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
         let m1 = s1.merge_with(&s2);
         println!("{:?}", m1);
         assert_eq!(
@@ -105,8 +105,8 @@ mod test {
 
     #[test]
     fn test_merge_2() {
-        let mut a = MergeObj::new(Interval::new(4, 5), Interval::new(4, 5));
-        let b = MergeObj::new(Interval::new(7, 9), Interval::new(7, 9));
+        let mut a: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(4, 5), Interval::new(4, 5));
+        let b: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(7, 9), Interval::new(7, 9));
         let v = Vector2::new(Interval::new(2, 3), Interval::new(2, 3));
         a.impl_.xcoord.lb += v.x_.lb;
         a.impl_.xcoord.ub += v.x_.ub;
@@ -128,28 +128,50 @@ mod test {
         assert_eq!(r3, MergeObj::new(Interval::new(3, 8), Interval::new(3, 8)));
     }
 
-    // #[test]
-    // fn test_merge() {
-    //     let s1 = MergeObj::new(200 + 600, 200 - 600);
-    //     let s2 = MergeObj::new(500 + 900, 500 - 900);
-    //     let m1 = s1.merge_with(&s2);
-    //     println!("{:?}", m1);
-    //     assert_eq!(m1, MergeObj::new(Interval::new(1100, 1100), Interval::new(-700, -100)));
-    // }
-    //
-    // #[test]
-    // fn test_merge_2() {
-    //     let mut a = MergeObj::new(4 + 5, 4 - 5);
-    //     let b = MergeObj::new(7 + 9, 7 - 9);
-    //     let v = Vector2(2, 3);
-    //     a += &v;
-    //     a -= &v;
-    //     assert_eq!(a, MergeObj::new(4 + 5, 4 - 5));
-    //     let r1 = a.enlarge_with(3);
-    //     assert_eq!(r1, MergeObj::new(Interval::new(6, 12), Interval::new(-4, 2)));
-    //     let r2 = b.enlarge_with(4);
-    //     assert_eq!(r2, MergeObj::new(Interval::new(12, 20), Interval::new(-6, 2)));
-    //     let r3 = r1.intersect_with(&r2);
-    //     assert_eq!(r3, MergeObj::new(Interval::new(12, 12), Interval::new(-4, 2)));
-    // }
+    #[test]
+    fn test_min_dist_with_more_cases() {
+        let r1 = MergeObj::<i32, i32>::construct(0, 0);
+        let r2 = MergeObj::<i32, i32>::construct(3, 4);
+        assert_eq!(r1.min_dist_with(&r2), 7);
+
+        let r3 = MergeObj::<i32, i32>::construct(-3, -4);
+        assert_eq!(r1.min_dist_with(&r3), 7);
+    }
+
+    #[test]
+    fn test_enlarge_with_more_cases() {
+        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
+        let enlarged = s1.enlarge_with(100);
+        assert_eq!(
+            enlarged,
+            MergeObj::new(Interval::new(100, 700), Interval::new(100, 700))
+        );
+    }
+
+    #[test]
+    fn test_intersect_with_more_cases() {
+        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
+        let s2: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
+        let intersected = s1.intersect_with(&s2);
+        assert_eq!(
+            intersected,
+            MergeObj::new(Interval::new(500, 600), Interval::new(500, 600))
+        );
+
+        let s3 = MergeObj::new(Interval::new(700, 900), Interval::new(700, 900));
+        let intersected2 = s1.intersect_with(&s3);
+        assert!(intersected2.impl_.xcoord.is_invalid());
+        assert!(intersected2.impl_.ycoord.is_invalid());
+    }
+
+    #[test]
+    fn test_merge_with_more_cases() {
+        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(0, 100), Interval::new(0, 100));
+        let s2: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(100, 200), Interval::new(100, 200));
+        let merged = s1.merge_with(&s2);
+        assert_eq!(
+            merged,
+            MergeObj::new(Interval::new(100, 100), Interval::new(100, 100))
+        );
+    }
 }

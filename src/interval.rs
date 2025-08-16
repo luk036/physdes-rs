@@ -1,4 +1,5 @@
 use crate::generic::{Contain, Displacement, MinDist, Overlap};
+
 use std::cmp::{Eq, PartialEq, PartialOrd};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::marker::PhantomData;
@@ -130,6 +131,20 @@ where
     }
 }
 
+
+
+impl<T: Sub<Output = T>> Sub for Interval<T> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Self {
+            lb: self.lb - other.lb,
+            ub: self.ub - other.ub,
+            _marker: PhantomData,
+        }
+    }
+}
+
 impl<T> Neg for Interval<T>
 where
     T: Copy + Neg<Output = T>,
@@ -207,6 +222,18 @@ where
     }
 }
 
+impl<T: Add<Output = T>> Add for Interval<T> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self::Output {
+        Self {
+            lb: self.lb + other.lb,
+            ub: self.ub + other.ub,
+            _marker: PhantomData,
+        }
+    }
+}
+
 impl<T> Sub<T> for Interval<T>
 where
     T: Copy + Sub<Output = T>,
@@ -273,10 +300,10 @@ where
 /// `Output` and a method `enlarge_with` that takes a reference to `self` and a parameter `alpha` of
 /// type `T`. The method returns an object of type `Output`. This trait can be implemented for types to
 /// provide the functionality of enlarging or modifying the object with the provided `alpha` value.
-pub trait Enlarge<T: ?Sized> {
+pub trait Enlarge<Alpha> {
     type Output;
 
-    fn enlarge_with(&self, alpha: T) -> Self::Output;
+    fn enlarge_with(&self, alpha: Alpha) -> Self::Output;
 }
 
 impl Enlarge<i32> for i32 {
@@ -817,16 +844,27 @@ mod tests {
         assert!(b.overlaps(&a));
     }
 
-    // @given(integers(), integers(), integers(), integers(), integers())
-    // #[test]
-    // fn test_interval_hypo(a1: int, a2: int, b1: int, b2: int, v: int) {
-    //     a = Interval::new(min(a1, a2), max(a1, a2));
-    //     b = Interval::new(min(b1, b2), max(b1, b2));
-    //     // c = Interval::new(min(a, b), max(a, b))  // interval of interval
-    //     assert!((a - v) + v == a);
-    //     assert!((b - v) + v == b);
-    //     // assert (c - v) + v == c
-    // }
+    
+    
+
+    #[test]
+    fn test_hull_more_cases() {
+        let a = Interval::new(3, 5);
+        let b = Interval::new(1, 7);
+        assert_eq!(a.hull_with(&b), Interval::new(1, 7));
+
+        let c = Interval::new(-2, 2);
+        assert_eq!(a.hull_with(&c), Interval::new(-2, 5));
+
+        let d = 4;
+        assert_eq!(a.hull_with(&d), Interval::new(3, 5));
+
+        let e = 8;
+        assert_eq!(a.hull_with(&e), Interval::new(3, 8));
+
+        let f = 0;
+        assert_eq!(a.hull_with(&f), Interval::new(0, 5));
+    }
 
     #[test]
     fn test_interval1() {

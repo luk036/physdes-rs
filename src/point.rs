@@ -2,7 +2,7 @@
 
 use super::Vector2;
 use crate::generic::{Contain, Displacement, MinDist, Overlap};
-use crate::interval::{Hull, Intersect};
+use crate::interval::{Enlarge, Hull, Intersect, Interval};
 // use core::cmp::Ordering;
 // #[cfg(any(test, feature = "std"))]
 #[cfg(test)]
@@ -305,6 +305,21 @@ where
         Self::Output::new(
             self.xcoord.intersect_with(&other.xcoord),
             self.ycoord.intersect_with(&other.ycoord),
+        )
+    }
+}
+
+impl<T1, T2, Alpha> Enlarge<Alpha> for Point<T1, T2>
+where
+    T1: Enlarge<Alpha, Output = Interval<T1>> + Copy,
+    T2: Enlarge<Alpha, Output = Interval<T2>> + Copy,
+    Alpha: Copy,
+{
+    type Output = Point<Interval<T1>, Interval<T2>>;
+    fn enlarge_with(&self, alpha: Alpha) -> Self::Output {
+        Self::Output::new(
+            self.xcoord.enlarge_with(alpha),
+            self.ycoord.enlarge_with(alpha),
         )
     }
 }
@@ -812,8 +827,70 @@ mod test {
 
     #[test]
     fn test_enlarge() {
-        let _a = Point::new(3, 5);
-        // assert_eq!(a.enlarge_with(2), Point::new(Interval::new(1, 5), Interval::new(3, 7)));
+        let a = Point::new(3, 5);
+        let b: Point<Interval<i32>, Interval<i32>> = a.enlarge_with(2);
+        assert_eq!(
+            b,
+            Point::new(Interval::new(1, 5), Interval::new(3, 7))
+        );
+    }
+
+    #[test]
+    fn test_displace_more_cases() {
+        let a = Point::new(0, 0);
+        let b = Point::new(3, 4);
+        assert_eq!(a.displace(&b), Vector2::new(-3, -4));
+        let c = Point::new(-3, -4);
+        assert_eq!(a.displace(&c), Vector2::new(3, 4));
+    }
+
+    #[test]
+    fn test_hull_more_cases() {
+        let a = Point::new(0, 0);
+        let b = Point::new(3, 4);
+        assert_eq!(
+            a.hull_with(&b),
+            Point::new(Interval::new(0, 3), Interval::new(0, 4))
+        );
+        let c = Point::new(-3, -4);
+        assert_eq!(
+            a.hull_with(&c),
+            Point::new(Interval::new(-3, 0), Interval::new(-4, 0))
+        );
+    }
+
+    #[test]
+    fn test_intersect_with_more_cases() {
+        let p1 = Point::new(Interval::new(0, 5), Interval::new(0, 5));
+        let p2 = Point::new(Interval::new(3, 8), Interval::new(3, 8));
+        assert_eq!(
+            p1.intersect_with(&p2),
+            Point::new(Interval::new(3, 5), Interval::new(3, 5))
+        );
+
+        let p3 = Point::new(Interval::new(6, 8), Interval::new(6, 8));
+        assert!(p1.intersect_with(&p3).xcoord.is_invalid());
+        assert!(p1.intersect_with(&p3).ycoord.is_invalid());
+    }
+
+    #[test]
+    fn test_overlaps_more_cases() {
+        let p1 = Point::new(Interval::new(0, 5), Interval::new(0, 5));
+        let p2 = Point::new(Interval::new(5, 8), Interval::new(5, 8));
+        assert!(p1.overlaps(&p2));
+
+        let p3 = Point::new(Interval::new(6, 8), Interval::new(6, 8));
+        assert!(!p1.overlaps(&p3));
+    }
+
+    #[test]
+    fn test_contains_more_cases() {
+        let p1 = Point::new(Interval::new(0, 10), Interval::new(0, 10));
+        let p2 = Point::new(Interval::new(3, 8), Interval::new(3, 8));
+        assert!(p1.contains(&p2));
+
+        let p3 = Point::new(Interval::new(3, 12), Interval::new(3, 8));
+        assert!(!p1.contains(&p3));
     }
 
     #[test]

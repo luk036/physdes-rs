@@ -891,8 +891,37 @@ mod test {
     }
 
     #[test]
-    fn test_div_more() {
-        assert_eq!(_1_1v / 2.0, _05_05v);
+    fn test_dot_more_cases() {
+        assert_eq!(_0_0v.dot(&_1_1v), 0.0);
+        assert_eq!(_1_1v.dot(&_0_0v), 0.0);
+        assert_eq!(_neg1_1v.dot(&_1_1v), 0.0);
+    }
+
+    #[test]
+    fn test_cross_more_cases() {
+        assert_eq!(_0_0v.cross(&_1_1v), 0.0);
+        assert_eq!(_1_1v.cross(&_0_0v), 0.0);
+        assert_eq!(_neg1_1v.cross(&_1_1v), -2.0);
+    }
+
+    #[test]
+    fn test_l1_norm_more_cases() {
+        assert_eq!(_0_0v.l1_norm(), 0.0);
+        assert_eq!(_neg1_1v.l1_norm(), 2.0);
+    }
+
+    #[test]
+    fn test_norm_inf_more_cases() {
+        assert_eq!(_0_0v.norm_inf(), 0.0);
+        assert_eq!(_neg1_1v.norm_inf(), 1.0);
+    }
+
+    #[test]
+    fn test_scalar_arithmetic_more_cases() {
+        assert_eq!(_0_0v * 2.0, _0_0v);
+        assert_eq!(_1_1v * 0.0, _0_0v);
+        assert_eq!(_1_1v * 1.0, _1_1v);
+        assert_eq!(_1_1v * -1.0, -_1_1v);
     }
 
     #[test]

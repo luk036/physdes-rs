@@ -290,27 +290,59 @@ mod test {
     }
 
     #[test]
-    fn test_lb_ub() {
-        let coords = [
-            (-2, 2),
-            (0, -1),
-            (-5, 1),
-            (-2, 4),
-            (0, -4),
-            (-4, 3),
-            (-6, -2),
-            (5, 1),
-            (2, 2),
-            (3, -3),
-            (-3, -4),
-            (1, 4),
-        ];
-        let mut pointset = vec![];
-        for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
-        }
-        let poly = RPolygon::<i32>::new(&pointset);
-        assert_eq!(poly.lb(), Point::new(-6, -4));
-        assert_eq!(poly.ub(), Point::new(5, 4));
+    fn test_signed_area_more_cases() {
+        let p1 = Point::new(0, 0);
+        let p2 = Point::new(1, 0);
+        let p3 = Point::new(1, 1);
+        let p4 = Point::new(0, 1);
+        let poly = RPolygon::new(&[p1, p2, p3, p4]);
+        assert_eq!(poly.signed_area(), 1);
+
+        let p5 = Point::new(0, 0);
+        let p6 = Point::new(0, 1);
+        let p7 = Point::new(1, 1);
+        let p8 = Point::new(1, 0);
+        let poly2 = RPolygon::new(&[p5, p6, p7, p8]);
+        assert_eq!(poly2.signed_area(), -1);
+    }
+
+    #[test]
+    fn test_lb_ub_more_cases() {
+        let p1 = Point::new(0, 0);
+        let p2 = Point::new(1, 0);
+        let p3 = Point::new(1, 1);
+        let p4 = Point::new(0, 1);
+        let poly = RPolygon::new(&[p1, p2, p3, p4]);
+        assert_eq!(poly.lb(), Point::new(0, 0));
+        assert_eq!(poly.ub(), Point::new(1, 1));
+
+        let p5 = Point::new(-1, -1);
+        let p6 = Point::new(1, -1);
+        let p7 = Point::new(1, 1);
+        let p8 = Point::new(-1, 1);
+        let poly2 = RPolygon::new(&[p5, p6, p7, p8]);
+        assert_eq!(poly2.lb(), Point::new(-1, -1));
+        assert_eq!(poly2.ub(), Point::new(1, 1));
+    }
+
+    #[test]
+    fn test_point_in_rpolygon_more_cases() {
+        let p1 = Point::new(0, 0);
+        let p2 = Point::new(1, 0);
+        let p3 = Point::new(1, 1);
+        let p4 = Point::new(0, 1);
+        let pointset = &[p1, p2, p3, p4];
+
+        let q1 = Point::new(0, 0);
+        assert!(RPolygon::<i32>::point_in_rpolygon(pointset, &q1));
+
+        let q2 = Point::new(1, 1);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &q2));
+
+        let q3 = Point::new(0, 1);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &q3));
+
+        let q4 = Point::new(1, 0);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &q4));
     }
 }
