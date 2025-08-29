@@ -18,7 +18,7 @@ pub struct Polygon<T> {
     pub vecs: Vec<Vector2<T, T>>,
 }
 
-impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> Polygon<T> {
+impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// The `new` function constructs a new `Polygon` object by calculating the vectors between each
     /// coordinate and the origin.
     ///
@@ -146,9 +146,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> Polygon<T> {
         }
         Point::new(max_x, max_y)
     }
-}
 
-impl<T: Clone + Num + Ord + Copy> Polygon<T> {
     /// The function `create_mono_polygon` takes a set of points and a function, and returns a sorted
     /// list of points that form a monotonic polygon.
     ///
@@ -259,6 +257,49 @@ impl<T: Clone + Num + Ord + Copy> Polygon<T> {
             p0 = p1;
         }
         c
+    }
+
+    /// The `is_rectilinear` function checks if a polygon is rectilinear.
+    ///
+    /// A polygon is rectilinear if all its edges are either horizontal or vertical.
+    ///
+    /// Returns:
+    ///
+    /// The function `is_rectilinear` returns a boolean value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    ///
+    /// let p1 = Point::new(0, 0);
+    /// let p2 = Point::new(0, 1);
+    /// let p3 = Point::new(1, 1);
+    /// let p4 = Point::new(1, 0);
+    /// let poly = Polygon::new(&[p1, p2, p3, p4]);
+    /// assert!(poly.is_rectilinear());
+    ///
+    /// let p5 = Point::new(0, 0);
+    /// let p6 = Point::new(1, 1);
+    /// let p7 = Point::new(0, 2);
+    /// let poly2 = Polygon::new(&[p5, p6, p7]);
+    /// assert!(!poly2.is_rectilinear());
+    /// ```
+    pub fn is_rectilinear(&self) -> bool {
+        let mut vertices = vec![self.origin];
+        for vec in &self.vecs {
+            vertices.push(self.origin + *vec);
+        }
+
+        for i in 0..vertices.len() {
+            let p1 = vertices[i];
+            let p2 = vertices[(i + 1) % vertices.len()];
+            if p1.xcoord != p2.xcoord && p1.ycoord != p2.ycoord {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -410,5 +451,21 @@ mod test {
 
         let q4 = Point::new(5, 5);
         assert!(!Polygon::<i32>::point_in_polygon(&pointset, &q4));
+    }
+
+    #[test]
+    fn test_is_rectilinear() {
+        let p1 = Point::new(0, 0);
+        let p2 = Point::new(0, 1);
+        let p3 = Point::new(1, 1);
+        let p4 = Point::new(1, 0);
+        let poly = Polygon::new(&[p1, p2, p3, p4]);
+        assert!(poly.is_rectilinear());
+
+        let p5 = Point::new(0, 0);
+        let p6 = Point::new(1, 1);
+        let p7 = Point::new(0, 2);
+        let poly2 = Polygon::new(&[p5, p6, p7]);
+        assert!(!poly2.is_rectilinear());
     }
 }
