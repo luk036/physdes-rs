@@ -1,8 +1,11 @@
 #![allow(clippy::type_complexity)]
 
-use super::{Point, Vector2};
+use std::cmp::Ordering;
 use num_traits::Num;
 use std::ops::{AddAssign, SubAssign};
+
+use crate::point::Point;
+use crate::vector2::Vector2;
 
 /// Represents an arbitrary polygon with coordinates of type T
 ///
@@ -47,7 +50,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// assert_eq!(poly.vecs.len(), 4);
     /// assert_eq!(poly.vecs[0], Vector2::new(1, 1));
     /// ```
-    pub fn new(coords: &[Point<T, T>]) -> Self {
+     pub fn new(coords: &[Point<T, T>]) -> Self {
         let (&origin, coords) = coords.split_first().unwrap();
         let vecs = coords.iter().map(|pt| pt - origin).collect();
         Polygon { origin, vecs }
@@ -60,6 +63,16 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// * `origin` - The origin point of the polygon
     /// * `vecs` - Vector of displacement vectors from origin
     pub fn from_origin_and_vectors(origin: Point<T, T>, vecs: Vec<Vector2<T, T>>) -> Self {
+        Polygon { origin, vecs }
+    }
+
+    /// Constructs a new Polygon from a point set
+    ///
+    /// The first point in the set is used as the origin, and the remaining points
+    /// are used to construct displacement vectors relative to the origin.
+    pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
+        let origin = pointset[0];
+        let vecs = pointset[1..].iter().map(|pt| pt - origin).collect();
         Polygon { origin, vecs }
     }
 
@@ -127,10 +140,18 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
             return T::zero();
         }
         
-        let mut res = vecs[0].x_ * vecs[1].y_ - vecs[n - 1].x_ * vecs[n - 2].y_;
+        let mut itr = vecs.iter();
+        let vec0 = itr.next().unwrap();
+        let vec1 = itr.next().unwrap();
+        let mut res = vec0.x_ * vec1.y_ - vecs[n - 1].x_ * vecs[n - 2].y_;
         
-        for i in 1..n - 1 {
-            res += vecs[i].x_ * (vecs[i + 1].y_ - vecs[i - 1].y_);
+        let mut vec0 = vec0;
+        let mut vec1 = vec1;
+        
+        for vec2 in itr {
+            res += vec1.x_ * (vec2.y_ - vec0.y_);
+            vec0 = vec1;
+            vec1 = vec2;
         }
         
         res
@@ -176,225 +197,320 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// assert!(!poly2.is_rectilinear());
     /// ```
     pub fn is_rectilinear(&self) -> bool {
-        let vertices = self.vertices();
-        let n = vertices.len();
-        
-        for i in 0..n {
-            let current = vertices[i];
-            let next = vertices[(i + 1) % n];
-            
-            if current.xcoord != next.xcoord && current.ycoord != next.ycoord {
+        if self.vecs.is_empty() {
+            return true;
+        }
+
+        // Check from origin to vecs[0]
+        if self.vecs[0].x_ != T::zero() && self.vecs[0].y_ != T::zero() {
+            return false;
+        }
+
+        // Check between vecs
+        for i in 0..self.vecs.len() - 1 {
+            let v1 = self.vecs[i];
+            let v2 = self.vecs[i + 1];
+            if v1.x_ != v2.x_ && v1.y_ != v2.y_ {
                 return false;
             }
         }
-        
+
+        // Check from vecs[-1] to origin
+        let last_vec = self.vecs.last().unwrap();
+        if last_vec.x_ != T::zero() && last_vec.y_ != T::zero() {
+            return false;
+        }
+
         true
     }
 
+    /// Checks if the polygon is oriented anticlockwise
+    pub fn is_anticlockwise(&self) -> bool 
+    where
+        T: PartialOrd,
+    {
+        let mut pointset = Vec::with_capacity(self.vecs.len() + 1);
+        pointset.push(Vector2::new(T::zero(), T::zero()));
+        pointset.extend(self.vecs.iter().cloned());
+
+        if pointset.len() < 3 {
+            panic!("Polygon must have at least 3 points");
+        }
+
+        // Find the point with minimum coordinates
+        let (min_index, _) = pointset.iter()
+            .enumerate()
+            .min_by(|(_, a), (_, b)| 
+                a.x_.partial_cmp(&b.x_)
+                    .unwrap_or(Ordering::Equal)
+                    .then(a.y_.partial_cmp(&b.y_).unwrap_or(Ordering::Equal))
+            )
+            .unwrap();
+
+        // Get previous and next points with wrap-around
+        let n = pointset.len();
+        let prev_point = pointset[(min_index + n - 1) % n];
+        let current_point = pointset[min_index];
+        let next_point = pointset[(min_index + 1) % n];
+
+        // Calculate cross product
+        (current_point - prev_point).cross(&(next_point - current_point)) > T::zero()
+    }
+
     /// Checks if the polygon is convex
-    ///
-    /// A polygon is convex if all its interior angles are less than or equal to 180 degrees.
-    ///
-    /// # Returns
-    ///
-    /// `true` if the polygon is convex, `false` otherwise
-    pub fn is_convex(&self) -> bool {
-        let vertices = self.vertices();
-        let n = vertices.len();
-        
+    pub fn is_convex(&self) -> bool 
+    where
+        T: PartialOrd,
+    {
+        let n = self.vecs.len() + 1;
         if n < 3 {
             return false;
         }
-        
         if n == 3 {
             return true;
         }
 
-        // Determine initial cross product sign
-        let pv0 = vertices[n - 2]; // ???
-        let pv2 = vertices[1];
-        let cross_product_sign = (pv2 - vertices[0]).cross(&(pv0 - vertices[0]));
+        let is_anticlockwise = self.is_anticlockwise();
         
-        // Check all consecutive edges
-        for i in 1..n - 1 {
-            let v0 = vertices[i - 1];
-            let v1 = vertices[i];
-            let v2 = vertices[i + 1];
-            
-            let current_cross_product = (v1 - v0).cross(&(v2 - v1));
-            
-            if (cross_product_sign > T::zero()) != (current_cross_product > T::zero()) {
-                return false;
+        // Create extended pointset for easier edge traversal
+        let mut pointset = Vec::with_capacity(n + 2);
+        pointset.push(self.vecs.last().unwrap().clone());
+        pointset.push(Vector2::new(T::zero(), T::zero()));
+        pointset.extend(self.vecs.iter().cloned());
+        pointset.push(Vector2::new(T::zero(), T::zero()));
+
+        if is_anticlockwise {
+            for i in 1..pointset.len() - 1 {
+                let v1 = pointset[i] - pointset[i - 1];
+                let v2 = pointset[i + 1] - pointset[i];
+                if v1.cross(&v2) < T::zero() {
+                    return false;
+                }
+            }
+        } else {
+            for i in 1..pointset.len() - 1 {
+                let v1 = pointset[i] - pointset[i - 1];
+                let v2 = pointset[i + 1] - pointset[i];
+                if v1.cross(&v2) > T::zero() {
+                    return false;
+                }
             }
         }
-        
+
         true
     }
 
-    /// Gets the lower bound (minimum x and y coordinates) of the polygon's bounding box
+    /// Gets the lower bound of the polygon's bounding box
     pub fn lb(&self) -> Point<T, T> {
         let mut min_x = T::zero();
         let mut min_y = T::zero();
         
         for vec in &self.vecs {
-            let p = *vec;
-            if p.x_ < min_x {
-                min_x = p.x_;
+            if vec.x_ < min_x {
+                min_x = vec.x_;
             }
-            if p.y_ < min_y {
-                min_y = p.y_;
+            if vec.y_ < min_y {
+                min_y = vec.y_;
             }
         }
         
         Point::new(self.origin.xcoord + min_x, self.origin.ycoord + min_y)
     }
 
-    /// Gets the upper bound (maximum x and y coordinates) of the polygon's bounding box
+    /// Gets the upper bound of the polygon's bounding box
     pub fn ub(&self) -> Point<T, T> {
         let mut max_x = T::zero();
         let mut max_y = T::zero();
         
         for vec in &self.vecs {
-            let p = *vec;
-            if p.x_ > max_x {
-                max_x = p.x_;
+            if vec.x_ > max_x {
+                max_x = vec.x_;
             }
-            if p.y_ > max_y {
-                max_y = p.y_;
+            if vec.y_ > max_y {
+                max_y = vec.y_;
             }
         }
         
         Point::new(self.origin.xcoord + max_x, self.origin.ycoord + max_y)
     }
+}
 
-    /// Creates a monotone polygon from a set of points using a custom comparison function
-    ///
-    /// # Arguments
-    ///
-    /// * `pointset` - A slice of points to create the polygon from
-    /// * `f` - A closure that defines the ordering of points
-    pub fn create_mono_polygon<F>(pointset: &[Point<T, T>], f: F) -> Vec<Point<T, T>>
-    where
-        F: Fn(&&Point<T, T>) -> (T, T),
-    {
-        let max_pt = pointset.iter().max_by_key(&f).unwrap();
-        let min_pt = pointset.iter().min_by_key(&f).unwrap();
-        let d = *max_pt - *min_pt;
+/// Creates a monotone polygon from a set of points using a custom comparison function
+///
+/// # Arguments
+///
+/// * `pointset` - A slice of points to create the polygon from
+/// * `f` - A closure that defines the ordering of points
+pub fn create_mono_polygon<T, F>(pointset: &[Point<T, T>], f: F) -> Vec<Point<T, T>>
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+    F: Fn(&&Point<T, T>) -> (T, T),
+{
+    let max_pt = pointset.iter().max_by_key(&f).unwrap();
+    let min_pt = pointset.iter().min_by_key(&f).unwrap();
+    let d = *max_pt - *min_pt;
+    
+    let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = pointset
+        .iter()
+        .partition(|&a| d.cross(&(a - min_pt)) <= T::zero());
         
-        let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = pointset
-            .iter()
-            .partition(|&a| d.cross(&(a - min_pt)) <= T::zero());
-            
-        lst1.sort_by_key(|a| f(&a));
-        lst2.sort_by_key(|a| f(&a));
-        lst2.reverse();
-        lst1.append(&mut lst2);
-        lst1
+    lst1.sort_by_key(|a| f(&a));
+    lst2.sort_by_key(|a| f(&a));
+    lst2.reverse();
+    lst1.append(&mut lst2);
+    lst1
+}
+
+/// Creates an x-monotone polygon from a set of points
+///
+/// Points are ordered primarily by x-coordinate, secondarily by y-coordinate
+#[inline]
+pub fn create_xmono_polygon<T>(pointset: &[Point<T, T>]) -> Vec<Point<T, T>>
+where 
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    create_mono_polygon(pointset, |a| (a.xcoord, a.ycoord))
+}
+
+/// Creates a y-monotone polygon from a set of points
+///
+/// Points are ordered primarily by y-coordinate, secondarily by x-coordinate
+#[inline]
+pub fn create_ymono_polygon<T>(pointset: &[Point<T, T>]) -> Vec<Point<T, T>>
+where 
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    create_mono_polygon(pointset, |a| (a.ycoord, a.xcoord))
+}
+
+/// Checks if a polygon is monotone in a given direction
+pub fn polygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+    F: Fn(&Point<T, T>) -> (T, T),
+{
+    if lst.len() <= 3 {
+        return true;
     }
 
-    /// Creates an x-monotone polygon from a set of points
-    ///
-    /// Points are ordered primarily by x-coordinate, secondarily by y-coordinate
-    #[inline]
-    pub fn create_xmono_polygon(pointset: &[Point<T, T>]) -> Vec<Point<T, T>> {
-        Self::create_mono_polygon(pointset, |a| (a.xcoord, a.ycoord))
-    }
+    let (min_index, _) = lst.iter()
+        .enumerate()
+        .min_by_key(|(_, pt)| dir(pt))
+        .unwrap();
+        
+    let (max_index, _) = lst.iter()
+        .enumerate()
+        .max_by_key(|(_, pt)| dir(pt))
+        .unwrap();
 
-    /// Creates a y-monotone polygon from a set of points
-    ///
-    /// Points are ordered primarily by y-coordinate, secondarily by x-coordinate
-    #[inline]
-    pub fn create_ymono_polygon(pointset: &[Point<T, T>]) -> Vec<Point<T, T>> {
-        Self::create_mono_polygon(pointset, |a| (a.ycoord, a.xcoord))
-    }
+    let n = lst.len();
 
-    /// Determines if a point is strictly inside a polygon using the Winding Number algorithm
-    ///
-    /// The boundary behavior is complex but determined; for a partition of a region into polygons,
-    /// each Point is "in" exactly one Polygon.
-    ///
-    /// # Arguments
-    ///
-    /// * `pointset` - The vertices of the polygon
-    /// * `q` - The point to test
-    ///
-    /// # Returns
-    ///
-    /// `true` if the point is strictly inside the polygon, `false` otherwise
-    pub fn point_in_polygon(pointset: &[Point<T, T>], q: &Point<T, T>) -> bool {
-        let n = pointset.len();
-        if n == 0 {
+    // Chain from min to max
+    let mut i = min_index;
+    while i != max_index {
+        let next_i = (i + 1) % n;
+        if dir(&lst[i]).0 > dir(&lst[next_i]).0 {
             return false;
         }
-        
-        let mut p0 = &pointset[n - 1];
-        let mut c = false;
-        
-        for p1 in pointset.iter() {
-            if (p1.ycoord <= q.ycoord && q.ycoord < p0.ycoord)
-                || (p0.ycoord <= q.ycoord && q.ycoord < p1.ycoord)
-            {
-                let d = (*q - *p0).cross(&(*p1 - *p0));
-                if p1.ycoord > p0.ycoord {
-                    if d < T::zero() {
-                        c = !c;
-                    }
-                } else {
-                    if d > T::zero() {
-                        c = !c;
-                    }
+        i = next_i;
+    }
+
+    // Chain from max to min
+    let mut i = max_index;
+    while i != min_index {
+        let next_i = (i + 1) % n;
+        if dir(&lst[i]).0 < dir(&lst[next_i]).0 {
+            return false;
+        }
+        i = next_i;
+    }
+
+    true
+}
+
+/// Checks if a polygon is x-monotone
+pub fn polygon_is_xmonotone<T>(lst: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    polygon_is_monotone(lst, |pt| (pt.xcoord, pt.ycoord))
+}
+
+/// Checks if a polygon is y-monotone
+pub fn polygon_is_ymonotone<T>(lst: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    polygon_is_monotone(lst, |pt| (pt.ycoord, pt.xcoord))
+}
+
+/// Determines if a point is inside a polygon using the winding number algorithm
+pub fn point_in_polygon<T>(pointset: &[Point<T, T>], ptq: &Point<T, T>) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    let n = pointset.len();
+    if n == 0 {
+        return false;
+    }
+    
+    let mut pt0 = &pointset[n - 1];
+    let mut res = false;
+    
+    for pt1 in pointset.iter() {
+        if (pt1.ycoord <= ptq.ycoord && ptq.ycoord < pt0.ycoord)
+            || (pt0.ycoord <= ptq.ycoord && ptq.ycoord < pt1.ycoord)
+        {
+            let det = (*ptq - *pt0).cross(&(*pt1 - *pt0));
+            if pt1.ycoord > pt0.ycoord {
+                if det < T::zero() {
+                    res = !res;
+                }
+            } else {
+                if det > T::zero() {
+                    res = !res;
                 }
             }
-            p0 = p1;
         }
-        
-        c
+        pt0 = pt1;
+    }
+    
+    res
+}
+
+/// Determines if a polygon represented by points is oriented anticlockwise
+pub fn polygon_is_anticlockwise<T>(pointset: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    if pointset.len() < 3 {
+        panic!("Polygon must have at least 3 points");
     }
 
-    /// Determines if a polygon represented by a range of points is oriented clockwise
-    ///
-    /// # Arguments
-    ///
-    /// * `pointset` - The vertices of the polygon
-    ///
-    /// # Returns
-    ///
-    /// `true` if the polygon is oriented clockwise, `false` otherwise
-    pub fn polygon_is_anticlockwise(pointset: &[Point<T, T>]) -> bool 
-    where
-        T: PartialOrd,
-    {
-        if pointset.len() < 3 { // ???
-            return false;
-        }
-        
-        // Find the point with minimum x (and minimum y if tie)
-        let min_index = pointset.iter()
-            .enumerate()
-            .min_by(|(_, a), (_, b)| 
-                a.xcoord.cmp(&b.xcoord)
-                    .then(a.ycoord.cmp(&b.ycoord))
-            )
-            .map(|(i, _)| i)
-            .unwrap();
-            
-        let prev_index = if min_index == 0 {
-            pointset.len() - 1
-        } else {
-            min_index - 1
-        };
-        
-        let next_index = if min_index == pointset.len() - 1 {
-            0
-        } else {
-            min_index + 1
-        };
-        
-        let v_prev = pointset[min_index] - pointset[prev_index];
-        let v_next = pointset[next_index] - pointset[min_index];
-        
-        v_prev.cross(&v_next) > T::zero()
-    }
+    // Find the point with minimum coordinates
+    let (min_index, min_point) = pointset.iter()
+        .enumerate()
+        .min_by(|(_, a), (_, b)| 
+            a.xcoord.partial_cmp(&b.xcoord)
+                .unwrap_or(Ordering::Equal)
+                .then(a.ycoord.partial_cmp(&b.ycoord).unwrap_or(Ordering::Equal))
+        )
+        .unwrap();
+
+    // Get previous and next points with wrap-around
+    let n = pointset.len();
+    let prev_index = (min_index + n - 1) % n;
+    let next_index = (min_index + 1) % n;
+
+    let prev_point = pointset[prev_index];
+    let current_point = *min_point;
+    let next_point = pointset[next_index];
+
+    // Calculate vectors and cross product
+    let vec1 = current_point - prev_point;
+    let vec2 = next_point - current_point;
+    
+    vec1.cross(&vec2) > T::zero()
 }
 
 // Implement PartialEq for Polygon
@@ -418,41 +534,13 @@ impl<T: SubAssign + Clone + Num> SubAssign<Vector2<T, T>> for Polygon<T> {
 }
 
 #[cfg(test)]
-mod test {
-    #![allow(non_upper_case_globals)]
-
+mod tests {
     use super::*;
-    // use rand::prelude::*;
-    // use rand::seq::index::sample;
-
-    // Simple van der Corput sequence generator for testing
-    struct VdCorput {
-        base: u32,
-        index: u32,
-    }
-
-    impl VdCorput {
-        fn new(base: u32, seed: u32) -> Self {
-            VdCorput { base, index: seed }
-        }
-
-        fn pop(&mut self) -> f64 {
-            let mut result = 0.0;
-            let mut f = 1.0;
-            let mut n = self.index;
-            self.index += 1;
-
-            while n > 0 {
-                f /= self.base as f64;
-                result += f * (n % self.base) as f64;
-                n /= self.base;
-            }
-            result
-        }
-    }
+    use crate::point::Point;
+    use crate::vector2::Vector2;
 
     #[test]
-    fn test_polygon_basic() {
+    fn test_polygon() {
         let coords = [
             (-2, 2),
             (0, -1),
@@ -469,21 +557,20 @@ mod test {
             (-3, -4),
             (1, 4),
         ];
-        let mut pointset = vec![];
-        for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
-        }
-
-        let ymono_pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
-        let poly = Polygon::<i32>::new(&ymono_pointset);
-        assert_eq!(poly.signed_area_x2(), 102);
         
-        // Test += and -= operators
-        let mut q = poly.clone();
-        let translation = Vector2::new(4, 5);
-        q += translation;
-        q -= translation;
-        assert_eq!(q, poly);
+        let mut pointset = Vec::new();
+        for (x, y) in coords.iter() {
+            pointset.push(Point::new(*x, *y));
+        }
+        
+        let s = create_xmono_polygon(&pointset);
+        assert!(polygon_is_anticlockwise(&s));
+        
+        let p = Polygon::from_pointset(&s);
+        let mut q = Polygon::from_pointset(&s);
+        q.add_assign(Vector2::new(4, 5));
+        q.sub_assign(Vector2::new(4, 5));
+        assert_eq!(q, p);
     }
 
     #[test]
@@ -504,18 +591,20 @@ mod test {
             (-3, -4),
             (1, 4),
         ];
-        let mut pointset = vec![];
+        
+        let mut pointset = Vec::new();
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
+            pointset.push(Point::new(*x, *y));
         }
         
-        let ymono_pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
-        let poly = Polygon::<i32>::new(&ymono_pointset);
-        assert_eq!(poly.signed_area_x2(), 102);
+        let s = create_ymono_polygon(&pointset);
+        assert!(polygon_is_ymonotone(&s));
+        assert!(!polygon_is_xmonotone(&s));
+        assert!(polygon_is_anticlockwise(&s));
         
-        // Test point not in polygon
-        let test_point = Point::new(4, 5);
-        assert!(!Polygon::<i32>::point_in_polygon(&ymono_pointset, &test_point));
+        let p = Polygon::from_pointset(&s);
+        assert_eq!(p.signed_area_x2(), 102);
+        assert!(p.is_anticlockwise());
     }
 
     #[test]
@@ -536,285 +625,195 @@ mod test {
             (-3, -4),
             (1, 4),
         ];
-        let mut pointset = vec![];
+        
+        let mut pointset = Vec::new();
         for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
+            pointset.push(Point::new(*x, *y));
         }
         
-        let xmono_pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
-        let poly = Polygon::<i32>::new(&xmono_pointset);
-        assert_eq!(poly.signed_area_x2(), 111);
+        let s = create_xmono_polygon(&pointset);
+        assert!(polygon_is_xmonotone(&s));
+        assert!(!polygon_is_ymonotone(&s));
+        assert!(polygon_is_anticlockwise(&s));
         
-        // Test polygon orientation
-        assert!(Polygon::<i32>::polygon_is_anticlockwise(&xmono_pointset));
-    }
-
-    #[test]
-    fn test_ymono_polygon_20() {
-        let mut hgen_x = VdCorput::new(2, 11);
-        let mut hgen_y = VdCorput::new(3, 7);
-        
-        let mut pointset = Vec::new();
-        for _ in 0..20 {
-            let x = (hgen_x.pop() * 1000.0) as i32;
-            let y = (hgen_y.pop() * 1000.0) as i32;
-            pointset.push(Point::new(x, y));
-        }
-        
-        let ymono_pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
-        let poly = Polygon::<i32>::new(&ymono_pointset);
-        
-        // The exact value might differ due to different scaling, but we test that it's consistent
-        assert!(poly.signed_area_x2().abs() > 0);
-    }
-
-    #[test]
-    fn test_xmono_polygon_20() {
-        let mut hgen_x = VdCorput::new(2, 11);
-        let mut hgen_y = VdCorput::new(3, 7);
-        
-        let mut pointset = Vec::new();
-        for _ in 0..20 {
-            let x = (hgen_x.pop() * 1000.0) as i32;
-            let y = (hgen_y.pop() * 1000.0) as i32;
-            pointset.push(Point::new(x, y));
-        }
-        
-        let xmono_pointset = Polygon::<i32>::create_xmono_polygon(&pointset);
-        let poly = Polygon::<i32>::new(&xmono_pointset);
-        
-        // The exact value might differ due to different scaling, but we test that it's consistent
-        assert!(poly.signed_area_x2().abs() > 0);
-    }
-
-    #[test]
-    fn test_ymono_polygon_50() {
-        let mut hgen_x = VdCorput::new(3, 7);
-        let mut hgen_y = VdCorput::new(2, 11);
-        
-        let mut pointset = Vec::new();
-        for _ in 0..50 {
-            let x = (hgen_x.pop() * 1000.0) as i32;
-            let y = (hgen_y.pop() * 1000.0) as i32;
-            pointset.push(Point::new(x, y));
-        }
-        
-        let ymono_pointset = Polygon::<i32>::create_ymono_polygon(&pointset);
-        let poly = Polygon::<i32>::new(&ymono_pointset);
-        
-        // Generate a test point
-        // let test_x = (hgen_x.pop() * 1000.0) as i32;
-        // let test_y = (hgen_y.pop() * 1000.0) as i32;
-        // let test_point = Point::new(test_x, test_y);
-        
-        // Test polygon properties
-        assert!(poly.signed_area_x2().abs() > 0);
-        assert!(Polygon::<i32>::polygon_is_anticlockwise(&ymono_pointset));
-        
-        // Note: The point_in_polygon test might not always pass due to different
-        // scaling and point distribution, so we'll skip the exact check
-    }
-
-    #[test]
-    fn test_polygon_rectilinear() {
-        // Create a rectilinear polygon (rectangle)
-        let rectilinear_coords = vec![
-            Point::new(0, 0),
-            Point::new(0, 1),
-            Point::new(1, 1),
-            Point::new(1, 0),
-        ];
-        let rectilinear_polygon = Polygon::new(&rectilinear_coords);
-        assert!(rectilinear_polygon.is_rectilinear());
-
-        // Create a non-rectilinear polygon (triangle with diagonal)
-        let non_rectilinear_coords = vec![
-            Point::new(0, 0),
-            Point::new(1, 1),
-            Point::new(2, 0),
-        ];
-        let non_rectilinear_polygon = Polygon::new(&non_rectilinear_coords);
-        assert!(!non_rectilinear_polygon.is_rectilinear());
-    }
-
-    #[test]
-    fn test_polygon_convexity() {
-    //     // Test case 1: Convex polygon (square)
-    //     let convex_coords = vec![
-    //         Point::new(0, 0),
-    //         Point::new(2, 0),
-    //         Point::new(2, 2),
-    //         Point::new(0, 2),
-    //     ];
-    //     let convex_polygon = Polygon::new(&convex_coords);
-    //     assert!(convex_polygon.is_convex());
-
-    //     // Test case 2: Non-convex polygon (concave shape)
-    //     let non_convex_coords = vec![
-    //         Point::new(0, 0),
-    //         Point::new(2, 0),
-    //         Point::new(1, 1),
-    //         Point::new(2, 2),
-    //         Point::new(0, 2),
-    //     ];
-    //     let non_convex_polygon = Polygon::new(&non_convex_coords);
-    //     assert!(!non_convex_polygon.is_convex());
-
-        // Test case 3: Triangle (always convex)
-        let triangle_coords = vec![
-            Point::new(0, 0),
-            Point::new(2, 0),
-            Point::new(1, 2),
-        ];
-        let triangle = Polygon::new(&triangle_coords);
-        assert!(triangle.is_convex());
-    }
-
-    #[test]
-    fn test_polygon_equality() {
-        let coords = vec![
-            Point::new(0, 0),
-            Point::new(1, 0),
-            Point::new(1, 1),
-            Point::new(0, 1),
-        ];
-        let p = Polygon::new(&coords);
-        let q = Polygon::new(&coords);
-        
-        assert_eq!(p, q);
-        
-        // Test inequality after translation
-        let mut r = Polygon::new(&coords);
-        r += Vector2::new(1, 0);
-        assert_ne!(p, r);
-    }
-
-    #[test]
-    fn test_polygon_vertices_access() {
-        let coords = vec![
-            Point::new(0, 0),
-            Point::new(1, 0),
-            Point::new(1, 1),
-            Point::new(0, 1),
-        ];
-        let p = Polygon::new(&coords);
-        
-        let vertices = p.vertices();
-        assert_eq!(vertices.len(), 4);
-        assert_eq!(vertices[0], Point::new(0, 0));
-        assert_eq!(vertices[1], Point::new(1, 0));
-        assert_eq!(vertices[2], Point::new(1, 1));
-        assert_eq!(vertices[3], Point::new(0, 1));
-    }
-
-    #[test]
-    fn test_polygon_small_cases() {
-        // Single point
-        let single_coords = vec![Point::new(1, 1)];
-        let single_polygon = Polygon::new(&single_coords);
-        assert_eq!(single_polygon.signed_area_x2(), 0);
-        assert!(single_polygon.is_rectilinear());
-        assert!(!single_polygon.is_convex());
-
-        // Two points (line segment)
-        let line_coords = vec![Point::new(0, 0), Point::new(1, 1)];
-        let line_polygon = Polygon::new(&line_coords);
-        assert_eq!(line_polygon.signed_area_x2(), 0);
-        assert!(!line_polygon.is_rectilinear()); // Diagonal line is not rectilinear
-        assert!(!line_polygon.is_convex());
-    }
-
-    #[test]
-    fn test_ymono_polygon_simple() {
-        let coords = vec![
-            Point::new(0, 0),
-            Point::new(0, 10),
-            Point::new(10, 10),
-            Point::new(10, 0),
-        ];
-        
-        let ymono_pointset = Polygon::<i32>::create_ymono_polygon(&coords);
-        let poly = Polygon::new(&ymono_pointset);
-        
-        assert_eq!(poly.signed_area_x2(), 200);
-        assert!(Polygon::<i32>::polygon_is_anticlockwise(&ymono_pointset));
-        
-        // Test point inside
-        assert!(Polygon::<i32>::point_in_polygon(&ymono_pointset, &Point::new(5, 5)));
-        
-        // Test point outside
-        assert!(!Polygon::<i32>::point_in_polygon(&ymono_pointset, &Point::new(15, 5)));
-    }
-
-    #[test]
-    fn test_signed_area_x2_more_cases() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(1, 0);
-        let p3 = Point::new(1, 1);
-        let p4 = Point::new(0, 1);
-        let poly = Polygon::new(&[p1, p2, p3, p4]);
-        assert_eq!(poly.signed_area_x2(), 2);
-
-        let p5 = Point::new(0, 0);
-        let p6 = Point::new(0, 1);
-        let p7 = Point::new(1, 1);
-        let p8 = Point::new(1, 0);
-        let poly2 = Polygon::new(&[p5, p6, p7, p8]);
-        assert_eq!(poly2.signed_area_x2(), -2);
-    }
-
-    #[test]
-    fn test_lb_ub_more_cases() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(1, 0);
-        let p3 = Point::new(1, 1);
-        let p4 = Point::new(0, 1);
-        let poly = Polygon::new(&[p1, p2, p3, p4]);
-        assert_eq!(poly.lb(), Point::new(0, 0));
-        assert_eq!(poly.ub(), Point::new(1, 1));
-
-        let p5 = Point::new(-1, -1);
-        let p6 = Point::new(1, -1);
-        let p7 = Point::new(1, 1);
-        let p8 = Point::new(-1, 1);
-        let poly2 = Polygon::new(&[p5, p6, p7, p8]);
-        assert_eq!(poly2.lb(), Point::new(-1, -1));
-        assert_eq!(poly2.ub(), Point::new(1, 1));
-    }
-
-    #[test]
-    fn test_point_in_polygon_more_cases() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(4, 0);
-        let p3 = Point::new(2, 4);
-        let pointset = Polygon::<i32>::create_xmono_polygon(&[p1, p2, p3]);
-
-        let q1 = Point::new(2, 2);
-        assert!(Polygon::<i32>::point_in_polygon(&pointset, &q1));
-
-        let q2 = Point::new(0, 0);
-        assert!(Polygon::<i32>::point_in_polygon(&pointset, &q2));
-
-        let q3 = Point::new(4, 1);
-        assert!(!Polygon::<i32>::point_in_polygon(&pointset, &q3));
-
-        let q4 = Point::new(5, 5);
-        assert!(!Polygon::<i32>::point_in_polygon(&pointset, &q4));
+        let p = Polygon::from_pointset(&s);
+        assert_eq!(p.signed_area_x2(), 111);
+        assert!(p.is_anticlockwise());
     }
 
     #[test]
     fn test_is_rectilinear() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(0, 1);
-        let p3 = Point::new(1, 1);
-        let p4 = Point::new(1, 0);
-        let poly = Polygon::new(&[p1, p2, p3, p4]);
-        assert!(poly.is_rectilinear());
+        // Create a rectilinear polygon
+        let rectilinear_coords = vec![(0, 0), (0, 1), (1, 1), (1, 0)];
+        let rectilinear_points: Vec<Point<i32, i32>> = rectilinear_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let rectilinear_polygon = Polygon::from_pointset(&rectilinear_points);
+        assert!(rectilinear_polygon.is_rectilinear());
 
-        let p5 = Point::new(0, 0);
-        let p6 = Point::new(1, 1);
-        let p7 = Point::new(0, 2);
-        let poly2 = Polygon::new(&[p5, p6, p7]);
-        assert!(!poly2.is_rectilinear());
+        // Create a non-rectilinear polygon
+        let non_rectilinear_coords = vec![(0, 0), (1, 1), (2, 0)];
+        let non_rectilinear_points: Vec<Point<i32, i32>> = non_rectilinear_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let non_rectilinear_polygon = Polygon::from_pointset(&non_rectilinear_points);
+        assert!(!non_rectilinear_polygon.is_rectilinear());
+    }
+
+    #[test]
+    fn test_is_convex() {
+        // Test case 1: Convex polygon
+        let convex_coords = vec![(0, 0), (2, 0), (2, 2), (0, 2)];
+        let convex_points: Vec<Point<i32, i32>> = convex_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let convex_polygon = Polygon::from_pointset(&convex_points);
+        assert!(convex_polygon.is_convex());
+
+        // Test case 2: Non-convex polygon
+        let non_convex_coords = vec![(0, 0), (2, 0), (1, 1), (2, 2), (0, 2)];
+        let non_convex_points: Vec<Point<i32, i32>> = non_convex_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let non_convex_polygon = Polygon::from_pointset(&non_convex_points);
+        assert!(!non_convex_polygon.is_convex());
+
+        // Test case 3: Triangle (always convex)
+        let triangle_coords = vec![(0, 0), (2, 0), (1, 2)];
+        let triangle_points: Vec<Point<i32, i32>> = triangle_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let triangle = Polygon::from_pointset(&triangle_points);
+        assert!(triangle.is_convex());
+    }
+
+    #[test]
+    fn test_is_anticlockwise() {
+        // Clockwise polygon
+        let clockwise_coords = vec![(0, 0), (0, 1), (1, 1), (1, 0)];
+        let clockwise_points: Vec<Point<i32, i32>> = clockwise_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let clockwise_polygon = Polygon::from_pointset(&clockwise_points);
+        assert!(!clockwise_polygon.is_anticlockwise());
+
+        // Counter-clockwise polygon
+        let counter_clockwise_coords = vec![(0, 0), (1, 0), (1, 1), (0, 1)];
+        let counter_clockwise_points: Vec<Point<i32, i32>> = counter_clockwise_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let counter_clockwise_polygon = Polygon::from_pointset(&counter_clockwise_points);
+        assert!(counter_clockwise_polygon.is_anticlockwise());
+    }
+
+    #[test]
+    fn test_is_convex_clockwise() {
+        // Convex clockwise polygon
+        let convex_coords = vec![(0, 0), (0, 2), (2, 2), (2, 0)];
+        let convex_points: Vec<Point<i32, i32>> = convex_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let convex_polygon = Polygon::from_pointset(&convex_points);
+        assert!(convex_polygon.is_convex());
+
+        // Non-convex clockwise polygon
+        let non_convex_coords = vec![(0, 0), (0, 2), (1, 1), (2, 2), (2, 0)];
+        let non_convex_points: Vec<Point<i32, i32>> = non_convex_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let non_convex_polygon = Polygon::from_pointset(&non_convex_points);
+        assert!(!non_convex_polygon.is_convex());
+    }
+
+    #[test]
+    fn test_point_in_polygon_missed_branches() {
+        let coords = vec![(0, 0), (10, 0), (10, 10), (0, 10)];
+        let pointset: Vec<Point<i32, i32>> = coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        
+        // Test case where ptq.ycoord == pt0.ycoord
+        assert!(!point_in_polygon(&pointset, &Point::new(5, 10)));
+        
+        // Test case where ptq.ycoord == pt1.ycoord
+        assert!(point_in_polygon(&pointset, &Point::new(5, 0)));
+        
+        // Test case where det == 0 (point on edge)
+        assert!(point_in_polygon(&pointset, &Point::new(5, 0)));
+    }
+
+    #[test]
+    #[should_panic(expected = "Polygon must have at least 3 points")]
+    fn test_polygon_is_anticlockwise_less_than_3_points() {
+        let coords = vec![(0, 0), (0, 1)];
+        let points: Vec<Point<i32, i32>> = coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        polygon_is_anticlockwise(&points);
+    }
+
+    #[test]
+    #[should_panic(expected = "Polygon must have at least 3 points")]
+    fn test_is_anticlockwise_less_than_3_points() {
+        let coords = vec![(0, 0), (0, 1)];
+        let points: Vec<Point<i32, i32>> = coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let polygon = Polygon::from_pointset(&points);
+        polygon.is_anticlockwise();
+    }
+
+    #[test]
+    fn test_is_convex_more() {
+        // Non-convex anti-clockwise polygon
+        let non_convex_coords = vec![(0, 0), (2, 0), (1, 1), (2, 2), (0, 2)];
+        let non_convex_points: Vec<Point<i32, i32>> = non_convex_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let non_convex_polygon = Polygon::from_pointset(&non_convex_points);
+        assert!(!non_convex_polygon.is_convex());
+
+        // Convex anti-clockwise polygon
+        let convex_coords = vec![(0, 0), (2, 0), (2, 2), (0, 2)];
+        let convex_points: Vec<Point<i32, i32>> = convex_coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        let convex_polygon = Polygon::from_pointset(&convex_points);
+        assert!(convex_polygon.is_convex());
+    }
+
+    #[test]
+    fn test_point_in_polygon_more() {
+        // Create a polygon that will trigger the missed branches
+        let coords = vec![(0, 0), (10, 5), (0, 10)];
+        let pointset: Vec<Point<i32, i32>> = coords
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        
+        // This should trigger `det > 0`
+        assert!(point_in_polygon(&pointset, &Point::new(1, 5)));
+        
+        // Create a clockwise polygon to trigger `det < 0`
+        let coords_cw = vec![(0, 0), (0, 10), (10, 5)];
+        let pointset_cw: Vec<Point<i32, i32>> = coords_cw
+            .iter()
+            .map(|(x, y)| Point::new(*x, *y))
+            .collect();
+        assert!(point_in_polygon(&pointset_cw, &Point::new(1, 5)));
     }
 }
