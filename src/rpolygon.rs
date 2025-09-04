@@ -121,46 +121,6 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         res
     }
 
-    /**
-     * @brief
-     *
-     * @return `Point<T, T>`
-     */
-    pub fn lb(&self) -> Point<T, T> {
-        let mut min_x = self.origin.xcoord;
-        let mut min_y = self.origin.ycoord;
-        for vec in &self.vecs {
-            let p = self.origin + *vec;
-            if p.xcoord < min_x {
-                min_x = p.xcoord;
-            }
-            if p.ycoord < min_y {
-                min_y = p.ycoord;
-            }
-        }
-        Point::new(min_x, min_y)
-    }
-
-    /**
-     * @brief
-     *
-     * @return `Point<T, T>`
-     */
-    pub fn ub(&self) -> Point<T, T> {
-        let mut max_x = self.origin.xcoord;
-        let mut max_y = self.origin.ycoord;
-        for vec in &self.vecs {
-            let p = self.origin + *vec;
-            if p.xcoord > max_x {
-                max_x = p.xcoord;
-            }
-            if p.ycoord > max_y {
-                max_y = p.ycoord;
-            }
-        }
-        Point::new(max_x, max_y)
-    }
-
     /// Gets all vertices of the polygon as points
     pub fn vertices(&self) -> Vec<Point<T, T>> {
         let mut result = Vec::with_capacity(self.vecs.len() + 1);
@@ -171,6 +131,34 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         }
 
         result
+    }
+
+    /// Gets the bounding box of the polygon
+    pub fn bounding_box(&self) -> (Point<T, T>, Point<T, T>) {
+        let mut min_x = T::zero();
+        let mut min_y = T::zero();
+        let mut max_x = T::zero();
+        let mut max_y = T::zero();
+
+        for vec in &self.vecs {
+            if vec.x_ < min_x {
+                min_x = vec.x_;
+            }
+            if vec.y_ < min_y {
+                min_y = vec.y_;
+            }
+            if vec.x_ > max_x {
+                max_x = vec.x_;
+            }
+            if vec.y_ > max_y {
+                max_y = vec.y_;
+            }
+        }
+
+        (
+            Point::new(self.origin.xcoord + min_x, self.origin.ycoord + min_y),
+            Point::new(self.origin.xcoord + max_x, self.origin.ycoord + max_y),
+        )
     }
 
     /// Checks if the polygon is rectilinear
@@ -257,19 +245,19 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     ///             points in the `pointset`. The first value of the tuple represents the x-coordinate
     pub fn create_mono_rpolygon<F>(pointset: &[Point<T, T>], f: F) -> (Vec<Point<T, T>>, bool)
     where
-        F: Fn(&&Point<T, T>) -> (T, T),
+        F: Fn(&Point<T, T>) -> (T, T),
     {
         // Use x-mono as model
-        let rightmost = pointset.iter().max_by_key(&f).unwrap();
-        let leftmost = pointset.iter().min_by_key(&f).unwrap();
+        let rightmost = pointset.iter().max_by(|a, b| f(a).partial_cmp(&f(b)).unwrap()).unwrap();
+        let leftmost = pointset.iter().min_by(|a, b| f(a).partial_cmp(&f(b)).unwrap()).unwrap();
         let is_anticlockwise = f(&rightmost).1 <= f(&leftmost).1;
         let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = if is_anticlockwise {
             pointset.iter().partition(|pt| (f(pt).1 <= f(&leftmost).1))
         } else {
             pointset.iter().partition(|pt| (f(pt).1 >= f(&leftmost).1))
         };
-        lst1.sort_by_key(|a| f(&a));
-        lst2.sort_by_key(|a| f(&a));
+        lst1.sort_by_key(|a| f(a));
+        lst2.sort_by_key(|a| f(a));
         lst2.reverse();
         lst1.append(&mut lst2);
         (lst1, is_anticlockwise) // is_clockwise if y-mono
@@ -553,25 +541,6 @@ mod test {
         let p8 = Point::new(1, 0);
         let poly2 = RPolygon::new(&[p5, p6, p7, p8]);
         assert_eq!(poly2.signed_area(), -1);
-    }
-
-    #[test]
-    fn test_lb_ub_more_cases() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(1, 0);
-        let p3 = Point::new(1, 1);
-        let p4 = Point::new(0, 1);
-        let poly = RPolygon::new(&[p1, p2, p3, p4]);
-        assert_eq!(poly.lb(), Point::new(0, 0));
-        assert_eq!(poly.ub(), Point::new(1, 1));
-
-        let p5 = Point::new(-1, -1);
-        let p6 = Point::new(1, -1);
-        let p7 = Point::new(1, 1);
-        let p8 = Point::new(-1, 1);
-        let poly2 = RPolygon::new(&[p5, p6, p7, p8]);
-        assert_eq!(poly2.lb(), Point::new(-1, -1));
-        assert_eq!(poly2.ub(), Point::new(1, 1));
     }
 
     #[test]
