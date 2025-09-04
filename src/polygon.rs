@@ -17,7 +17,7 @@ use crate::vector2::Vector2;
 ///
 /// * `origin`: The origin point of the polygon
 /// * `vecs`: Vector of displacement vectors from origin to other vertices
-#[derive(Eq, Clone, Hash, Debug, Default)]
+#[derive(Eq, Clone, Debug, Default)]
 pub struct Polygon<T> {
     pub origin: Point<T, T>,
     pub vecs: Vec<Vector2<T, T>>,
@@ -76,21 +76,21 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
         Polygon { origin, vecs }
     }
 
-    /// Equality comparison
-    pub fn eq(&self, other: &Self) -> bool
-    where
-        T: PartialEq,
-    {
-        self.origin == other.origin && self.vecs == other.vecs
-    }
+    // /// Equality comparison
+    // pub fn eq(&self, other: &Self) -> bool
+    // where
+    //     T: PartialEq,
+    // {
+    //     self.origin == other.origin && self.vecs == other.vecs
+    // }
 
-    /// Inequality comparison
-    pub fn ne(&self, other: &Self) -> bool
-    where
-        T: PartialEq,
-    {
-        !self.eq(other)
-    }
+    // /// Inequality comparison
+    // pub fn ne(&self, other: &Self) -> bool
+    // where
+    //     T: PartialEq,
+    // {
+    //     !self.eq(other)
+    // }
 
     /// Translates the polygon by adding a vector to its origin
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)
@@ -217,11 +217,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 
         // Check from vecs[-1] to origin
         let last_vec = self.vecs.last().unwrap();
-        if last_vec.x_ != T::zero() && last_vec.y_ != T::zero() {
-            return false;
-        }
-
-        true
+        last_vec.x_ == T::zero() || last_vec.y_ == T::zero()
     }
 
     /// Checks if the polygon is oriented anticlockwise
@@ -301,10 +297,12 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
         true
     }
 
-    /// Gets the lower bound of the polygon's bounding box
-    pub fn lb(&self) -> Point<T, T> {
+    /// Gets the bounding box of the polygon
+    pub fn bounding_box(&self) -> (Point<T, T>, Point<T, T>) {
         let mut min_x = T::zero();
         let mut min_y = T::zero();
+        let mut max_x = T::zero();
+        let mut max_y = T::zero();
 
         for vec in &self.vecs {
             if vec.x_ < min_x {
@@ -313,17 +311,6 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
             if vec.y_ < min_y {
                 min_y = vec.y_;
             }
-        }
-
-        Point::new(self.origin.xcoord + min_x, self.origin.ycoord + min_y)
-    }
-
-    /// Gets the upper bound of the polygon's bounding box
-    pub fn ub(&self) -> Point<T, T> {
-        let mut max_x = T::zero();
-        let mut max_y = T::zero();
-
-        for vec in &self.vecs {
             if vec.x_ > max_x {
                 max_x = vec.x_;
             }
@@ -332,7 +319,10 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
             }
         }
 
-        Point::new(self.origin.xcoord + max_x, self.origin.ycoord + max_y)
+        (
+            Point::new(self.origin.xcoord + min_x, self.origin.ycoord + min_y),
+            Point::new(self.origin.xcoord + max_x, self.origin.ycoord + max_y),
+        )
     }
 }
 
@@ -345,18 +335,24 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 pub fn create_mono_polygon<T, F>(pointset: &[Point<T, T>], f: F) -> Vec<Point<T, T>>
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
-    F: Fn(&&Point<T, T>) -> (T, T),
+    F: Fn(&Point<T, T>) -> (T, T),
 {
-    let max_pt = pointset.iter().max_by_key(&f).unwrap();
-    let min_pt = pointset.iter().min_by_key(&f).unwrap();
+    let max_pt = pointset
+        .iter()
+        .max_by(|a, b| f(a).partial_cmp(&f(b)).unwrap())
+        .unwrap();
+    let min_pt = pointset
+        .iter()
+        .min_by(|a, b| f(a).partial_cmp(&f(b)).unwrap())
+        .unwrap();
     let d = *max_pt - *min_pt;
 
     let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = pointset
         .iter()
         .partition(|&a| d.cross(&(a - min_pt)) <= T::zero());
 
-    lst1.sort_by_key(|a| f(&a));
-    lst2.sort_by_key(|a| f(&a));
+    lst1.sort_by_key(|a| f(a));
+    lst2.sort_by_key(|a| f(a));
     lst2.reverse();
     lst1.append(&mut lst2);
     lst1
@@ -397,13 +393,13 @@ where
     let (min_index, _) = lst
         .iter()
         .enumerate()
-        .min_by_key(|(_, pt)| dir(pt))
+        .min_by(|(_, a), (_, b)| dir(a).partial_cmp(&dir(b)).unwrap())
         .unwrap();
 
     let (max_index, _) = lst
         .iter()
         .enumerate()
-        .max_by_key(|(_, pt)| dir(pt))
+        .max_by(|(_, a), (_, b)| dir(a).partial_cmp(&dir(b)).unwrap())
         .unwrap();
 
     let n = lst.len();
@@ -489,7 +485,7 @@ where
     }
 
     // Find the point with minimum coordinates
-    let (min_index, min_point) = pointset
+    let (min_index, _) = pointset
         .iter()
         .enumerate()
         .min_by(|(_, a), (_, b)| {
@@ -502,18 +498,12 @@ where
 
     // Get previous and next points with wrap-around
     let n = pointset.len();
-    let prev_index = (min_index + n - 1) % n;
-    let next_index = (min_index + 1) % n;
+    let prev_point = pointset[(min_index + n - 1) % n];
+    let current_point = pointset[min_index];
+    let next_point = pointset[(min_index + 1) % n];
 
-    let prev_point = pointset[prev_index];
-    let current_point = *min_point;
-    let next_point = pointset[next_index];
-
-    // Calculate vectors and cross product
-    let vec1 = current_point - prev_point;
-    let vec2 = next_point - current_point;
-
-    vec1.cross(&vec2) > T::zero()
+    // Calculate cross product
+    (current_point - prev_point).cross(&(next_point - current_point)) > T::zero()
 }
 
 // Implement PartialEq for Polygon

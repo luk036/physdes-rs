@@ -20,6 +20,7 @@ use crate::vector2::Vector2;
 ///             (e.g., integer or floating-point).
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the rectilinear
 ///             polygon.
+#[derive(Eq, Clone, Debug, Default)]
 pub struct RPolygon<T> {
     pub origin: Point<T, T>,
     vecs: Vec<Vector2<T, T>>,
@@ -70,21 +71,21 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         RPolygon { origin, vecs }
     }
 
-    /// Equality comparison
-    pub fn eq(&self, other: &Self) -> bool
-    where
-        T: PartialEq,
-    {
-        self.origin == other.origin && self.vecs == other.vecs
-    }
+    // /// Equality comparison
+    // pub fn eq(&self, other: &Self) -> bool
+    // where
+    //     T: PartialEq,
+    // {
+    //     self.origin == other.origin && self.vecs == other.vecs
+    // }
 
-    /// Inequality comparison
-    pub fn ne(&self, other: &Self) -> bool
-    where
-        T: PartialEq,
-    {
-        !self.eq(other)
-    }
+    // /// Inequality comparison
+    // pub fn ne(&self, other: &Self) -> bool
+    // where
+    //     T: PartialEq,
+    // {
+    //     !self.eq(other)
+    // }
 
     /// Translates the polygon by adding a vector to its origin
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)
@@ -233,6 +234,13 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         let current_point = pointset[min_index];
 
         prev_point.y_ > current_point.y_
+    }
+}
+
+// Implement PartialEq for RPolygon
+impl<T: PartialEq> PartialEq for RPolygon<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.origin == other.origin && self.vecs == other.vecs
     }
 }
 
