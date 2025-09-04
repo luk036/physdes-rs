@@ -275,7 +275,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 
         // Create extended pointset for easier edge traversal
         let mut pointset = Vec::with_capacity(n + 2);
-        pointset.push(self.vecs.last().unwrap().clone());
+        pointset.push(*self.vecs.last().unwrap());
         pointset.push(Vector2::new(T::zero(), T::zero()));
         pointset.extend(self.vecs.iter().cloned());
         pointset.push(Vector2::new(T::zero(), T::zero()));
@@ -469,10 +469,8 @@ where
                 if det < T::zero() {
                     res = !res;
                 }
-            } else {
-                if det > T::zero() {
-                    res = !res;
-                }
+            } else if det > T::zero() {
+                res = !res;
             }
         }
         pt0 = pt1;
@@ -649,7 +647,7 @@ mod tests {
     #[test]
     fn test_is_rectilinear() {
         // Create a rectilinear polygon
-        let rectilinear_coords = vec![(0, 0), (0, 1), (1, 1), (1, 0)];
+        let rectilinear_coords = [(0, 0), (0, 1), (1, 1), (1, 0)];
         let rectilinear_points: Vec<Point<i32, i32>> = rectilinear_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -658,7 +656,7 @@ mod tests {
         assert!(rectilinear_polygon.is_rectilinear());
 
         // Create a non-rectilinear polygon
-        let non_rectilinear_coords = vec![(0, 0), (1, 1), (2, 0)];
+        let non_rectilinear_coords = [(0, 0), (1, 1), (2, 0)];
         let non_rectilinear_points: Vec<Point<i32, i32>> = non_rectilinear_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -670,7 +668,7 @@ mod tests {
     #[test]
     fn test_is_convex() {
         // Test case 1: Convex polygon
-        let convex_coords = vec![(0, 0), (2, 0), (2, 2), (0, 2)];
+        let convex_coords = [(0, 0), (2, 0), (2, 2), (0, 2)];
         let convex_points: Vec<Point<i32, i32>> = convex_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -679,7 +677,7 @@ mod tests {
         assert!(convex_polygon.is_convex());
 
         // Test case 2: Non-convex polygon
-        let non_convex_coords = vec![(0, 0), (2, 0), (1, 1), (2, 2), (0, 2)];
+        let non_convex_coords = [(0, 0), (2, 0), (1, 1), (2, 2), (0, 2)];
         let non_convex_points: Vec<Point<i32, i32>> = non_convex_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -688,7 +686,7 @@ mod tests {
         assert!(!non_convex_polygon.is_convex());
 
         // Test case 3: Triangle (always convex)
-        let triangle_coords = vec![(0, 0), (2, 0), (1, 2)];
+        let triangle_coords = [(0, 0), (2, 0), (1, 2)];
         let triangle_points: Vec<Point<i32, i32>> = triangle_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -700,7 +698,7 @@ mod tests {
     #[test]
     fn test_is_anticlockwise() {
         // Clockwise polygon
-        let clockwise_coords = vec![(0, 0), (0, 1), (1, 1), (1, 0)];
+        let clockwise_coords = [(0, 0), (0, 1), (1, 1), (1, 0)];
         let clockwise_points: Vec<Point<i32, i32>> = clockwise_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -709,7 +707,7 @@ mod tests {
         assert!(!clockwise_polygon.is_anticlockwise());
 
         // Counter-clockwise polygon
-        let counter_clockwise_coords = vec![(0, 0), (1, 0), (1, 1), (0, 1)];
+        let counter_clockwise_coords = [(0, 0), (1, 0), (1, 1), (0, 1)];
         let counter_clockwise_points: Vec<Point<i32, i32>> = counter_clockwise_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -721,7 +719,7 @@ mod tests {
     #[test]
     fn test_is_convex_clockwise() {
         // Convex clockwise polygon
-        let convex_coords = vec![(0, 0), (0, 2), (2, 2), (2, 0)];
+        let convex_coords = [(0, 0), (0, 2), (2, 2), (2, 0)];
         let convex_points: Vec<Point<i32, i32>> = convex_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -730,7 +728,7 @@ mod tests {
         assert!(convex_polygon.is_convex());
 
         // Non-convex clockwise polygon
-        let non_convex_coords = vec![(0, 0), (0, 2), (1, 1), (2, 2), (2, 0)];
+        let non_convex_coords = [(0, 0), (0, 2), (1, 1), (2, 2), (2, 0)];
         let non_convex_points: Vec<Point<i32, i32>> = non_convex_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -741,7 +739,7 @@ mod tests {
 
     #[test]
     fn test_point_in_polygon_missed_branches() {
-        let coords = vec![(0, 0), (10, 0), (10, 10), (0, 10)];
+        let coords = [(0, 0), (10, 0), (10, 10), (0, 10)];
         let pointset: Vec<Point<i32, i32>> =
             coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
 
@@ -758,7 +756,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "Polygon must have at least 3 points")]
     fn test_polygon_is_anticlockwise_less_than_3_points() {
-        let coords = vec![(0, 0), (0, 1)];
+        let coords = [(0, 0), (0, 1)];
         let points: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
         polygon_is_anticlockwise(&points);
     }
@@ -766,7 +764,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "Polygon must have at least 3 points")]
     fn test_is_anticlockwise_less_than_3_points() {
-        let coords = vec![(0, 0), (0, 1)];
+        let coords = [(0, 0), (0, 1)];
         let points: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
         let polygon = Polygon::from_pointset(&points);
         polygon.is_anticlockwise();
@@ -775,7 +773,7 @@ mod tests {
     #[test]
     fn test_is_convex_more() {
         // Non-convex anti-clockwise polygon
-        let non_convex_coords = vec![(0, 0), (2, 0), (1, 1), (2, 2), (0, 2)];
+        let non_convex_coords = [(0, 0), (2, 0), (1, 1), (2, 2), (0, 2)];
         let non_convex_points: Vec<Point<i32, i32>> = non_convex_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -784,7 +782,7 @@ mod tests {
         assert!(!non_convex_polygon.is_convex());
 
         // Convex anti-clockwise polygon
-        let convex_coords = vec![(0, 0), (2, 0), (2, 2), (0, 2)];
+        let convex_coords = [(0, 0), (2, 0), (2, 2), (0, 2)];
         let convex_points: Vec<Point<i32, i32>> = convex_coords
             .iter()
             .map(|(x, y)| Point::new(*x, *y))
@@ -796,7 +794,7 @@ mod tests {
     #[test]
     fn test_point_in_polygon_more() {
         // Create a polygon that will trigger the missed branches
-        let coords = vec![(0, 0), (10, 5), (0, 10)];
+        let coords = [(0, 0), (10, 5), (0, 10)];
         let pointset: Vec<Point<i32, i32>> =
             coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
 
@@ -804,7 +802,7 @@ mod tests {
         assert!(point_in_polygon(&pointset, &Point::new(1, 5)));
 
         // Create a clockwise polygon to trigger `det < 0`
-        let coords_cw = vec![(0, 0), (0, 10), (10, 5)];
+        let coords_cw = [(0, 0), (0, 10), (10, 5)];
         let pointset_cw: Vec<Point<i32, i32>> =
             coords_cw.iter().map(|(x, y)| Point::new(*x, *y)).collect();
         assert!(point_in_polygon(&pointset_cw, &Point::new(1, 5)));
