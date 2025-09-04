@@ -75,7 +75,7 @@ mod test {
     use super::*;
     use crate::interval::Interval;
     use crate::vector2::Vector2;
-    
+
     // use crate::generic::Overlap;
     // use crate::interval::Interval;
 
@@ -93,8 +93,10 @@ mod test {
 
     #[test]
     fn test_merge() {
-        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
-        let s2: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
+        let s1: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
+        let s2: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
         let m1 = s1.merge_with(&s2);
         println!("{:?}", m1);
         assert_eq!(
@@ -105,8 +107,10 @@ mod test {
 
     #[test]
     fn test_merge_2() {
-        let mut a: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(4, 5), Interval::new(4, 5));
-        let b: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(7, 9), Interval::new(7, 9));
+        let mut a: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(4, 5), Interval::new(4, 5));
+        let b: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(7, 9), Interval::new(7, 9));
         let v = Vector2::new(Interval::new(2, 3), Interval::new(2, 3));
         a.impl_.xcoord.lb += v.x_.lb;
         a.impl_.xcoord.ub += v.x_.ub;
@@ -140,7 +144,8 @@ mod test {
 
     #[test]
     fn test_enlarge_with_more_cases() {
-        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
+        let s1: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
         let enlarged = s1.enlarge_with(100);
         assert_eq!(
             enlarged,
@@ -150,8 +155,10 @@ mod test {
 
     #[test]
     fn test_intersect_with_more_cases() {
-        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
-        let s2: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
+        let s1: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(200, 600), Interval::new(200, 600));
+        let s2: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(500, 900), Interval::new(500, 900));
         let intersected = s1.intersect_with(&s2);
         assert_eq!(
             intersected,
@@ -166,8 +173,10 @@ mod test {
 
     #[test]
     fn test_merge_with_more_cases() {
-        let s1: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(0, 100), Interval::new(0, 100));
-        let s2: MergeObj<Interval<i32>, Interval<i32>> = MergeObj::new(Interval::new(100, 200), Interval::new(100, 200));
+        let s1: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(0, 100), Interval::new(0, 100));
+        let s2: MergeObj<Interval<i32>, Interval<i32>> =
+            MergeObj::new(Interval::new(100, 200), Interval::new(100, 200));
         let merged = s1.merge_with(&s2);
         assert_eq!(
             merged,

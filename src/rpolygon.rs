@@ -1,9 +1,9 @@
 #![allow(clippy::type_complexity)]
 
-use std::cmp::Ordering;
 use num_traits::Num;
-use std::ops::{AddAssign, SubAssign};
 use std::cmp::Ord;
+use std::cmp::Ordering;
+use std::ops::{AddAssign, SubAssign};
 
 use crate::point::Point;
 use crate::vector2::Vector2;
@@ -71,7 +71,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Equality comparison
-    pub fn eq(&self, other: &Self) -> bool 
+    pub fn eq(&self, other: &Self) -> bool
     where
         T: PartialEq,
     {
@@ -79,7 +79,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Inequality comparison
-    pub fn ne(&self, other: &Self) -> bool 
+    pub fn ne(&self, other: &Self) -> bool
     where
         T: PartialEq,
     {
@@ -87,7 +87,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Translates the polygon by adding a vector to its origin
-    pub fn add_assign(&mut self, rhs: Vector2<T, T>) 
+    pub fn add_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: AddAssign,
     {
@@ -95,7 +95,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Translates the polygon by subtracting a vector from its origin
-    pub fn sub_assign(&mut self, rhs: Vector2<T, T>) 
+    pub fn sub_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: SubAssign,
     {
@@ -164,11 +164,11 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     pub fn vertices(&self) -> Vec<Point<T, T>> {
         let mut result = Vec::with_capacity(self.vecs.len() + 1);
         result.push(self.origin);
-        
+
         for vec in &self.vecs {
             result.push(self.origin + *vec);
         }
-        
+
         result
     }
 
@@ -204,7 +204,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Checks if the polygon is oriented anticlockwise
-    pub fn is_anticlockwise(&self) -> bool 
+    pub fn is_anticlockwise(&self) -> bool
     where
         T: PartialOrd,
     {
@@ -217,13 +217,14 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         }
 
         // Find the point with minimum coordinates
-        let (min_index, _) = pointset.iter()
+        let (min_index, _) = pointset
+            .iter()
             .enumerate()
-            .min_by(|(_, a), (_, b)| 
+            .min_by(|(_, a), (_, b)| {
                 a.x_.partial_cmp(&b.x_)
                     .unwrap_or(Ordering::Equal)
                     .then(a.y_.partial_cmp(&b.y_).unwrap_or(Ordering::Equal))
-            )
+            })
             .unwrap();
 
         // Get previous and next points with wrap-around
@@ -233,7 +234,6 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
 
         prev_point.y_ > current_point.y_
     }
-
 }
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
@@ -342,12 +342,14 @@ where
         return true;
     }
 
-    let (min_index, _) = lst.iter()
+    let (min_index, _) = lst
+        .iter()
         .enumerate()
         .min_by_key(|(_, pt)| dir(pt))
         .unwrap();
-        
-    let (max_index, _) = lst.iter()
+
+    let (max_index, _) = lst
+        .iter()
         .enumerate()
         .max_by_key(|(_, pt)| dir(pt))
         .unwrap();
@@ -398,7 +400,7 @@ pub fn rpolygon_is_convex<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
 {
-    rpolygon_is_xmonotone(lst) && rpolygon_is_ymonotone(lst) 
+    rpolygon_is_xmonotone(lst) && rpolygon_is_ymonotone(lst)
 }
 
 /// Determines if a polygon represented by points is oriented anticlockwise
@@ -411,13 +413,15 @@ where
     }
 
     // Find the point with minimum coordinates
-    let (min_index, min_point) = pointset.iter()
+    let (min_index, min_point) = pointset
+        .iter()
         .enumerate()
-        .min_by(|(_, a), (_, b)| 
-            a.xcoord.partial_cmp(&b.xcoord)
+        .min_by(|(_, a), (_, b)| {
+            a.xcoord
+                .partial_cmp(&b.xcoord)
                 .unwrap_or(Ordering::Equal)
                 .then(a.ycoord.partial_cmp(&b.ycoord).unwrap_or(Ordering::Equal))
-        )
+        })
         .unwrap();
 
     // Get previous and next points with wrap-around

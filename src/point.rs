@@ -9,8 +9,6 @@ use num_traits::Num;
 #[cfg(test)]
 use core::hash;
 
-
-
 /// Generic Point struct with x and y coordinates
 ///
 /// This struct represents a point in 2D space with coordinates of potentially different types.
@@ -216,7 +214,7 @@ where
     Alpha: Copy,
 {
     type Output = Point<Interval<T1>, Interval<T2>>;
-    
+
     fn enlarge_with(&self, alpha: Alpha) -> Self::Output {
         Self::Output::new(
             self.xcoord.enlarge_with(alpha),
@@ -403,7 +401,9 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
 }
 
 // Assignment operations
-impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2<T1, T2>> for Point<T1, T2> {
+impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2<T1, T2>>
+    for Point<T1, T2>
+{
     #[inline]
     fn add_assign(&mut self, other: Vector2<T1, T2>) {
         self.xcoord += other.x_;
@@ -411,7 +411,9 @@ impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2
     }
 }
 
-impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2<T1, T2>> for Point<T1, T2> {
+impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2<T1, T2>>
+    for Point<T1, T2>
+{
     #[inline]
     fn sub_assign(&mut self, other: Vector2<T1, T2>) {
         self.xcoord -= other.x_;
@@ -419,7 +421,9 @@ impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2
     }
 }
 
-impl<'a, T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<&'a Vector2<T1, T2>> for Point<T1, T2> {
+impl<'a, T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<&'a Vector2<T1, T2>>
+    for Point<T1, T2>
+{
     #[inline]
     fn add_assign(&mut self, other: &'a Vector2<T1, T2>) {
         self.xcoord += other.x_.clone();
@@ -427,7 +431,9 @@ impl<'a, T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<&'a
     }
 }
 
-impl<'a, T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<&'a Vector2<T1, T2>> for Point<T1, T2> {
+impl<'a, T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<&'a Vector2<T1, T2>>
+    for Point<T1, T2>
+{
     #[inline]
     fn sub_assign(&mut self, other: &'a Vector2<T1, T2>) {
         self.xcoord -= other.x_.clone();
@@ -455,7 +461,9 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
     }
 }
 
-impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg for &Point<T1, T2> {
+impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
+    for &Point<T1, T2>
+{
     type Output = Point<T1, T2>;
 
     #[inline]
@@ -480,8 +488,8 @@ mod test {
     use super::*;
     use crate::generic::{Contain, Overlap};
     use crate::interval::Interval;
-    use std::hash::{Hash, Hasher};
     use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
 
     pub const _0_0p: Point<i32, i32> = Point {
         xcoord: 0,
@@ -526,7 +534,7 @@ mod test {
         let p1 = Point::new(1, 2);
         let p2 = Point::new(1, 2);
         let p3 = Point::new(2, 3);
-        
+
         assert_eq!(p1, p2);
         assert_ne!(p1, p3);
         assert!(p1 < p3);
@@ -538,11 +546,11 @@ mod test {
         let v = Vector2::new(1, 1);
         let p4 = p1 + v;
         assert_eq!(p4, Point::new(2, 3));
-        
+
         let mut p5 = p4;
         p5 -= v;
         assert_eq!(p5, p1);
-        
+
         let p6 = p4 - v;
         assert_eq!(p6, p1);
     }
@@ -552,7 +560,7 @@ mod test {
         let p1 = Point::new(1, 2);
         let p_flipped = p1.flip_xy();
         assert_eq!(p_flipped, Point::new(2, 1));
-        
+
         let p_flipped_y = p1.flip_y();
         assert_eq!(p_flipped_y, Point::new(-1, 2));
     }
@@ -734,10 +742,7 @@ mod test {
     fn test_enlarge() {
         let a = Point::new(3, 5);
         let b: Point<Interval<i32>, Interval<i32>> = a.enlarge_with(2);
-        assert_eq!(
-            b,
-            Point::new(Interval::new(1, 5), Interval::new(3, 7))
-        );
+        assert_eq!(b, Point::new(Interval::new(1, 5), Interval::new(3, 7)));
     }
 
     #[test]

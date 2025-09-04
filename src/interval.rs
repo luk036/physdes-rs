@@ -131,8 +131,6 @@ where
     }
 }
 
-
-
 impl<T: Sub<Output = T>> Sub for Interval<T> {
     type Output = Self;
 
@@ -843,9 +841,6 @@ mod tests {
         assert!(a.overlaps(&b));
         assert!(b.overlaps(&a));
     }
-
-    
-    
 
     #[test]
     fn test_hull_more_cases() {
