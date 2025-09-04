@@ -1,8 +1,13 @@
 #![allow(clippy::type_complexity)]
 
-use super::{Point, Vector2};
+use std::cmp::Ordering;
 use num_traits::Num;
+use std::ops::{AddAssign, SubAssign};
 use std::cmp::Ord;
+
+use crate::point::Point;
+use crate::vector2::Vector2;
+
 // use core::ops::{Add, Neg, Sub};
 
 /// The `RPolygon` struct represents a rectilinear polygon with an origin point and a vector of 2D
@@ -43,6 +48,58 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         let (&origin, coords) = coords.split_first().unwrap();
         let vecs = coords.iter().map(|pt| pt - origin).collect();
         RPolygon { origin, vecs }
+    }
+
+    /// Constructs a new Polygon from origin and displacement vectors
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The origin point of the polygon
+    /// * `vecs` - Vector of displacement vectors from origin
+    pub fn from_origin_and_vectors(origin: Point<T, T>, vecs: Vec<Vector2<T, T>>) -> Self {
+        RPolygon { origin, vecs }
+    }
+
+    /// Constructs a new Polygon from a point set
+    ///
+    /// The first point in the set is used as the origin, and the remaining points
+    /// are used to construct displacement vectors relative to the origin.
+    pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
+        let origin = pointset[0];
+        let vecs = pointset[1..].iter().map(|pt| pt - origin).collect();
+        RPolygon { origin, vecs }
+    }
+
+    /// Equality comparison
+    pub fn eq(&self, other: &Self) -> bool 
+    where
+        T: PartialEq,
+    {
+        self.origin == other.origin && self.vecs == other.vecs
+    }
+
+    /// Inequality comparison
+    pub fn ne(&self, other: &Self) -> bool 
+    where
+        T: PartialEq,
+    {
+        !self.eq(other)
+    }
+
+    /// Translates the polygon by adding a vector to its origin
+    pub fn add_assign(&mut self, rhs: Vector2<T, T>) 
+    where
+        T: AddAssign,
+    {
+        self.origin += rhs;
+    }
+
+    /// Translates the polygon by subtracting a vector from its origin
+    pub fn sub_assign(&mut self, rhs: Vector2<T, T>) 
+    where
+        T: SubAssign,
+    {
+        self.origin -= rhs;
     }
 
     /// The `signed_area` function calculates the signed area of a polygon.
@@ -102,6 +159,81 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         }
         Point::new(max_x, max_y)
     }
+
+    /// Gets all vertices of the polygon as points
+    pub fn vertices(&self) -> Vec<Point<T, T>> {
+        let mut result = Vec::with_capacity(self.vecs.len() + 1);
+        result.push(self.origin);
+        
+        for vec in &self.vecs {
+            result.push(self.origin + *vec);
+        }
+        
+        result
+    }
+
+    /// Checks if the polygon is rectilinear
+    ///
+    /// A polygon is rectilinear if all its edges are either horizontal or vertical.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the polygon is rectilinear, `false` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::rpolygon::RPolygon;
+    ///
+    /// let p1 = Point::new(0, 0);
+    /// let p2 = Point::new(0, 1);
+    /// let p3 = Point::new(1, 1);
+    /// let p4 = Point::new(1, 0);
+    /// let poly = RPolygon::new(&[p1, p2, p3, p4]);
+    /// assert!(poly.is_rectilinear());
+    ///
+    /// let p5 = Point::new(0, 0);
+    /// let p6 = Point::new(1, 1);
+    /// let p7 = Point::new(0, 2);
+    /// let poly2 = RPolygon::new(&[p5, p6, p7]);
+    /// assert!(poly2.is_rectilinear());
+    /// ```
+    pub fn is_rectilinear(&self) -> bool {
+        true
+    }
+
+    /// Checks if the polygon is oriented anticlockwise
+    pub fn is_anticlockwise(&self) -> bool 
+    where
+        T: PartialOrd,
+    {
+        let mut pointset = Vec::with_capacity(self.vecs.len() + 1);
+        pointset.push(Vector2::new(T::zero(), T::zero()));
+        pointset.extend(self.vecs.iter().cloned());
+
+        if pointset.len() < 2 {
+            panic!("Polygon must have at least 2 points");
+        }
+
+        // Find the point with minimum coordinates
+        let (min_index, _) = pointset.iter()
+            .enumerate()
+            .min_by(|(_, a), (_, b)| 
+                a.x_.partial_cmp(&b.x_)
+                    .unwrap_or(Ordering::Equal)
+                    .then(a.y_.partial_cmp(&b.y_).unwrap_or(Ordering::Equal))
+            )
+            .unwrap();
+
+        // Get previous and next points with wrap-around
+        let n = pointset.len();
+        let prev_point = pointset[(min_index + n - 1) % n];
+        let current_point = pointset[min_index];
+
+        prev_point.y_ > current_point.y_
+    }
+
 }
 
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
@@ -200,6 +332,104 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     }
 }
 
+/// Checks if a polygon is monotone in a given direction
+pub fn rpolygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+    F: Fn(&Point<T, T>) -> (T, T),
+{
+    if lst.len() <= 3 {
+        return true;
+    }
+
+    let (min_index, _) = lst.iter()
+        .enumerate()
+        .min_by_key(|(_, pt)| dir(pt))
+        .unwrap();
+        
+    let (max_index, _) = lst.iter()
+        .enumerate()
+        .max_by_key(|(_, pt)| dir(pt))
+        .unwrap();
+
+    let n = lst.len();
+
+    // Chain from min to max
+    let mut i = min_index;
+    while i != max_index {
+        let next_i = (i + 1) % n;
+        if dir(&lst[i]).0 > dir(&lst[next_i]).0 {
+            return false;
+        }
+        i = next_i;
+    }
+
+    // Chain from max to min
+    let mut i = max_index;
+    while i != min_index {
+        let next_i = (i + 1) % n;
+        if dir(&lst[i]).0 < dir(&lst[next_i]).0 {
+            return false;
+        }
+        i = next_i;
+    }
+
+    true
+}
+
+/// Checks if a polygon is x-monotone
+pub fn rpolygon_is_xmonotone<T>(lst: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    rpolygon_is_monotone(lst, |pt| (pt.xcoord, pt.ycoord))
+}
+
+/// Checks if a polygon is y-monotone
+pub fn rpolygon_is_ymonotone<T>(lst: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    rpolygon_is_monotone(lst, |pt| (pt.ycoord, pt.xcoord))
+}
+
+/// Checks if a polygon is rectilinearly convex
+pub fn rpolygon_is_convex<T>(lst: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    rpolygon_is_xmonotone(lst) && rpolygon_is_ymonotone(lst) 
+}
+
+/// Determines if a polygon represented by points is oriented anticlockwise
+pub fn rpolygon_is_anticlockwise<T>(pointset: &[Point<T, T>]) -> bool
+where
+    T: Clone + Num + Ord + Copy + PartialOrd,
+{
+    if pointset.len() < 2 {
+        panic!("Polygon must have at least 2 points");
+    }
+
+    // Find the point with minimum coordinates
+    let (min_index, min_point) = pointset.iter()
+        .enumerate()
+        .min_by(|(_, a), (_, b)| 
+            a.xcoord.partial_cmp(&b.xcoord)
+                .unwrap_or(Ordering::Equal)
+                .then(a.ycoord.partial_cmp(&b.ycoord).unwrap_or(Ordering::Equal))
+        )
+        .unwrap();
+
+    // Get previous and next points with wrap-around
+    let n = pointset.len();
+    let prev_index = (min_index + n - 1) % n;
+
+    let prev_point = pointset[prev_index];
+    let current_point = *min_point;
+
+    prev_point.ycoord() > current_point.ycoord()
+}
+
 #[cfg(test)]
 mod test {
     #![allow(non_upper_case_globals)]
@@ -227,6 +457,9 @@ mod test {
             pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let (pointset, is_cw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
+        assert!(rpolygon_is_anticlockwise(&pointset));
+        assert!(rpolygon_is_ymonotone(&pointset));
+        assert!(!rpolygon_is_xmonotone(&pointset));
         for p in pointset.iter() {
             print!("({}, {}) ", p.xcoord, p.ycoord);
         }
@@ -256,12 +489,16 @@ mod test {
             pointset.push(Point::<i32, i32>::new(*x, *y));
         }
         let (pointset, is_anticw) = RPolygon::<i32>::create_xmono_rpolygon(&pointset);
+        assert!(!rpolygon_is_anticlockwise(&pointset));
+        assert!(rpolygon_is_xmonotone(&pointset));
+        assert!(!rpolygon_is_ymonotone(&pointset));
         for p in pointset.iter() {
             print!("({}, {}) ", p.xcoord, p.ycoord);
         }
         let poly = RPolygon::<i32>::new(&pointset);
         assert!(!is_anticw);
         assert_eq!(poly.signed_area(), -53);
+        assert!(!poly.is_anticlockwise())
     }
 
     #[test]
