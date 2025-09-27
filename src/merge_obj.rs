@@ -1,16 +1,7 @@
-// use super::Vector2;
-use super::Point;
-use std::cmp;
-// use crate::generic::{Contain, Displacement, MinDist, Overlap};
 use crate::generic::MinDist;
 use crate::interval::{Enlarge, Intersect};
-
-// #[cfg(any(test, feature = "std"))]
-// #[cfg(test)]
-// use core::hash;
-// use core::ops::{Add, Neg, Sub};
-// use num_traits::Num;
-// use std::cmp::Ordering;
+use crate::point::Point;
+use std::cmp;
 
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 pub struct MergeObj<T1, T2> {

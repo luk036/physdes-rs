@@ -39,14 +39,6 @@ mod tests {
         let x = Interval::<i32>::new(12, 23);
         // let y = Interval::<i32>::new(42, 53);
         println!("{:?}", x);
-
-        // let _x = Interval::<i32>::new(12, 23);
-        // let _y = Interval::<i32>::new(42, 53);
-        // let r = Rect::<i32, i32>::new(x, y);
-        // println!("{:?}", r);
-
-        // let mm = Matrix2::<i32, i32>::new(a, b);
-        // println!("{:?}", mm);
     }
 
     #[quickcheck]

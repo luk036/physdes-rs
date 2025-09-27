@@ -8,8 +8,6 @@ use std::ops::{AddAssign, SubAssign};
 use crate::point::Point;
 use crate::vector2::Vector2;
 
-// use core::ops::{Add, Neg, Sub};
-
 /// The `RPolygon` struct represents a rectilinear polygon with an origin point and a vector of 2D
 /// vectors.
 ///
@@ -47,7 +45,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         //     vecs.push(pt - origin);
         // }
         let (&origin, coords) = coords.split_first().unwrap();
-        let vecs = coords.iter().map(|pt| pt - origin).collect();
+        let vecs = coords.iter().map(|pt| *pt - origin).collect();
         RPolygon { origin, vecs }
     }
 
@@ -66,26 +64,8 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     /// The first point in the set is used as the origin, and the remaining points
     /// are used to construct displacement vectors relative to the origin.
     pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
-        let origin = pointset[0];
-        let vecs = pointset[1..].iter().map(|pt| pt - origin).collect();
-        RPolygon { origin, vecs }
+        Self::new(pointset)
     }
-
-    // /// Equality comparison
-    // pub fn eq(&self, other: &Self) -> bool
-    // where
-    //     T: PartialEq,
-    // {
-    //     self.origin == other.origin && self.vecs == other.vecs
-    // }
-
-    // /// Inequality comparison
-    // pub fn ne(&self, other: &Self) -> bool
-    // where
-    //     T: PartialEq,
-    // {
-    //     !self.eq(other)
-    // }
 
     /// Translates the polygon by adding a vector to its origin
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)

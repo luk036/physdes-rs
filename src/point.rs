@@ -1,5 +1,3 @@
-// #![no_std]
-
 use super::Vector2;
 use crate::generic::{Contain, Displacement, MinDist, Overlap};
 use crate::interval::{Enlarge, Hull, Intersect, Interval};
@@ -225,11 +223,11 @@ where
 
 // Macro implementations for arithmetic operations
 macro_rules! forward_xf_xf_binop {
-    (impl $imp:ident, $method:ident) => {
+    (impl $imp:ident, $method:ident, $output:ty) => {
         impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>>
             for &'a Point<T1, T2>
         {
-            type Output = Point<T1, T2>;
+            type Output = $output;
 
             #[inline]
             fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
@@ -240,9 +238,9 @@ macro_rules! forward_xf_xf_binop {
 }
 
 macro_rules! forward_xf_val_binop {
-    (impl $imp:ident, $method:ident) => {
+    (impl $imp:ident, $method:ident, $output:ty) => {
         impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<Vector2<T1, T2>> for &'a Point<T1, T2> {
-            type Output = Point<T1, T2>;
+            type Output = $output;
 
             #[inline]
             fn $method(self, other: Vector2<T1, T2>) -> Self::Output {
@@ -253,9 +251,9 @@ macro_rules! forward_xf_val_binop {
 }
 
 macro_rules! forward_val_xf_binop {
-    (impl $imp:ident, $method:ident) => {
+    (impl $imp:ident, $method:ident, $output:ty) => {
         impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<&'a Vector2<T1, T2>> for Point<T1, T2> {
-            type Output = Point<T1, T2>;
+            type Output = $output;
 
             #[inline]
             fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
@@ -266,14 +264,14 @@ macro_rules! forward_val_xf_binop {
 }
 
 macro_rules! forward_all_binop {
-    (impl $imp:ident, $method:ident) => {
-        forward_xf_xf_binop!(impl $imp, $method);
-        forward_xf_val_binop!(impl $imp, $method);
-        forward_val_xf_binop!(impl $imp, $method);
+    (impl $imp:ident, $method:ident, $output:ty) => {
+        forward_xf_xf_binop!(impl $imp, $method, $output);
+        forward_xf_val_binop!(impl $imp, $method, $output);
+        forward_val_xf_binop!(impl $imp, $method, $output);
     };
 }
 
-forward_all_binop!(impl Add, add);
+forward_all_binop!(impl Add, add, Point<T1, T2>);
 
 impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Point<T1, T2> {
     type Output = Self;
@@ -299,7 +297,7 @@ impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Point<T1, T2> {
     }
 }
 
-forward_all_binop!(impl Sub, sub);
+forward_all_binop!(impl Sub, sub, Point<T1, T2>);
 
 impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Point<T1, T2> {
     type Output = Self;
@@ -326,57 +324,6 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Point<T1, T2> {
 }
 
 // Macro implementations for point-to-point subtraction
-macro_rules! forward_xf_xf_binop2 {
-    (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Point<T1, T2>>
-            for &'a Point<T1, T2>
-        {
-            type Output = Vector2<T1, T2>;
-
-            #[inline]
-            fn $method(self, other: &Point<T1, T2>) -> Self::Output {
-                self.clone().$method(other.clone())
-            }
-        }
-    };
-}
-
-macro_rules! forward_xf_val_binop2 {
-    (impl $imp:ident, $method:ident) => {
-        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<Point<T1, T2>> for &'a Point<T1, T2> {
-            type Output = Vector2<T1, T2>;
-
-            #[inline]
-            fn $method(self, other: Point<T1, T2>) -> Self::Output {
-                self.clone().$method(other)
-            }
-        }
-    };
-}
-
-macro_rules! forward_val_xf_binop2 {
-    (impl $imp:ident, $method:ident) => {
-        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<&'a Point<T1, T2>> for Point<T1, T2> {
-            type Output = Vector2<T1, T2>;
-
-            #[inline]
-            fn $method(self, other: &Point<T1, T2>) -> Self::Output {
-                self.$method(other.clone())
-            }
-        }
-    };
-}
-
-macro_rules! forward_all_binop2 {
-    (impl $imp:ident, $method:ident) => {
-        forward_xf_xf_binop2!(impl $imp, $method);
-        forward_xf_val_binop2!(impl $imp, $method);
-        forward_val_xf_binop2!(impl $imp, $method);
-    };
-}
-
-forward_all_binop2!(impl Sub, sub);
-
 impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
     type Output = Vector2<T1, T2>;
 

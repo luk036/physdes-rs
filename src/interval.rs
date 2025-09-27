@@ -640,11 +640,6 @@ impl Hull<i32> for i32 {
         } else {
             Interval::new(*other, *self)
         }
-        // Self::Output {
-        //     lb: (*self).min(*other),
-        //     ub: (*self).max(*other),
-        //     _marker: PhantomData,
-        // }
     }
 }
 

@@ -1,19 +1,4 @@
-// #![no_std]
-
-// #[cfg(any(test, feature = "std"))]
-// #[cfg_attr(test, macro_use)]
-// extern crate std;
-
-// use core::fmt;
-#[cfg(test)]
-use core::hash;
-// use core::iter::{Product, Sum};
 use core::ops::{Add, Div, Mul, Neg, Rem, Sub};
-
-// use core::str::FromStr;
-// #[cfg(feature = "std")]
-// use std::error::Error;
-
 use num_traits::{Num, Signed, Zero};
 
 /// The code defines a generic struct called Vector2 with two fields, x_ and y_.
@@ -213,63 +198,6 @@ impl<T1: Clone + PartialOrd> Vector2<T1, T1> {
     }
 }
 
-macro_rules! forward_xf_xf_binop {
-    (impl $imp:ident, $method:ident) => {
-        impl<'a, 'b, T1: Clone + Num, T2: Clone + Num> $imp<&'b Vector2<T1, T2>>
-            for &'a Vector2<T1, T2>
-        {
-            type Output = Vector2<T1, T2>;
-
-            /// The function clones the input arguments and calls the specified method on them.
-            ///
-            /// Arguments:
-            ///
-            /// * `other`: A reference to another Vector2 object of the same type as self.
-            #[inline]
-            fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
-                self.clone().$method(other.clone())
-            }
-        }
-    };
-}
-
-macro_rules! forward_xf_val_binop {
-    (impl $imp:ident, $method:ident) => {
-        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<Vector2<T1, T2>> for &'a Vector2<T1, T2> {
-            type Output = Vector2<T1, T2>;
-
-            #[inline]
-            fn $method(self, other: Vector2<T1, T2>) -> Self::Output {
-                self.clone().$method(other)
-            }
-        }
-    };
-}
-
-macro_rules! forward_val_xf_binop {
-    (impl $imp:ident, $method:ident) => {
-        impl<'a, T1: Clone + Num, T2: Clone + Num> $imp<&'a Vector2<T1, T2>> for Vector2<T1, T2> {
-            type Output = Vector2<T1, T2>;
-
-            #[inline]
-            fn $method(self, other: &Vector2<T1, T2>) -> Self::Output {
-                self.$method(other.clone())
-            }
-        }
-    };
-}
-
-macro_rules! forward_all_binop {
-    (impl $imp:ident, $method:ident) => {
-        forward_xf_xf_binop!(impl $imp, $method);
-        forward_xf_val_binop!(impl $imp, $method);
-        forward_val_xf_binop!(impl $imp, $method);
-    };
-}
-
-// arithmetic
-forward_all_binop!(impl Add, add);
-
 // (a, b) + (c, d) == (a + c), (b + d)
 impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> {
     type Output = Self;
@@ -295,8 +223,6 @@ impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> 
         Self::Output::new(self.x_ + other.x_, self.y_ + other.y_)
     }
 }
-
-forward_all_binop!(impl Sub, sub);
 
 // (a, b) - (c, d) == (a - c), (b - d)
 impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Vector2<T1, T2> {
@@ -601,7 +527,7 @@ impl<T1: Clone + Num> Rem<T1> for Vector2<T1, T1> {
 scalar_arithmetic!(usize, u8, u16, u32, u64, u128, isize, i8, i16, i32, i64, i128, f32, f64);
 
 // constants
-impl<T1: Clone + Num, T2: Clone + Num> Zero for Vector2<T1, T2> {
+impl<T1: Clone + Num + Add, T2: Clone + Num + Add> Zero for Vector2<T1, T2> {
     #[inline]
     fn zero() -> Self {
         Self::new(Zero::zero(), Zero::zero())
@@ -620,21 +546,21 @@ impl<T1: Clone + Num, T2: Clone + Num> Zero for Vector2<T1, T2> {
 }
 
 #[cfg(test)]
-fn hash<T: hash::Hash>(x: &T) -> u64 {
-    use std::collections::hash_map::RandomState;
-    use std::hash::{BuildHasher, Hasher};
-    let mut hasher = <RandomState as BuildHasher>::Hasher::new();
-    x.hash(&mut hasher);
-    hasher.finish()
-}
-
-#[cfg(test)]
 mod test {
     #![allow(non_upper_case_globals)]
 
-    use super::{hash, Vector2};
+    use super::Vector2;
     use core::f64;
     use num_traits::Zero;
+    use std::hash;
+
+    fn hash<T: hash::Hash>(x: &T) -> u64 {
+        use std::collections::hash_map::RandomState;
+        use std::hash::{BuildHasher, Hasher};
+        let mut hasher = <RandomState as BuildHasher>::Hasher::new();
+        x.hash(&mut hasher);
+        hasher.finish()
+    }
 
     pub const _0_0v: Vector2<f64, f64> = Vector2 { x_: 0.0, y_: 0.0 };
     pub const _1_0v: Vector2<f64, f64> = Vector2 { x_: 1.0, y_: 0.0 };

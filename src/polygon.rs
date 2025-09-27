@@ -52,7 +52,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// ```
     pub fn new(coords: &[Point<T, T>]) -> Self {
         let (&origin, coords) = coords.split_first().unwrap();
-        let vecs = coords.iter().map(|pt| pt - origin).collect();
+        let vecs = coords.iter().map(|pt| *pt - origin).collect();
         Polygon { origin, vecs }
     }
 
@@ -71,26 +71,8 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// The first point in the set is used as the origin, and the remaining points
     /// are used to construct displacement vectors relative to the origin.
     pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
-        let origin = pointset[0];
-        let vecs = pointset[1..].iter().map(|pt| pt - origin).collect();
-        Polygon { origin, vecs }
+        Self::new(pointset)
     }
-
-    // /// Equality comparison
-    // pub fn eq(&self, other: &Self) -> bool
-    // where
-    //     T: PartialEq,
-    // {
-    //     self.origin == other.origin && self.vecs == other.vecs
-    // }
-
-    // /// Inequality comparison
-    // pub fn ne(&self, other: &Self) -> bool
-    // where
-    //     T: PartialEq,
-    // {
-    //     !self.eq(other)
-    // }
 
     /// Translates the polygon by adding a vector to its origin
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)
@@ -349,7 +331,7 @@ where
 
     let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = pointset
         .iter()
-        .partition(|&a| d.cross(&(a - min_pt)) <= T::zero());
+        .partition(|&a| d.cross(&(*a - *min_pt)) <= T::zero());
 
     lst1.sort_by_key(|a| f(a));
     lst2.sort_by_key(|a| f(a));
