@@ -1,6 +1,6 @@
 [package]
 name = "physdes-rs"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "Physical Design in Rust"
 repository = "https://github.com/luk036/physdes-rs"
@@ -15,9 +15,9 @@ path = "src/lib.rs"
 [dependencies]
 num = { version = "0.4.3" }
 num-traits = { version = "0.2.19" }
-intervallum = { version = "1.4.1" }
+intervallum = { version = "1.4.4" }
 # lds-rs = { path = "lds-rs" }
 
 [dev-dependencies]
 quickcheck = "1"
-quickcheck_macros = "1"
+quickcheck_macros = "1.1.0"
