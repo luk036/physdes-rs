@@ -248,13 +248,19 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
         F: Fn(&Point<T, T>) -> (T, T),
     {
         // Use x-mono as model
-        let rightmost = pointset.iter().max_by(|a, b| f(a).partial_cmp(&f(b)).unwrap()).unwrap();
-        let leftmost = pointset.iter().min_by(|a, b| f(a).partial_cmp(&f(b)).unwrap()).unwrap();
-        let is_anticlockwise = f(&rightmost).1 <= f(&leftmost).1;
+        let rightmost = pointset
+            .iter()
+            .max_by(|a, b| f(a).partial_cmp(&f(b)).unwrap())
+            .unwrap();
+        let leftmost = pointset
+            .iter()
+            .min_by(|a, b| f(a).partial_cmp(&f(b)).unwrap())
+            .unwrap();
+        let is_anticlockwise = f(rightmost).1 <= f(leftmost).1;
         let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = if is_anticlockwise {
-            pointset.iter().partition(|pt| (f(pt).1 <= f(&leftmost).1))
+            pointset.iter().partition(|pt| (f(pt).1 <= f(leftmost).1))
         } else {
-            pointset.iter().partition(|pt| (f(pt).1 >= f(&leftmost).1))
+            pointset.iter().partition(|pt| (f(pt).1 >= f(leftmost).1))
         };
         lst1.sort_by_key(|a| f(a));
         lst2.sort_by_key(|a| f(a));
