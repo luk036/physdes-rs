@@ -1,4 +1,35 @@
-// pub mod halton_int;
+//! # physdes-rs
+//! 
+//! A library for Physical Design in Rust with geometric operations and algorithms.
+//! 
+//! ## Overview
+//! 
+//! ```svgbob
+//!    Point (x, y)
+//!         *
+//!        /|\
+//!       / | \
+//!      /  |  \
+//!     /   |   \
+//!    *----*----*
+//! Interval [lb, ub]
+//! 
+//!  Vector2 (x, y)
+//!      -->
+//!     (dx, dy)
+//! ```
+//! 
+//! ## Main Components
+//! 
+//! The library provides several geometric structures:
+//! 
+//! - `Point<T1, T2>`: A 2D point with x and y coordinates
+//! - `Vector2<T1, T2>`: A 2D vector with x and y components
+//! - `Interval<T>`: A range with lower and upper bounds
+//! - `Polygon<T>`: An arbitrary polygon
+//! - `RPolygon<T>`: A rectilinear polygon
+//! 
+//! pub mod halton_int;
 pub mod generic;
 pub mod interval;
 pub mod merge_obj;

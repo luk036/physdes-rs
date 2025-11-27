@@ -8,6 +8,12 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 /// The `Interval` struct represents a range of values with a lower bound (`lb`) and an upper bound
 /// (`ub`).
 ///
+/// ```svgbob
+///  lb        ub
+///   |---------|
+///   *=========*-----> T
+/// ```
+///
 /// Properties:
 ///
 /// * `lb`: The `lb` property represents the lower bound of the interval. It is of type `T`, which is a

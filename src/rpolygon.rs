@@ -11,6 +11,16 @@ use crate::vector2::Vector2;
 /// The `RPolygon` struct represents a rectilinear polygon with an origin point and a vector of 2D
 /// vectors.
 ///
+/// ```svgbob
+///    *-----*-----*
+///    |           |
+///    |           *-----*
+///    |                 |
+///    *-----------------*
+///    |
+///    *-> origin
+/// ```
+///
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the

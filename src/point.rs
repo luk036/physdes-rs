@@ -13,6 +13,17 @@ use core::hash;
 /// It provides various operations and functionalities for working with points, such as
 /// comparison operators, arithmetic operators, flipping, overlap checking, distance calculation, and more.
 ///
+/// ```svgbob
+///        y
+///        ^
+///        |
+///        |
+///   (x,y)*-----> x
+///        |
+///        |
+///        O-----> x
+/// ```
+///
 /// Properties:
 ///
 /// * `xcoord`: The x-coordinate of the point

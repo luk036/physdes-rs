@@ -3,6 +3,20 @@ use num_traits::{Num, Signed, Zero};
 
 /// The code defines a generic struct called Vector2 with two fields, x_ and y_.
 ///
+/// ```svgbob
+///        y
+///        ^
+///        |
+///        |
+///        *-----> x
+///       /|
+///      / | y_
+///     /  |
+///    /   |
+///   *----+-----> x
+///  (0,0) x_
+/// ```
+///
 /// Properties:
 ///
 /// * `x_`: The `x_` property represents the x-coordinate of the Vector2 object. It is of type `T`,

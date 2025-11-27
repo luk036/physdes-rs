@@ -13,6 +13,15 @@ use crate::vector2::Vector2;
 /// It provides various operations and functionalities for working with polygons, such as
 /// area calculation, point containment checks, and geometric property verification.
 ///
+/// ```svgbob
+///       *-----*-----*
+///      /     / \   \
+///     /     /   \   \
+///    *-----*     *---*
+///    |  origin
+///    *--> vecs[0]
+/// ```
+///
 /// Properties:
 ///
 /// * `origin`: The origin point of the polygon
