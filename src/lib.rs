@@ -46,9 +46,6 @@ pub use crate::vector2::Vector2;
 #[cfg(test)]
 mod tests {
     use super::*;
-    extern crate interval;
-    use interval::ops::*;
-    use interval::Interval;
     use quickcheck_macros::quickcheck;
 
     #[test]
@@ -67,8 +64,8 @@ mod tests {
         let mm = Point::<Point<i32, i32>, Point<i32, i32>>::new(a, c);
         println!("{:?}", mm);
 
-        let x = Interval::<i32>::new(12, 23);
-        // let y = Interval::<i32>::new(42, 53);
+        let x = interval::Interval::<i32>::new(12, 23);
+        // let y = interval::Interval::<i32>::new(42, 53);
         println!("{:?}", x);
     }
 
@@ -77,5 +74,26 @@ mod tests {
         let a = Point::<i32, i32>::new(ax as i32, 23);
         let b = Vector2::<i32, i32>::new(bx as i32, 45);
         a == (a - b) + b
+    }
+
+    // Additional quickcheck tests to verify build configuration
+    #[quickcheck]
+    fn check_point_arithmetic_properties(x: i16, y: i16, dx: i16, dy: i16) -> bool {
+        let p = Point::<i32, i32>::new(x as i32, y as i32);
+        let v = Vector2::<i32, i32>::new(dx as i32, dy as i32);
+        
+        // Test associative property: (p + v) - v == p
+        let result = (p + v) - v;
+        p == result
+    }
+
+    #[quickcheck]
+    fn check_interval_properties(a: i32, b: i32) -> bool {
+        let lower = a.min(b);
+        let upper = a.max(b);
+        let interval = interval::Interval::<i32>::new(lower, upper);
+        
+        // Test that the interval has correct bounds
+        interval.lb() <= interval.ub()
     }
 }
