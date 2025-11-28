@@ -20,9 +20,9 @@ use num_traits::{Num, Signed, Zero};
 /// Properties:
 ///
 /// * `x_`: The `x_` property represents the x-coordinate of the Vector2 object. It is of type `T`,
-///         which means it can be any type specified when creating an instance of the Vector2 struct.
+///   which means it can be any type specified when creating an instance of the Vector2 struct.
 /// * `y_`: The `y_` property is the y-coordinate of the `Vector2` object. It represents the vertical
-///         position of the vector in a 2D coordinate system.
+///   position of the vector in a 2D coordinate system.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 // #[repr(C)]
 pub struct Vector2<T1, T2> {
@@ -39,7 +39,7 @@ impl<T1, T2> Vector2<T1, T2> {
     ///
     /// * `x_`: The parameter `x_` represents the x-coordinate of the Vector2.
     /// * `y_`: The parameter `y_` represents the y-coordinate of the Vector2. It is of type `T`, which
-    ///         means it can be any type that is specified when the Vector2 is created.
+    ///   means it can be any type that is specified when the Vector2 is created.
     ///
     /// Returns:
     ///
@@ -66,7 +66,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is of the same type as `self`, which means it is an instance of
-    ///             the same struct or class that the `dot` method is defined in.
+    ///   the same struct or class that the `dot` method is defined in.
     ///
     /// Returns:
     ///
@@ -90,7 +90,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is of type `Self`, which means it is the same type as the
-    ///             current object.
+    ///   current object.
     ///
     /// # Example
     ///
@@ -115,7 +115,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     /// Arguments:
     ///
     /// * `t`: The parameter `t` is a scalar value that will be used to multiply each component of
-    ///         `self`.
+    ///   `self`.
     ///
     /// Returns:
     ///
@@ -140,8 +140,8 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     /// Arguments:
     ///
     /// * `t`: The parameter `t` is a scalar value that is used to divide the `self` object. It is of
-    ///         type `T`, which is a generic type parameter. The division operation is performed on the `x_` and
-    ///         `y_` fields of the `self` object.
+    ///   type `T`, which is a generic type parameter. The division operation is performed on the `x_` and
+  ///   `y_` fields of the `self` object.
     ///
     /// Returns:
     ///
@@ -221,7 +221,7 @@ impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> 
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is of the same type as `self` and represents the other object
-    ///             that you want to add to `self`.
+    ///   that you want to add to `self`.
     ///
     /// # Example
     ///
@@ -247,7 +247,7 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Vector2<T1, T2> 
     /// Arguments:
     ///
     /// * `other`: The `other` parameter is of the same type as `self` and represents the other value
-    ///             that you want to subtract from `self`.
+    ///   that you want to subtract from `self`.
     ///
     /// # Example
     ///
@@ -280,9 +280,9 @@ mod opassign {
         /// Arguments:
         ///
         /// * `other`: The "other" parameter is of type Self, which means it is a reference to another
-        ///             instance of the same struct or class that the method is defined in. In this case, it
-        ///             represents another instance of the struct or class that has the same fields or properties as
-        ///             self.
+        ///   instance of the same struct or class that the method is defined in. In this case, it
+      ///   represents another instance of the struct or class that has the same fields or properties as
+      ///   self.
         ///
         /// # Example
         ///
@@ -307,9 +307,9 @@ mod opassign {
         /// Arguments:
         ///
         /// * `other`: The parameter "other" is of type Self, which means it is a reference to another
-        ///             instance of the same struct or class that the method is defined in. In this case, it is a
-        ///             reference to another instance of the struct or class that has the same fields as self
-        ///             (x_ and y_)
+        ///   instance of the same struct or class that the method is defined in. In this case, it is a
+      ///   reference to another instance of the struct or class that has the same fields as self
+      ///   (x_ and y_)
         ///
         /// # Example
         ///
@@ -329,11 +329,11 @@ mod opassign {
 
     impl<T1: Clone + NumAssign> MulAssign<T1> for Vector2<T1, T1> {
         /// The function multiplies the values of self.x_ and self.y_ by the value of other.
-        ///
-        /// Arguments:
-        ///
-        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
-        ///             implements the `Clone` trait.
+      ///
+      /// Arguments:
+      ///
+      /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
+      ///   implements the `Clone` trait.
         ///
         /// # Example
         ///
@@ -353,11 +353,11 @@ mod opassign {
 
     impl<T1: Clone + NumAssign> DivAssign<T1> for Vector2<T1, T1> {
         /// The function divides the values of self.x_ and self.y_ by the value of other.
-        ///
-        /// Arguments:
-        ///
-        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
-        ///             implements the `Clone` trait.
+      ///
+      /// Arguments:
+      ///
+      /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
+      ///   implements the `Clone` trait.
         ///
         /// # Example
         ///

@@ -24,10 +24,10 @@ use crate::vector2::Vector2;
 /// Properties:
 ///
 /// * `origin`: The origin property represents the starting point or the reference point of the
-///             rectilinear polygon. It is of type `Point<T, T>`, where T is the type of the coordinates of the point
-///             (e.g., integer or floating-point).
+///   rectilinear polygon. It is of type `Point<T, T>`, where T is the type of the coordinates of the point
+///   (e.g., integer or floating-point).
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the rectilinear
-///             polygon.
+///   polygon.
 #[derive(Eq, Clone, Debug, Default)]
 pub struct RPolygon<T> {
     pub origin: Point<T, T>,
@@ -41,9 +41,9 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     /// Arguments:
     ///
     /// * `coords`: The `coords` parameter is an array of `Point<T, T>` objects. It represents the
-    ///             coordinates of the points that define the polygon. The first element of the array (`coords[0]`)
-    ///             is considered as the origin of the polygon, and the remaining elements represent the vectors
-    ///             from the origin to the
+    ///   coordinates of the points that define the polygon. The first element of the array (`coords[0]`)
+  ///   is considered as the origin of the polygon, and the remaining elements represent the vectors
+  ///   from the origin to the
     ///
     /// Returns:
     ///
@@ -229,10 +229,10 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: `pointset` is a slice of `Point<T, T>` elements. It represents a set of points in a
-    ///             two-dimensional space.
+    ///   two-dimensional space.
     /// * `f`: The parameter `f` is a closure that takes a reference to a reference of a `Point<T, T>` and
-    ///             returns a tuple of two values of type `T`. The closure is used to determine the ordering of the
-    ///             points in the `pointset`. The first value of the tuple represents the x-coordinate
+    ///   returns a tuple of two values of type `T`. The closure is used to determine the ordering of the
+  ///   points in the `pointset`. The first value of the tuple represents the x-coordinate
     pub fn create_mono_rpolygon<F>(pointset: &[Point<T, T>], f: F) -> (Vec<Point<T, T>>, bool)
     where
         F: Fn(&Point<T, T>) -> (T, T),
@@ -276,7 +276,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: A slice of Point objects, where each Point object has two fields: ycoord and
-    ///               xcoord.
+    ///   xcoord.
     #[inline]
     pub fn create_ymono_rpolygon(pointset: &[Point<T, T>]) -> (Vec<Point<T, T>>, bool) {
         Self::create_mono_rpolygon(pointset, |a| (a.ycoord, a.xcoord))
@@ -297,9 +297,9 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// Arguments:
     ///
     /// * `pointset`: A slice of points representing the vertices of the polygon. Each point has x and y
-    ///             coordinates.
+    ///   coordinates.
     /// * `q`: The parameter `q` represents the point that we want to determine if it is within the
-    ///             polygon or not.
+    ///   polygon or not.
     ///
     /// Returns:
     ///
