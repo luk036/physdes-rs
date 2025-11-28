@@ -56,7 +56,7 @@ impl<T> Interval<T> {
     /// assert_eq!(Interval::new(2, 1), Interval { lb: 2, ub: 1, _marker: PhantomData });
     /// ```
     #[inline]
-    pub fn new(lb: T, ub: T) -> Self {
+    pub const fn new(lb: T, ub: T) -> Self {
         Self {
             lb,
             ub,
@@ -73,7 +73,7 @@ impl<T: Copy> Interval<T> {
     /// The `lb` method is returning the value of the `lb` field of the struct or object that the method
     /// is being called on.
     #[inline]
-    pub fn lb(&self) -> T {
+    pub const fn lb(&self) -> T {
         self.lb
     }
 
@@ -83,7 +83,7 @@ impl<T: Copy> Interval<T> {
     ///
     /// The `ub` field of the struct is being returned.
     #[inline]
-    pub fn ub(&self) -> T {
+    pub const fn ub(&self) -> T {
         self.ub
     }
 }

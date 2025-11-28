@@ -9,13 +9,13 @@ pub struct MergeObj<T1, T2> {
 }
 
 impl<T1, T2> MergeObj<T1, T2> {
-    pub fn new(xcoord: T1, ycoord: T2) -> MergeObj<T1, T2> {
+    pub const fn new(xcoord: T1, ycoord: T2) -> MergeObj<T1, T2> {
         MergeObj {
             impl_: Point::new(xcoord, ycoord),
         }
     }
 
-    pub fn construct(xcoord: i32, ycoord: i32) -> MergeObj<i32, i32> {
+    pub const fn construct(xcoord: i32, ycoord: i32) -> MergeObj<i32, i32> {
         let impl_ = Point::new(xcoord + ycoord, xcoord - ycoord);
         MergeObj { impl_ }
     }

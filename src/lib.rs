@@ -96,4 +96,14 @@ mod tests {
         // Test that the interval has correct bounds
         interval.lb() <= interval.ub()
     }
+    
+    #[test]
+    fn test_const_functions() {
+        // Test that the const functions we added actually work in const contexts
+        const _P1: Point<i32, i32> = Point::new(1, 2);
+        const _I1: interval::Interval<i32> = interval::Interval::new(1, 5);
+        const _LB: i32 = _I1.lb();
+        const _UB: i32 = _I1.ub();
+        const _M1: merge_obj::MergeObj<i32, i32> = merge_obj::MergeObj::new(1, 2);
+    }
 }
