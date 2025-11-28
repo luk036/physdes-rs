@@ -141,7 +141,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     ///
     /// * `t`: The parameter `t` is a scalar value that is used to divide the `self` object. It is of
     ///   type `T`, which is a generic type parameter. The division operation is performed on the `x_` and
-  ///   `y_` fields of the `self` object.
+    ///   `y_` fields of the `self` object.
     ///
     /// Returns:
     ///
@@ -281,8 +281,8 @@ mod opassign {
         ///
         /// * `other`: The "other" parameter is of type Self, which means it is a reference to another
         ///   instance of the same struct or class that the method is defined in. In this case, it
-      ///   represents another instance of the struct or class that has the same fields or properties as
-      ///   self.
+        ///   represents another instance of the struct or class that has the same fields or properties as
+        ///   self.
         ///
         /// # Example
         ///
@@ -308,8 +308,8 @@ mod opassign {
         ///
         /// * `other`: The parameter "other" is of type Self, which means it is a reference to another
         ///   instance of the same struct or class that the method is defined in. In this case, it is a
-      ///   reference to another instance of the struct or class that has the same fields as self
-      ///   (x_ and y_)
+        ///   reference to another instance of the struct or class that has the same fields as self
+        ///   (x_ and y_)
         ///
         /// # Example
         ///
@@ -329,11 +329,11 @@ mod opassign {
 
     impl<T1: Clone + NumAssign> MulAssign<T1> for Vector2<T1, T1> {
         /// The function multiplies the values of self.x_ and self.y_ by the value of other.
-      ///
-      /// Arguments:
-      ///
-      /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
-      ///   implements the `Clone` trait.
+        ///
+        /// Arguments:
+        ///
+        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
+        ///   implements the `Clone` trait.
         ///
         /// # Example
         ///
@@ -353,11 +353,11 @@ mod opassign {
 
     impl<T1: Clone + NumAssign> DivAssign<T1> for Vector2<T1, T1> {
         /// The function divides the values of self.x_ and self.y_ by the value of other.
-      ///
-      /// Arguments:
-      ///
-      /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
-      ///   implements the `Clone` trait.
+        ///
+        /// Arguments:
+        ///
+        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
+        ///   implements the `Clone` trait.
         ///
         /// # Example
         ///

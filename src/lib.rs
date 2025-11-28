@@ -1,9 +1,9 @@
 //! # physdes-rs
-//! 
+//!
 //! A library for Physical Design in Rust with geometric operations and algorithms.
-//! 
+//!
 //! ## Overview
-//! 
+//!
 //! ```svgbob
 //!    Point (x, y)
 //!         *
@@ -13,22 +13,22 @@
 //!     /   |   \
 //!    *----*----*
 //! Interval [lb, ub]
-//! 
+//!
 //!  Vector2 (x, y)
 //!      -->
 //!     (dx, dy)
 //! ```
-//! 
+//!
 //! ## Main Components
-//! 
+//!
 //! The library provides several geometric structures:
-//! 
+//!
 //! - `Point<T1, T2>`: A 2D point with x and y coordinates
 //! - `Vector2<T1, T2>`: A 2D vector with x and y components
 //! - `Interval<T>`: A range with lower and upper bounds
 //! - `Polygon<T>`: An arbitrary polygon
 //! - `RPolygon<T>`: A rectilinear polygon
-//! 
+//!
 //! pub mod halton_int;
 pub mod generic;
 pub mod interval;
@@ -81,7 +81,7 @@ mod tests {
     fn check_point_arithmetic_properties(x: i16, y: i16, dx: i16, dy: i16) -> bool {
         let p = Point::<i32, i32>::new(x as i32, y as i32);
         let v = Vector2::<i32, i32>::new(dx as i32, dy as i32);
-        
+
         // Test associative property: (p + v) - v == p
         let result = (p + v) - v;
         p == result
@@ -92,11 +92,11 @@ mod tests {
         let lower = a.min(b);
         let upper = a.max(b);
         let interval = interval::Interval::<i32>::new(lower, upper);
-        
+
         // Test that the interval has correct bounds
         interval.lb() <= interval.ub()
     }
-    
+
     #[test]
     fn test_const_functions() {
         // Test that the const functions we added actually work in const contexts

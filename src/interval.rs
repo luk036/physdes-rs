@@ -36,10 +36,10 @@ impl<T> Interval<T> {
     /// The function `new` creates a new instance of a struct with given lower and upper bounds.
     ///
     /// Arguments:
-  ///
-  /// * `lb`: The `lb` parameter represents the lower bound value. It is of type `T`, which means it
-  ///   can be any type that implements the necessary traits for the struct.
-  /// * `ub`: The `ub` parameter represents the upper bound value. It is of type `T`, which means it
+    ///
+    /// * `lb`: The `lb` parameter represents the lower bound value. It is of type `T`, which means it
+    ///   can be any type that implements the necessary traits for the struct.
+    /// * `ub`: The `ub` parameter represents the upper bound value. It is of type `T`, which means it
     ///   can be any type that implements the necessary traits for the struct.
     ///
     /// Returns:
@@ -177,7 +177,7 @@ where
     ///
     /// * `rhs`: The `rhs` parameter in the `add_assign` function represents the right-hand side operand
     ///   that will be added to the `lb` and `ub` fields of the struct or object on which the method is
-  ///   called.
+    ///   called.
     #[inline]
     fn add_assign(&mut self, rhs: T) {
         self.lb += rhs;
@@ -218,7 +218,7 @@ where
     ///
     /// * `rhs`: `rhs` is a parameter of type `T` that is passed by value to the `sub_assign` function.
     ///   It is used to subtract its value from both `self.lb` and `self.ub` in the function
-  ///   implementation.
+    ///   implementation.
     #[inline]
     fn sub_assign(&mut self, rhs: T) {
         self.lb -= rhs;
@@ -347,7 +347,7 @@ where
     ///
     /// * `alpha`: The `alpha` parameter in the `enlarge_with` function represents the amount by which
     ///   the lower bound (`lb`) and upper bound (`ub`) of an `Interval` struct are adjusted. The lower
-  ///   bound is decreased by `alpha` and the upper bound is increased by `alpha`, effectively enlarg
+    ///   bound is decreased by `alpha` and the upper bound is increased by `alpha`, effectively enlarg
     ///
     /// Returns:
     ///
@@ -441,8 +441,8 @@ impl<T: PartialOrd> Overlap<Interval<T>> for T {
     ///
     /// * `other`: The `other` parameter is a reference to an `Interval<T>` struct, which represents
     ///   another interval. The `Interval<T>` struct likely contains two fields, `lb` and `ub`,
-  ///   representing the lower and upper bounds of the interval, respectively. The `overlaps` method is
-  ///   used to
+    ///   representing the lower and upper bounds of the interval, respectively. The `overlaps` method is
+    ///   used to
     ///
     /// Returns:
     ///
@@ -486,8 +486,8 @@ impl<T: PartialOrd> Contain<T> for Interval<T> {
     ///
     /// * `other`: The `other` parameter is a reference to a value of type `T`, which is the same type
     ///   as the elements stored in the struct or data structure that contains the `contains` method. The
-  ///   method checks if the value referenced by `other` falls within the range defined by the lower
-  ///   bound (`
+    ///   method checks if the value referenced by `other` falls within the range defined by the lower
+    ///   bound (`
     ///
     /// Returns:
     ///
@@ -529,7 +529,7 @@ where
     ///
     /// * `other`: The `other` parameter in the `displace` function represents another `Interval` object
     ///   of the same type as `self`. It is used to displace the lower bound and upper bound of the
-  ///   current `Interval` object (`self`) by the corresponding lower and upper bounds of the `other`
+    ///   current `Interval` object (`self`) by the corresponding lower and upper bounds of the `other`
     #[inline]
     fn displace(&self, other: &Interval<T>) -> Self::Output {
         Self::Output::new(self.lb.displace(&other.lb), self.ub.displace(&other.ub))
@@ -543,7 +543,7 @@ impl MinDist<Interval<i32>> for Interval<i32> {
     ///
     /// * `other`: The `min_dist_with` function calculates the minimum distance between two intervals.
     ///   The `self` interval is represented by the lower bound `lb` and upper bound `ub` of the current
-  ///   instance, while the `other` interval is passed as a reference to an `Interval<i32>`.
+    ///   instance, while the `other` interval is passed as a reference to an `Interval<i32>`.
     ///
     /// Returns:
     ///
@@ -572,7 +572,7 @@ impl MinDist<i32> for Interval<i32> {
     ///
     /// * `other`: The `other` parameter in the `min_dist_with` function is a reference to an `i32`
     ///   value. This parameter is used to calculate the minimum distance between the current instance
-  ///   (self) and the provided `i32` value.
+    ///   (self) and the provided `i32` value.
     ///
     /// Returns:
     ///
@@ -599,7 +599,7 @@ impl MinDist<Interval<i32>> for i32 {
     ///
     /// * `other`: The `min_dist_with` function calculates the minimum distance between two intervals.
     ///   The `self` interval is compared with the `other` interval to determine the minimum distance
-  ///   between them.
+    ///   between them.
     ///
     /// Returns:
     ///
@@ -638,7 +638,7 @@ impl Hull<i32> for i32 {
     ///
     /// * `other`: The `other` parameter in the `hull_with` function is a reference to an `i32` type.
     ///   This parameter is used to calculate the lower bound (`lb`) and upper bound (`ub`) values for the
-  ///   output struct.
+    ///   output struct.
     #[inline]
     fn hull_with(&self, other: &i32) -> Self::Output {
         if *self < *other {
@@ -684,7 +684,7 @@ where
     ///
     /// * `other`: The `other` parameter is a reference to a value of type `T`, which is the same type
     ///   as the values stored in the struct implementing the `hull_with` method. In this method, the
-  ///   `other` value is used to update the lower bound (`lb`) and upper bound (`
+    ///   `other` value is used to update the lower bound (`lb`) and upper bound (`
     #[inline]
     fn hull_with(&self, other: &T) -> Self::Output {
         Self::Output {
@@ -733,7 +733,7 @@ impl Intersect<i32> for i32 {
     ///
     /// * `other`: The `other` parameter in the `intersect_with` function is a reference to an `i32`
     ///   type. This parameter is used to find the intersection between the current instance (self) and
-  ///   the provided `i32` value.
+    ///   the provided `i32` value.
     #[inline]
     fn intersect_with(&self, other: &i32) -> Self::Output {
         Self::Output {
@@ -757,7 +757,7 @@ where
     ///
     /// * `other`: The `other` parameter is a reference to an `Interval<T>` object, which is used to
     ///   intersect with the current `Interval<T>` object. The `intersect_with` method calculates the
-  ///   intersection of the two intervals and returns a new `Interval<T>` object as the output.
+    ///   intersection of the two intervals and returns a new `Interval<T>` object as the output.
     #[inline]
     fn intersect_with(&self, other: &Interval<T>) -> Self::Output {
         Self::Output {
@@ -780,8 +780,8 @@ where
     ///
     /// * `other`: The `other` parameter is a reference to an object of type `T`, which is the same type
     ///   as the object on which the `intersect_with` method is being called. The method calculates the
-  ///   intersection of the object's lower bound (`lb`) and upper bound (`ub`) with the corresponding
-  ///   values
+    ///   intersection of the object's lower bound (`lb`) and upper bound (`ub`) with the corresponding
+    ///   values
     #[inline]
     fn intersect_with(&self, other: &T) -> Self::Output {
         Self::Output {
