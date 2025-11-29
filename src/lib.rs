@@ -29,6 +29,34 @@
 //! - `Polygon<T>`: An arbitrary polygon
 //! - `RPolygon<T>`: A rectilinear polygon
 //!
+//! # Examples
+//!
+//! ```
+//! use physdes::{Point, Vector2};
+//! use physdes::interval::Interval;
+//! use physdes::polygon::Polygon as Poly;
+//!
+//! // Create a point
+//! let p = Point::new(3, 4);
+//! assert_eq!(p.xcoord, 3);
+//! assert_eq!(p.ycoord, 4);
+//!
+//! // Create a vector
+//! let v = Vector2::new(1, 2);
+//! assert_eq!(v.x_, 1);
+//! assert_eq!(v.y_, 2);
+//!
+//! // Create an interval
+//! let interval = Interval::new(1, 5);
+//! assert_eq!(interval.lb(), 1);
+//! assert_eq!(interval.ub(), 5);
+//!
+//! // Create a polygon from points
+//! let points = vec![Point::new(0, 0), Point::new(1, 0), Point::new(1, 1), Point::new(0, 1)];
+//! let polygon = Poly::new(&points);
+//! assert_eq!(polygon.origin, Point::new(0, 0));
+//! ```
+//!
 //! pub mod halton_int;
 pub mod generic;
 pub mod interval;

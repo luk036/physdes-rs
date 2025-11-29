@@ -26,6 +26,20 @@ use crate::vector2::Vector2;
 ///
 /// * `origin`: The origin point of the polygon
 /// * `vecs`: Vector of displacement vectors from origin to other vertices
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::point::Point;
+/// use physdes::polygon::Polygon;
+/// use physdes::vector2::Vector2;
+/// 
+/// let origin = Point::new(0, 0);
+/// let vecs = vec![Vector2::new(1, 0), Vector2::new(1, 1), Vector2::new(0, 1)];
+/// let poly = Polygon::from_origin_and_vectors(origin, vecs);
+/// assert_eq!(poly.origin, Point::new(0, 0));
+/// assert_eq!(poly.vecs.len(), 3);
+/// ```
 #[derive(Eq, Clone, Debug, Default)]
 pub struct Polygon<T> {
     pub origin: Point<T, T>,

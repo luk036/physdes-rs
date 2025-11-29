@@ -2,6 +2,20 @@
 /// with each other. The `overlaps` method takes a reference to another object of type `T` as a
 /// parameter and returns a boolean value indicating whether the two objects overlap or not. This trait
 /// can be implemented for any type that needs to support the `overlaps` functionality.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::generic::Overlap;
+/// 
+/// let a: i32 = 42;
+/// let b: i32 = 42;
+/// assert!(a.overlaps(&b));
+/// 
+/// let a: i32 = 42;
+/// let b: i32 = 24;
+/// assert!(!a.overlaps(&b));
+/// ```
 pub trait Overlap<T> {
     fn overlaps(&self, other: &T) -> bool;
 }
@@ -12,11 +26,17 @@ pub trait Overlap<T> {
 ///
 /// # Examples
 ///
-/// use your_crate::generic::Overlap;
+/// ```
+/// use physdes::generic::Overlap;
 ///
 /// let a: i32 = 42;
 /// let b: i32 = 42;
 /// assert!(a.overlaps(&b));
+/// 
+/// let a: i32 = 42;
+/// let b: i32 = 24;
+/// assert!(!a.overlaps(&b));
+/// ```
 impl Overlap<i32> for i32 {
     /// The `overlaps` function in Rust checks if two references to `i32` values point to the same
     /// memory location.
@@ -40,6 +60,20 @@ impl Overlap<i32> for i32 {
 /// `T` as a parameter and returns a boolean value indicating whether the object is contained within the
 /// other object or not. This trait can be implemented for any type that needs to support the `contains`
 /// functionality.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::generic::Contain;
+/// 
+/// let a: i32 = 42;
+/// let b: i32 = 42;
+/// assert!(a.contains(&b));
+/// 
+/// let a: i32 = 42;
+/// let b: i32 = 24;
+/// assert!(!a.contains(&b));
+/// ```
 pub trait Contain<T> {
     fn contains(&self, other: &T) -> bool;
 }
@@ -50,11 +84,17 @@ pub trait Contain<T> {
 ///
 /// # Examples
 ///
-/// use your_crate::generic::Overlap;
+/// ```
+/// use physdes::generic::Contain;
 ///
 /// let a: i32 = 42;
 /// let b: i32 = 42;
 /// assert!(a.contains(&b));
+/// 
+/// let a: i32 = 42;
+/// let b: i32 = 24;
+/// assert!(!a.contains(&b));
+/// ```
 impl Contain<i32> for i32 {
     /// The function checks if a given value is equal to another value.
     ///
@@ -77,6 +117,22 @@ impl Contain<i32> for i32 {
 ///
 /// This trait provides a single method, `min_dist_with`, which takes a reference to another value of type `T`
 /// and returns the minimum distance between the two values as a `u32`.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::generic::MinDist;
+/// 
+/// let a: i32 = 10;
+/// let b: i32 = 5;
+/// let distance = a.min_dist_with(&b);
+/// assert_eq!(distance, 5);
+/// 
+/// let a: i32 = 5;
+/// let b: i32 = 10;
+/// let distance = a.min_dist_with(&b);
+/// assert_eq!(distance, 5);
+/// ```
 pub trait MinDist<T> {
     /// Calculates the minimum distance between the current value and the provided value.
     ///
@@ -96,11 +152,19 @@ pub trait MinDist<T> {
 ///
 /// # Examples
 ///
-/// use your_crate::MinDist;
+/// ```
+/// use physdes::generic::MinDist;
 ///
 /// let a: i32 = 10;
 /// let b: i32 = 5;
-/// let distance = a.min_dist_with(&b); // distance = 5
+/// let distance = a.min_dist_with(&b);
+/// assert_eq!(distance, 5);
+/// 
+/// let a: i32 = 5;
+/// let b: i32 = 10;
+/// let distance = a.min_dist_with(&b);
+/// assert_eq!(distance, 5);
+/// ```
 impl MinDist<i32> for i32 {
     #[inline]
     fn min_dist_with(&self, other: &i32) -> u32 {
@@ -112,6 +176,22 @@ impl MinDist<i32> for i32 {
 ///
 /// The `displace` method takes a reference to a `T` and returns a new value of the associated `Output` type,
 /// which represents the displaced value.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::generic::Displacement;
+/// 
+/// let a: i32 = 10;
+/// let b: i32 = 5;
+/// let displacement = a.displace(&b);
+/// assert_eq!(displacement, 5);
+/// 
+/// let a: i32 = 5;
+/// let b: i32 = 10;
+/// let displacement = a.displace(&b);
+/// assert_eq!(displacement, -5);
+/// ```
 pub trait Displacement<T: ?Sized> {
     type Output;
 
@@ -121,6 +201,22 @@ pub trait Displacement<T: ?Sized> {
 
 /// Implements the `Displacement` trait for `i32` types, providing a `displace` method that subtracts
 /// the given `i32` value from the current `i32` value.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::generic::Displacement;
+/// 
+/// let a: i32 = 10;
+/// let b: i32 = 5;
+/// let displacement = a.displace(&b);
+/// assert_eq!(displacement, 5);
+/// 
+/// let a: i32 = 5;
+/// let b: i32 = 10;
+/// let displacement = a.displace(&b);
+/// assert_eq!(displacement, -5);
+/// ```
 impl Displacement<i32> for i32 {
     type Output = i32;
 

@@ -28,6 +28,20 @@ use crate::vector2::Vector2;
 ///   (e.g., integer or floating-point).
 /// * `vecs`: vecs is a vector that stores the vectors representing the sides of the rectilinear
 ///   polygon.
+/// 
+/// # Examples
+/// 
+/// ```
+/// use physdes::point::Point;
+/// use physdes::rpolygon::RPolygon;
+/// use physdes::vector2::Vector2;
+/// 
+/// let origin = Point::new(0, 0);
+/// let vecs = vec![Vector2::new(1, 0), Vector2::new(1, 1), Vector2::new(0, 1)];
+/// let poly = RPolygon::from_origin_and_vectors(origin, vecs);
+/// assert_eq!(poly.origin, Point::new(0, 0));
+/// // Note: vecs field is private, so we can't access it directly in documentation
+/// ```
 #[derive(Eq, Clone, Debug, Default)]
 pub struct RPolygon<T> {
     pub origin: Point<T, T>,
