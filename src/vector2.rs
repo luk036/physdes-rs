@@ -23,12 +23,12 @@ use num_traits::{Num, Signed, Zero};
 ///   which means it can be any type specified when creating an instance of the Vector2 struct.
 /// * `y_`: The `y_` property is the y-coordinate of the `Vector2` object. It represents the vertical
 ///   position of the vector in a 2D coordinate system.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use physdes::vector2::Vector2;
-/// 
+///
 /// let v = Vector2::new(3, 4);
 /// assert_eq!(v.x_, 3);
 /// assert_eq!(v.y_, 4);

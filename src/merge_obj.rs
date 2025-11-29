@@ -4,15 +4,15 @@ use crate::point::Point;
 use std::cmp;
 
 /// Represents a merge object that encapsulates a point with coordinates of type T1 and T2.
-/// 
-/// The MergeObj struct is used for geometric operations such as distance calculation, 
+///
+/// The MergeObj struct is used for geometric operations such as distance calculation,
 /// enlargement, intersection, and merging with other merge objects.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use physdes::merge_obj::MergeObj;
-/// 
+///
 /// let merge_obj = MergeObj::new(3, 4);
 /// let internal_point = merge_obj.get_impl();
 /// assert_eq!(internal_point.xcoord, 3);
@@ -34,14 +34,14 @@ impl<T1, T2> MergeObj<T1, T2> {
         let impl_ = Point::new(xcoord + ycoord, xcoord - ycoord);
         MergeObj { impl_ }
     }
-    
+
     /// Returns a reference to the internal Point of the MergeObj
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use physdes::merge_obj::MergeObj;
-    /// 
+    ///
     /// let merge_obj = MergeObj::new(3, 4);
     /// let internal_point = merge_obj.get_impl();
     /// assert_eq!(internal_point.xcoord, 3);

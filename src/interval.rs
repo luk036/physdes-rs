@@ -25,13 +25,13 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 /// * `_marker`: The `_marker` field is a marker field that is used to indicate that the generic type
 ///   `T` is used in the struct. It is typically used when you want to associate a type parameter with a
 ///   struct, but you don't actually need to store any values of that type in the struct.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use physdes::interval::Interval;
 /// use std::marker::PhantomData;
-/// 
+///
 /// let interval = Interval::new(1, 5);
 /// assert_eq!(interval.lb, 1);
 /// assert_eq!(interval.ub, 5);
@@ -66,7 +66,7 @@ impl<T> Interval<T> {
     /// let interval = Interval::new(1, 5);
     /// assert_eq!(interval.lb, 1);
     /// assert_eq!(interval.ub, 5);
-    /// 
+    ///
     /// let interval = Interval::new(5, 1);  // Invalid interval but still created
     /// assert_eq!(interval.lb, 5);
     /// assert_eq!(interval.ub, 1);
@@ -112,15 +112,15 @@ impl<T: PartialOrd> Interval<T> {
     /// The `is_invalid` function is returning a boolean value based on the comparison `self.lb >
     /// self.ub`. If `self.lb` is greater than `self.ub`, it will return `true`, indicating that the
     /// values are invalid. Otherwise, it will return `false`.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use physdes::interval::Interval;
-    /// 
+    ///
     /// let valid_interval = Interval::new(1, 5);
     /// assert!(!valid_interval.is_invalid());
-    /// 
+    ///
     /// let invalid_interval = Interval::new(5, 1);
     /// assert!(invalid_interval.is_invalid());
     /// ```
@@ -138,15 +138,15 @@ impl<T: Copy + Sub<Output = T>> Interval<T> {
     ///
     /// The `length` method is returning the difference between the `ub` (upper bound) and `lb` (lower
     /// bound) values of the struct instance.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use physdes::interval::Interval;
-    /// 
+    ///
     /// let interval = Interval::new(2, 8);
     /// assert_eq!(interval.length(), 6);
-    /// 
+    ///
     /// let interval = Interval::new(-3, 5);
     /// assert_eq!(interval.length(), 8);
     /// ```

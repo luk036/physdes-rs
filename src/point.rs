@@ -28,12 +28,12 @@ use core::hash;
 ///
 /// * `xcoord`: The x-coordinate of the point
 /// * `ycoord`: The y-coordinate of the point
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use physdes::point::Point;
-/// 
+///
 /// let p = Point::new(3, 4);
 /// assert_eq!(p.xcoord, 3);
 /// assert_eq!(p.ycoord, 4);
