@@ -877,8 +877,17 @@ mod test {
     #[test]
     fn test_consts_vv() {
         // check our constants are what Vector2::new creates
-        fn test(vec: Vector2<Vector2<f64, f64>, Vector2<f64, f64>>, w_val: f64, x_val: f64, y_val: f64, z_val: f64) {
-            assert_eq!(vec, Vector2::new(Vector2::new(w_val, x_val), Vector2::new(y_val, z_val)));
+        fn test(
+            vec: Vector2<Vector2<f64, f64>, Vector2<f64, f64>>,
+            w_val: f64,
+            x_val: f64,
+            y_val: f64,
+            z_val: f64,
+        ) {
+            assert_eq!(
+                vec,
+                Vector2::new(Vector2::new(w_val, x_val), Vector2::new(y_val, z_val))
+            );
         }
 
         test(_0_0vv, 0.0, 0.0, 0.0, 0.0);

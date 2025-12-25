@@ -142,16 +142,25 @@ mod test {
         obj1.impl_.xcoord.ub -= vec.x_.ub;
         obj1.impl_.ycoord.lb -= vec.y_.lb;
         obj1.impl_.ycoord.ub -= vec.y_.ub;
-        assert_eq!(obj1, MergeObj::new(Interval::new(4, 5), Interval::new(4, 5)));
+        assert_eq!(
+            obj1,
+            MergeObj::new(Interval::new(4, 5), Interval::new(4, 5))
+        );
         let result1 = obj1.enlarge_with(3);
-        assert_eq!(result1, MergeObj::new(Interval::new(1, 8), Interval::new(1, 8)));
+        assert_eq!(
+            result1,
+            MergeObj::new(Interval::new(1, 8), Interval::new(1, 8))
+        );
         let result2 = obj2.enlarge_with(4);
         assert_eq!(
             result2,
             MergeObj::new(Interval::new(3, 13), Interval::new(3, 13))
         );
         let result3 = result1.intersect_with(&result2);
-        assert_eq!(result3, MergeObj::new(Interval::new(3, 8), Interval::new(3, 8)));
+        assert_eq!(
+            result3,
+            MergeObj::new(Interval::new(3, 8), Interval::new(3, 8))
+        );
     }
 
     #[test]

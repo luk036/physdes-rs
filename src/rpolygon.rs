@@ -262,9 +262,13 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
             .unwrap();
         let is_anticlockwise = func(rightmost).1 <= func(leftmost).1;
         let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = if is_anticlockwise {
-            pointset.iter().partition(|pt| func(pt).1 <= func(leftmost).1)
+            pointset
+                .iter()
+                .partition(|pt| func(pt).1 <= func(leftmost).1)
         } else {
-            pointset.iter().partition(|pt| func(pt).1 >= func(leftmost).1)
+            pointset
+                .iter()
+                .partition(|pt| func(pt).1 >= func(leftmost).1)
         };
         lst1.sort_by_key(|a| func(a));
         lst2.sort_by_key(|a| func(a));

@@ -735,8 +735,10 @@ mod tests {
     #[test]
     fn test_point_in_polygon_missed_branches() {
         let coords = [(0, 0), (10, 0), (10, 10), (0, 10)];
-        let pointset: Vec<Point<i32, i32>> =
-            coords.iter().map(|(x_coord, y_coord)| Point::new(*x_coord, *y_coord)).collect();
+        let pointset: Vec<Point<i32, i32>> = coords
+            .iter()
+            .map(|(x_coord, y_coord)| Point::new(*x_coord, *y_coord))
+            .collect();
 
         // Test case where ptq.ycoord == pt0.ycoord
         assert!(!point_in_polygon(&pointset, &Point::new(5, 10)));
@@ -790,16 +792,20 @@ mod tests {
     fn test_point_in_polygon_more() {
         // Create a polygon that will trigger the missed branches
         let coords = [(0, 0), (10, 5), (0, 10)];
-        let pointset: Vec<Point<i32, i32>> =
-            coords.iter().map(|(x_coord, y_coord)| Point::new(*x_coord, *y_coord)).collect();
+        let pointset: Vec<Point<i32, i32>> = coords
+            .iter()
+            .map(|(x_coord, y_coord)| Point::new(*x_coord, *y_coord))
+            .collect();
 
         // This should trigger `det > 0`
         assert!(point_in_polygon(&pointset, &Point::new(1, 5)));
 
         // Create a clockwise polygon to trigger `det < 0`
         let coords_cw = [(0, 0), (0, 10), (10, 5)];
-        let pointset_cw: Vec<Point<i32, i32>> =
-            coords_cw.iter().map(|(x_coord, y_coord)| Point::new(*x_coord, *y_coord)).collect();
+        let pointset_cw: Vec<Point<i32, i32>> = coords_cw
+            .iter()
+            .map(|(x_coord, y_coord)| Point::new(*x_coord, *y_coord))
+            .collect();
         assert!(point_in_polygon(&pointset_cw, &Point::new(1, 5)));
     }
 }

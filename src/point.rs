@@ -442,12 +442,12 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 
 #[cfg(test)]
 pub fn hash<T: hash::Hash>(item: &T) -> u64 {
-        use std::collections::hash_map::RandomState;
-        use std::hash::{BuildHasher, Hasher};
-        let mut hasher = <RandomState as BuildHasher>::Hasher::new();
-        item.hash(&mut hasher);
-        hasher.finish()
-    }
+    use std::collections::hash_map::RandomState;
+    use std::hash::{BuildHasher, Hasher};
+    let mut hasher = <RandomState as BuildHasher>::Hasher::new();
+    item.hash(&mut hasher);
+    hasher.finish()
+}
 #[cfg(test)]
 mod test {
     #![allow(non_upper_case_globals)]
