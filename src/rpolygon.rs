@@ -247,27 +247,27 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// * `f`: The parameter `f` is a closure that takes a reference to a reference of a `Point<T, T>` and
     ///   returns a tuple of two values of type `T`. The closure is used to determine the ordering of the
     ///   points in the `pointset`. The first value of the tuple represents the x-coordinate
-    pub fn create_mono_rpolygon<F>(pointset: &[Point<T, T>], f: F) -> (Vec<Point<T, T>>, bool)
+    pub fn create_mono_rpolygon<F>(pointset: &[Point<T, T>], func: F) -> (Vec<Point<T, T>>, bool)
     where
         F: Fn(&Point<T, T>) -> (T, T),
     {
         // Use x-mono as model
         let rightmost = pointset
             .iter()
-            .max_by(|a, b| f(a).partial_cmp(&f(b)).unwrap())
+            .max_by(|a, b| func(a).partial_cmp(&func(b)).unwrap())
             .unwrap();
         let leftmost = pointset
             .iter()
-            .min_by(|a, b| f(a).partial_cmp(&f(b)).unwrap())
+            .min_by(|a, b| func(a).partial_cmp(&func(b)).unwrap())
             .unwrap();
-        let is_anticlockwise = f(rightmost).1 <= f(leftmost).1;
+        let is_anticlockwise = func(rightmost).1 <= func(leftmost).1;
         let (mut lst1, mut lst2): (Vec<Point<T, T>>, Vec<Point<T, T>>) = if is_anticlockwise {
-            pointset.iter().partition(|pt| f(pt).1 <= f(leftmost).1)
+            pointset.iter().partition(|pt| func(pt).1 <= func(leftmost).1)
         } else {
-            pointset.iter().partition(|pt| f(pt).1 >= f(leftmost).1)
+            pointset.iter().partition(|pt| func(pt).1 >= func(leftmost).1)
         };
-        lst1.sort_by_key(|a| f(a));
-        lst2.sort_by_key(|a| f(a));
+        lst1.sort_by_key(|a| func(a));
+        lst2.sort_by_key(|a| func(a));
         lst2.reverse();
         lst1.append(&mut lst2);
         (lst1, is_anticlockwise) // is_clockwise if y-mono
@@ -321,20 +321,20 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// `q` is strictly inside the polygon defined by the `pointset` array, `false` if the point is
     /// strictly outside the polygon, and `ub` (undefined behavior) if the point lies on the boundary of
     /// the polygon.
-    pub fn point_in_rpolygon(pointset: &[Point<T, T>], q: &Point<T, T>) -> bool {
-        let mut res = false;
+    pub fn point_in_rpolygon(pointset: &[Point<T, T>], query_pt: &Point<T, T>) -> bool {
+        let mut result = false;
         let n = pointset.len();
-        let mut p0 = &pointset[n - 1];
-        for p1 in pointset.iter() {
-            if ((p1.ycoord <= q.ycoord && q.ycoord < p0.ycoord)
-                || (p0.ycoord <= q.ycoord && q.ycoord < p1.ycoord))
-                && p1.xcoord > q.xcoord
+        let mut pt0 = &pointset[n - 1];
+        for pt1 in pointset.iter() {
+            if ((pt1.ycoord <= query_pt.ycoord && query_pt.ycoord < pt0.ycoord)
+                || (pt0.ycoord <= query_pt.ycoord && query_pt.ycoord < pt1.ycoord))
+                && pt1.xcoord > query_pt.xcoord
             {
-                res = !res;
+                result = !result;
             }
-            p0 = p1;
+            pt0 = pt1;
         }
-        res
+        result
     }
 }
 
@@ -463,17 +463,17 @@ mod test {
             (1, 4),
         ];
         let mut pointset = vec![];
-        for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
+        for (x_coord, y_coord) in coords.iter() {
+            pointset.push(Point::<i32, i32>::new(*x_coord, *y_coord));
         }
-        let (pointset, is_cw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
-        assert!(rpolygon_is_anticlockwise(&pointset));
-        assert!(rpolygon_is_ymonotone(&pointset));
-        assert!(!rpolygon_is_xmonotone(&pointset));
-        for p in pointset.iter() {
-            print!("({}, {}) ", p.xcoord, p.ycoord);
+        let (poly_points, is_cw) = RPolygon::<i32>::create_ymono_rpolygon(&pointset);
+        assert!(rpolygon_is_anticlockwise(&poly_points));
+        assert!(rpolygon_is_ymonotone(&poly_points));
+        assert!(!rpolygon_is_xmonotone(&poly_points));
+        for pt in poly_points.iter() {
+            print!("({}, {}) ", pt.xcoord, pt.ycoord);
         }
-        let poly = RPolygon::<i32>::new(&pointset);
+        let poly = RPolygon::<i32>::new(&poly_points);
         assert!(!is_cw);
         assert_eq!(poly.signed_area(), 45);
     }
@@ -495,17 +495,17 @@ mod test {
             (1, 4),
         ];
         let mut pointset = vec![];
-        for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
+        for (x_coord, y_coord) in coords.iter() {
+            pointset.push(Point::<i32, i32>::new(*x_coord, *y_coord));
         }
-        let (pointset, is_anticw) = RPolygon::<i32>::create_xmono_rpolygon(&pointset);
-        assert!(!rpolygon_is_anticlockwise(&pointset));
-        assert!(rpolygon_is_xmonotone(&pointset));
-        assert!(!rpolygon_is_ymonotone(&pointset));
-        for p in pointset.iter() {
-            print!("({}, {}) ", p.xcoord, p.ycoord);
+        let (poly_points, is_anticw) = RPolygon::<i32>::create_xmono_rpolygon(&pointset);
+        assert!(!rpolygon_is_anticlockwise(&poly_points));
+        assert!(rpolygon_is_xmonotone(&poly_points));
+        assert!(!rpolygon_is_ymonotone(&poly_points));
+        for pt in poly_points.iter() {
+            print!("({}, {}) ", pt.xcoord, pt.ycoord);
         }
-        let poly = RPolygon::<i32>::new(&pointset);
+        let poly = RPolygon::<i32>::new(&poly_points);
         assert!(!is_anticw);
         assert_eq!(poly.signed_area(), -53);
         assert!(!poly.is_anticlockwise())
@@ -528,49 +528,49 @@ mod test {
             (1, 4),
         ];
         let mut pointset = vec![];
-        for (x, y) in coords.iter() {
-            pointset.push(Point::<i32, i32>::new(*x, *y));
+        for (x_coord, y_coord) in coords.iter() {
+            pointset.push(Point::<i32, i32>::new(*x_coord, *y_coord));
         }
-        let q = Point::<i32, i32>::new(0, -3);
+        let query_pt = Point::<i32, i32>::new(0, -3);
         // let poly = RPolygon::<i32>::new(&pointset);
-        assert!(!RPolygon::<i32>::point_in_rpolygon(&pointset, &q));
+        assert!(!RPolygon::<i32>::point_in_rpolygon(&pointset, &query_pt));
     }
 
     #[test]
     fn test_signed_area_more_cases() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(1, 0);
-        let p3 = Point::new(1, 1);
-        let p4 = Point::new(0, 1);
-        let poly = RPolygon::new(&[p1, p2, p3, p4]);
+        let pt1 = Point::new(0, 0);
+        let pt2 = Point::new(1, 0);
+        let pt3 = Point::new(1, 1);
+        let pt4 = Point::new(0, 1);
+        let poly = RPolygon::new(&[pt1, pt2, pt3, pt4]);
         assert_eq!(poly.signed_area(), 1);
 
-        let p5 = Point::new(0, 0);
-        let p6 = Point::new(0, 1);
-        let p7 = Point::new(1, 1);
-        let p8 = Point::new(1, 0);
-        let poly2 = RPolygon::new(&[p5, p6, p7, p8]);
+        let pt5 = Point::new(0, 0);
+        let pt6 = Point::new(0, 1);
+        let pt7 = Point::new(1, 1);
+        let pt8 = Point::new(1, 0);
+        let poly2 = RPolygon::new(&[pt5, pt6, pt7, pt8]);
         assert_eq!(poly2.signed_area(), -1);
     }
 
     #[test]
     fn test_point_in_rpolygon_more_cases() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(1, 0);
-        let p3 = Point::new(1, 1);
-        let p4 = Point::new(0, 1);
-        let pointset = &[p1, p2, p3, p4];
+        let pt1 = Point::new(0, 0);
+        let pt2 = Point::new(1, 0);
+        let pt3 = Point::new(1, 1);
+        let pt4 = Point::new(0, 1);
+        let pointset = &[pt1, pt2, pt3, pt4];
 
-        let q1 = Point::new(0, 0);
-        assert!(RPolygon::<i32>::point_in_rpolygon(pointset, &q1));
+        let query_pt1 = Point::new(0, 0);
+        assert!(RPolygon::<i32>::point_in_rpolygon(pointset, &query_pt1));
 
-        let q2 = Point::new(1, 1);
-        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &q2));
+        let query_pt2 = Point::new(1, 1);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &query_pt2));
 
-        let q3 = Point::new(0, 1);
-        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &q3));
+        let query_pt3 = Point::new(0, 1);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &query_pt3));
 
-        let q4 = Point::new(1, 0);
-        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &q4));
+        let query_pt4 = Point::new(1, 0);
+        assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &query_pt4));
     }
 }

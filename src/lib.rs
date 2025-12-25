@@ -78,41 +78,40 @@ mod tests {
 
     #[test]
     pub fn it_works() {
-        let a = Point::<i32, i32>::new(12, 23);
-        let b = Vector2::<i32, i32>::new(34, 45);
-        println!("{:?}", a + b);
-        println!("{:?}", a - b);
+        let pt_a = Point::<i32, i32>::new(12, 23);
+        let vec_b = Vector2::<i32, i32>::new(34, 45);
+        println!("{:?}", pt_a + vec_b);
+        println!("{:?}", pt_a - vec_b);
 
-        let mut a = Point::<i32, i32>::new(42, 53);
-        a += b;
-        a -= b;
-        println!("{:?}", -a);
+        let mut pt_a = Point::<i32, i32>::new(42, 53);
+        pt_a += vec_b;
+        pt_a -= vec_b;
+        println!("{:?}", -pt_a);
 
-        let c = Point::<i32, i32>::new(12, 23);
-        let mm = Point::<Point<i32, i32>, Point<i32, i32>>::new(a, c);
-        println!("{:?}", mm);
+        let pt_nested = Point::<Point<i32, i32>, Point<i32, i32>>::new(pt_a, pt_a);
+        println!("{:?}", pt_nested);
 
-        let x = interval::Interval::<i32>::new(12, 23);
-        // let y = interval::Interval::<i32>::new(42, 53);
-        println!("{:?}", x);
+        let interval_x = interval::Interval::<i32>::new(12, 23);
+        // let interval_y = interval::Interval::<i32>::new(42, 53);
+        println!("{:?}", interval_x);
     }
 
     #[quickcheck]
     fn check_point(ax: u16, bx: u16) -> bool {
-        let a = Point::<i32, i32>::new(ax as i32, 23);
-        let b = Vector2::<i32, i32>::new(bx as i32, 45);
-        a == (a - b) + b
+        let pt_a = Point::<i32, i32>::new(ax as i32, 23);
+        let vec_b = Vector2::<i32, i32>::new(bx as i32, 45);
+        pt_a == (pt_a - vec_b) + vec_b
     }
 
     // Additional quickcheck tests to verify build configuration
     #[quickcheck]
     fn check_point_arithmetic_properties(x: i16, y: i16, dx: i16, dy: i16) -> bool {
-        let p = Point::<i32, i32>::new(x as i32, y as i32);
-        let v = Vector2::<i32, i32>::new(dx as i32, dy as i32);
+        let pt = Point::<i32, i32>::new(x as i32, y as i32);
+        let vec = Vector2::<i32, i32>::new(dx as i32, dy as i32);
 
-        // Test associative property: (p + v) - v == p
-        let result = (p + v) - v;
-        p == result
+        // Test associative property: (pt + vec) - vec == pt
+        let result = (pt + vec) - vec;
+        pt == result
     }
 
     #[quickcheck]

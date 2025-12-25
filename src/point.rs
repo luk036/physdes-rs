@@ -441,14 +441,13 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 }
 
 #[cfg(test)]
-pub fn hash<T: hash::Hash>(x: &T) -> u64 {
-    use std::collections::hash_map::RandomState;
-    use std::hash::{BuildHasher, Hasher};
-    let mut hasher = <RandomState as BuildHasher>::Hasher::new();
-    x.hash(&mut hasher);
-    hasher.finish()
-}
-
+pub fn hash<T: hash::Hash>(item: &T) -> u64 {
+        use std::collections::hash_map::RandomState;
+        use std::hash::{BuildHasher, Hasher};
+        let mut hasher = <RandomState as BuildHasher>::Hasher::new();
+        item.hash(&mut hasher);
+        hasher.finish()
+    }
 #[cfg(test)]
 mod test {
     #![allow(non_upper_case_globals)]
@@ -484,10 +483,10 @@ mod test {
         ycoord: 2,
     };
 
-    fn hash<T: Hash>(t: &T) -> u64 {
-        let mut s = DefaultHasher::new();
-        t.hash(&mut s);
-        s.finish()
+    fn hash<T: Hash>(item: &T) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        item.hash(&mut hasher);
+        hasher.finish()
     }
 
     #[test]
@@ -566,8 +565,8 @@ mod test {
     #[test]
     fn test_consts() {
         // check our constants are what Point::new creates
-        fn test(c: Point<i32, i32>, r: i32, i: i32) {
-            assert_eq!(c, Point::new(r, i));
+        fn test(pt: Point<i32, i32>, x_val: i32, y_val: i32) {
+            assert_eq!(pt, Point::new(x_val, y_val));
         }
         test(_0_0p, 0, 0);
         test(_1_0p, 1, 0);
@@ -577,162 +576,162 @@ mod test {
 
     #[test]
     fn test_hash() {
-        let a = Point::new(0i32, 0i32);
-        let b = Point::new(1i32, 0i32);
-        let c = Point::new(0i32, 1i32);
-        assert!(hash(&a) != hash(&b));
-        assert!(hash(&b) != hash(&c));
-        assert!(hash(&c) != hash(&a));
+        let pt_a = Point::new(0i32, 0i32);
+        let pt_b = Point::new(1i32, 0i32);
+        let pt_c = Point::new(0i32, 1i32);
+        assert!(hash(&pt_a) != hash(&pt_b));
+        assert!(hash(&pt_b) != hash(&pt_c));
+        assert!(hash(&pt_c) != hash(&pt_a));
     }
 
     #[test]
     fn test_overlap() {
-        let a = Point::new(0i32, 0i32);
-        let b = Point::new(1i32, 0i32);
-        assert!(!a.overlaps(&b));
+        let pt_a = Point::new(0i32, 0i32);
+        let pt_b = Point::new(1i32, 0i32);
+        assert!(!pt_a.overlaps(&pt_b));
     }
 
     #[test]
     fn test_contain() {
-        let a = Point::new(0i32, 0i32);
-        let b = Point::new(1i32, 0i32);
-        assert!(!a.contains(&b));
+        let pt_a = Point::new(0i32, 0i32);
+        let pt_b = Point::new(1i32, 0i32);
+        assert!(!pt_a.contains(&pt_b));
     }
 
     #[test]
     fn test_min_dist_with() {
-        let a = Point::new(3i32, 5i32);
-        let b = Point::new(6i32, 4i32);
-        assert_eq!(a.min_dist_with(&b), 4);
+        let pt_a = Point::new(3i32, 5i32);
+        let pt_b = Point::new(6i32, 4i32);
+        assert_eq!(pt_a.min_dist_with(&pt_b), 4);
     }
 
     #[test]
     fn test_add() {
-        let a = Point::new(0i32, 0i32);
-        let b = Point::new(1i32, 0i32);
-        let v = Vector2::new(5i32, 6i32);
-        assert_eq!(a, a + v - v);
-        assert_eq!(b, b - v + v);
+        let pt_a = Point::new(0i32, 0i32);
+        let pt_b = Point::new(1i32, 0i32);
+        let vec = Vector2::new(5i32, 6i32);
+        assert_eq!(pt_a, pt_a + vec - vec);
+        assert_eq!(pt_b, pt_b - vec + vec);
     }
 
     #[test]
     fn test_sub() {
-        let a = Point::new(0i32, 0i32);
-        let b = Point::new(1i32, 0i32);
-        let v = Vector2::new(5i32, 6i32);
-        assert_eq!(a, a - v + v);
-        assert_eq!(b, b + v - v);
+        let pt_a = Point::new(0i32, 0i32);
+        let pt_b = Point::new(1i32, 0i32);
+        let vec = Vector2::new(5i32, 6i32);
+        assert_eq!(pt_a, pt_a - vec + vec);
+        assert_eq!(pt_b, pt_b + vec - vec);
     }
 
     #[test]
     fn test_neg() {
-        let a = Point::new(0i32, 0i32);
-        let b = Point::new(1i32, 0i32);
-        let c = Point::new(0i32, 1i32);
-        assert_eq!(a, -(-a));
-        assert_eq!(b, -(-b));
-        assert_eq!(c, -(-c));
+        let pt_a = Point::new(0i32, 0i32);
+        let pt_b = Point::new(1i32, 0i32);
+        let pt_c = Point::new(0i32, 1i32);
+        assert_eq!(pt_a, -(-pt_a));
+        assert_eq!(pt_b, -(-pt_b));
+        assert_eq!(pt_c, -(-pt_c));
     }
 
     #[test]
     fn test_add_assign() {
-        let mut a = Point::new(1i32, 0i32);
-        let b = Point::new(6i32, 6i32);
-        let v = Vector2::new(5i32, 6i32);
-        a += v;
-        assert_eq!(a, b);
+        let mut pt_a = Point::new(1i32, 0i32);
+        let pt_b = Point::new(6i32, 6i32);
+        let vec = Vector2::new(5i32, 6i32);
+        pt_a += vec;
+        assert_eq!(pt_a, pt_b);
     }
 
     #[test]
     fn test_sub_assign() {
-        let mut a = Point::new(1i32, 0i32);
-        let b = Point::new(-4i32, -6i32);
-        let v = Vector2::new(5i32, 6i32);
-        a -= v;
-        assert_eq!(a, b);
+        let mut pt_a = Point::new(1i32, 0i32);
+        let pt_b = Point::new(-4i32, -6i32);
+        let vec = Vector2::new(5i32, 6i32);
+        pt_a -= vec;
+        assert_eq!(pt_a, pt_b);
     }
 
     #[test]
     fn test_neg_assign() {
-        let mut a = Point::new(1i32, 0i32);
-        let b = Point::new(-1i32, 0i32);
-        let c = Point::new(1i32, 0i32);
-        a = -a;
-        assert_eq!(a, b);
-        a = -a;
-        assert_eq!(a, c);
+        let mut pt_a = Point::new(1i32, 0i32);
+        let pt_b = Point::new(-1i32, 0i32);
+        let pt_c = Point::new(1i32, 0i32);
+        pt_a = -pt_a;
+        assert_eq!(pt_a, pt_b);
+        pt_a = -pt_a;
+        assert_eq!(pt_a, pt_c);
     }
 
     #[test]
     fn test_point() {
-        let a = Point::new(4, 8);
-        let b = Point::new(5, 6);
-        assert!(a < b);
-        assert!(a <= b);
-        assert_ne!(b, a);
+        let pt_a = Point::new(4, 8);
+        let pt_b = Point::new(5, 6);
+        assert!(pt_a < pt_b);
+        assert!(pt_a <= pt_b);
+        assert_ne!(pt_b, pt_a);
     }
 
     #[test]
     fn test_point2() {
-        let a = Point::new(3, 4);
-        let r = Point::new(Interval::new(3, 4), Interval::new(5, 6)); // Rectangle
-        assert!(!r.contains(&a));
-        assert!(r.contains(&Point::new(4, 5)));
-        assert!(!r.overlaps(&a));
-        assert!(r.overlaps(&Point::new(4, 5)));
-        assert!(r.overlaps(&Point::new(4, 6)));
+        let pt_a = Point::new(3, 4);
+        let rect = Point::new(Interval::new(3, 4), Interval::new(5, 6)); // Rectangle
+        assert!(!rect.contains(&pt_a));
+        assert!(rect.contains(&Point::new(4, 5)));
+        assert!(!rect.overlaps(&pt_a));
+        assert!(rect.overlaps(&Point::new(4, 5)));
+        assert!(rect.overlaps(&Point::new(4, 6)));
     }
 
     #[test]
     fn test_transform() {
-        let mut a = Point::new(3, 5);
-        let b = Vector2::new(5, 7);
-        assert_eq!(a + b, Point::new(8, 12));
-        assert_eq!(a - b, Point::new(-2, -2));
-        a += b;
-        assert_eq!(a, Point::new(8, 12));
-        a -= b;
-        assert_eq!(a, Point::new(3, 5));
-        assert_eq!(a.flip_xy(), Point::new(5, 3));
+        let mut pt_a = Point::new(3, 5);
+        let vec_b = Vector2::new(5, 7);
+        assert_eq!(pt_a + vec_b, Point::new(8, 12));
+        assert_eq!(pt_a - vec_b, Point::new(-2, -2));
+        pt_a += vec_b;
+        assert_eq!(pt_a, Point::new(8, 12));
+        pt_a -= vec_b;
+        assert_eq!(pt_a, Point::new(3, 5));
+        assert_eq!(pt_a.flip_xy(), Point::new(5, 3));
     }
 
     #[test]
     fn test_displacement() {
-        let a = Point::new(3, 5);
-        let b = Point::new(5, 7);
-        let c = Point::new(7, 8);
-        assert_eq!(a.displace(&b), Vector2::new(-2, -2));
-        assert_eq!(a.displace(&c), Vector2::new(-4, -3));
-        assert_eq!(b.displace(&c), Vector2::new(-2, -1));
+        let pt_a = Point::new(3, 5);
+        let pt_b = Point::new(5, 7);
+        let pt_c = Point::new(7, 8);
+        assert_eq!(pt_a.displace(&pt_b), Vector2::new(-2, -2));
+        assert_eq!(pt_a.displace(&pt_c), Vector2::new(-4, -3));
+        assert_eq!(pt_b.displace(&pt_c), Vector2::new(-2, -1));
     }
 
     #[test]
     fn test_enlarge() {
-        let a = Point::new(3, 5);
-        let b: Point<Interval<i32>, Interval<i32>> = a.enlarge_with(2);
-        assert_eq!(b, Point::new(Interval::new(1, 5), Interval::new(3, 7)));
+        let pt_a = Point::new(3, 5);
+        let pt_b: Point<Interval<i32>, Interval<i32>> = pt_a.enlarge_with(2);
+        assert_eq!(pt_b, Point::new(Interval::new(1, 5), Interval::new(3, 7)));
     }
 
     #[test]
     fn test_displace_more_cases() {
-        let a = Point::new(0, 0);
-        let b = Point::new(3, 4);
-        assert_eq!(a.displace(&b), Vector2::new(-3, -4));
-        let c = Point::new(-3, -4);
-        assert_eq!(a.displace(&c), Vector2::new(3, 4));
+        let pt_a = Point::new(0, 0);
+        let pt_b = Point::new(3, 4);
+        assert_eq!(pt_a.displace(&pt_b), Vector2::new(-3, -4));
+        let pt_c = Point::new(-3, -4);
+        assert_eq!(pt_a.displace(&pt_c), Vector2::new(3, 4));
     }
 
     #[test]
     fn test_hull_more_cases() {
-        let a = Point::new(0, 0);
-        let b = Point::new(3, 4);
+        let pt_a = Point::new(0, 0);
+        let pt_b = Point::new(3, 4);
         assert_eq!(
-            a.hull_with(&b),
+            pt_a.hull_with(&pt_b),
             Point::new(Interval::new(0, 3), Interval::new(0, 4))
         );
-        let c = Point::new(-3, -4);
+        let pt_c = Point::new(-3, -4);
         assert_eq!(
-            a.hull_with(&c),
+            pt_a.hull_with(&pt_c),
             Point::new(Interval::new(-3, 0), Interval::new(-4, 0))
         );
     }
@@ -773,54 +772,54 @@ mod test {
 
     #[test]
     fn test_hull() {
-        let a = Point::new(3, 5);
-        let b = Point::new(5, 7);
+        let pt_a = Point::new(3, 5);
+        let pt_b = Point::new(5, 7);
         assert_eq!(
-            a.hull_with(&b),
+            pt_a.hull_with(&pt_b),
             Point::new(Interval::new(3, 5), Interval::new(5, 7))
         );
     }
 
     #[test]
     fn test_min_dist_with2() {
-        let a = Point::new(3, 5);
-        let b = Point::new(5, 7);
-        assert_eq!(a.min_dist_with(&b), 4);
+        let pt_a = Point::new(3, 5);
+        let pt_b = Point::new(5, 7);
+        assert_eq!(pt_a.min_dist_with(&pt_b), 4);
     }
 
     #[test]
     fn test_flip_xy() {
-        let p1 = Point::new(1, 2);
-        assert_eq!(p1.flip_xy(), Point::new(2, 1));
+        let pt1 = Point::new(1, 2);
+        assert_eq!(pt1.flip_xy(), Point::new(2, 1));
     }
 
     #[test]
     fn test_display() {
-        let p1 = Point::new(1, 2);
-        assert_eq!(format!("{}", p1), "(1, 2)");
+        let pt1 = Point::new(1, 2);
+        assert_eq!(format!("{}", pt1), "(1, 2)");
     }
 
     #[test]
     fn test_displace_more() {
-        let a = Point::new(3, 5);
-        let b = Point::new(-5, 7);
-        let c = Point::new(7, -8);
-        assert_eq!(a.displace(&b), Vector2::new(8, -2));
-        assert_eq!(a.displace(&c), Vector2::new(-4, 13));
-        assert_eq!(b.displace(&c), Vector2::new(-12, 15));
+        let pt_a = Point::new(3, 5);
+        let pt_b = Point::new(-5, 7);
+        let pt_c = Point::new(7, -8);
+        assert_eq!(pt_a.displace(&pt_b), Vector2::new(8, -2));
+        assert_eq!(pt_a.displace(&pt_c), Vector2::new(-4, 13));
+        assert_eq!(pt_b.displace(&pt_c), Vector2::new(-12, 15));
     }
 
     #[test]
     fn test_hull_more() {
-        let a = Point::new(3, 5);
-        let b = Point::new(5, 7);
-        let c = Point::new(-1, 9);
+        let pt_a = Point::new(3, 5);
+        let pt_b = Point::new(5, 7);
+        let pt_c = Point::new(-1, 9);
         assert_eq!(
-            a.hull_with(&b),
+            pt_a.hull_with(&pt_b),
             Point::new(Interval::new(3, 5), Interval::new(5, 7))
         );
         assert_eq!(
-            a.hull_with(&c),
+            pt_a.hull_with(&pt_c),
             Point::new(Interval::new(-1, 3), Interval::new(5, 9))
         );
     }

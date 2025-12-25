@@ -124,13 +124,13 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     ///
     /// Arguments:
     ///
-    /// * `t`: The parameter `t` is a scalar value that will be used to multiply each component of
+    /// * `factor`: The parameter `factor` is a scalar value that will be used to multiply each component of
     ///   `self`.
     ///
     /// Returns:
     ///
     /// The `scale` method returns a new instance of the same type as `self`.
-    /// Multiplies `self` by the scalar `t`.
+    /// Multiplies `self` by the scalar `factor`.
     ///
     /// # Example
     ///
@@ -141,22 +141,22 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     /// assert_eq!(Vector2::new(3, 4).scale(2), Vector2::new(6, 8));
     /// ```
     #[inline]
-    pub fn scale(&self, t: T1) -> Self {
-        Self::new(self.x_.clone() * t.clone(), self.y_.clone() * t)
+    pub fn scale(&self, factor: T1) -> Self {
+        Self::new(self.x_.clone() * factor.clone(), self.y_.clone() * factor)
     }
 
     /// The `unscale` function divides the coordinates of a vector by a scalar value.
     ///
     /// Arguments:
     ///
-    /// * `t`: The parameter `t` is a scalar value that is used to divide the `self` object. It is of
+    /// * `factor`: The parameter `factor` is a scalar value that is used to divide the `self` object. It is of
     ///   type `T`, which is a generic type parameter. The division operation is performed on the `x_` and
     ///   `y_` fields of the `self` object.
     ///
     /// Returns:
     ///
     /// The `unscale` method returns a new instance of the same type as `self`.
-    /// Divides `self` by the scalar `t`.
+    /// Divides `self` by the scalar `factor`.
     ///
     /// # Example
     ///
@@ -167,8 +167,8 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     /// assert_eq!(Vector2::new(6, 8).unscale(2), Vector2::new(3, 4));
     /// ```
     #[inline]
-    pub fn unscale(&self, t: T1) -> Self {
-        Self::new(self.x_.clone() / t.clone(), self.y_.clone() / t)
+    pub fn unscale(&self, factor: T1) -> Self {
+        Self::new(self.x_.clone() / factor.clone(), self.y_.clone() / factor)
     }
 }
 
@@ -578,11 +578,11 @@ mod test {
     use num_traits::Zero;
     use std::hash;
 
-    fn hash<T: hash::Hash>(x: &T) -> u64 {
+    fn hash<T: hash::Hash>(item: &T) -> u64 {
         use std::collections::hash_map::RandomState;
         use std::hash::{BuildHasher, Hasher};
         let mut hasher = <RandomState as BuildHasher>::Hasher::new();
-        x.hash(&mut hasher);
+        item.hash(&mut hasher);
         hasher.finish()
     }
 
@@ -677,8 +677,8 @@ mod test {
     #[test]
     fn test_consts() {
         // check our constants are what Vector2::new creates
-        fn test(c: Vector2<f64, f64>, r: f64, i: f64) {
-            assert_eq!(c, Vector2::new(r, i));
+        fn test(vec: Vector2<f64, f64>, x_val: f64, y_val: f64) {
+            assert_eq!(vec, Vector2::new(x_val, y_val));
         }
         test(_0_0v, 0.0, 0.0);
         test(_1_0v, 1.0, 0.0);
@@ -699,12 +699,12 @@ mod test {
 
     #[test]
     fn test_hash() {
-        let a = Vector2::new(0i32, 0i32);
-        let b = Vector2::new(1i32, 0i32);
-        let c = Vector2::new(0i32, 1i32);
-        assert!(hash(&a) != hash(&b));
-        assert!(hash(&b) != hash(&c));
-        assert!(hash(&c) != hash(&a));
+        let vec_a = Vector2::new(0i32, 0i32);
+        let vec_b = Vector2::new(1i32, 0i32);
+        let vec_c = Vector2::new(0i32, 1i32);
+        assert!(hash(&vec_a) != hash(&vec_b));
+        assert!(hash(&vec_b) != hash(&vec_c));
+        assert!(hash(&vec_c) != hash(&vec_a));
     }
 
     #[test]
@@ -793,30 +793,30 @@ mod test {
 
     #[test]
     fn test_add_assign() {
-        let mut a = _0_1v;
-        a += _1_0v;
-        assert_eq!(a, _1_1v);
+        let mut vec_a = _0_1v;
+        vec_a += _1_0v;
+        assert_eq!(vec_a, _1_1v);
     }
 
     #[test]
     fn test_sub_assign() {
-        let mut a = _1_1v;
-        a -= _1_1v;
-        assert_eq!(a, _0_0v);
+        let mut vec_a = _1_1v;
+        vec_a -= _1_1v;
+        assert_eq!(vec_a, _0_0v);
     }
 
     #[test]
     fn test_mul_assign() {
-        let mut a = _05_05v;
-        a *= 2.0;
-        assert_eq!(a, _1_1v);
+        let mut vec_a = _05_05v;
+        vec_a *= 2.0;
+        assert_eq!(vec_a, _1_1v);
     }
 
     #[test]
     fn test_div_assign() {
-        let mut a = _1_1v;
-        a /= 2.0;
-        assert_eq!(a, _05_05v);
+        let mut vec_a = _1_1v;
+        vec_a /= 2.0;
+        assert_eq!(vec_a, _05_05v);
     }
 
     #[test]
@@ -877,8 +877,8 @@ mod test {
     #[test]
     fn test_consts_vv() {
         // check our constants are what Vector2::new creates
-        fn test(c: Vector2<Vector2<f64, f64>, Vector2<f64, f64>>, w: f64, x: f64, y: f64, z: f64) {
-            assert_eq!(c, Vector2::new(Vector2::new(w, x), Vector2::new(y, z)));
+        fn test(vec: Vector2<Vector2<f64, f64>, Vector2<f64, f64>>, w_val: f64, x_val: f64, y_val: f64, z_val: f64) {
+            assert_eq!(vec, Vector2::new(Vector2::new(w_val, x_val), Vector2::new(y_val, z_val)));
         }
 
         test(_0_0vv, 0.0, 0.0, 0.0, 0.0);

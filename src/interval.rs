@@ -857,214 +857,214 @@ mod tests {
 
     #[test]
     fn test_interval() {
-        let a = Interval::new(4, 8);
-        let b = Interval::new(5, 6);
+        let interval_a = Interval::new(4, 8);
+        let interval_b = Interval::new(5, 6);
 
-        assert!(a <= b);
-        assert!(b <= a);
-        assert!(a >= b);
-        assert!(b >= a);
+        assert!(interval_a <= interval_b);
+        assert!(interval_b <= interval_a);
+        assert!(interval_a >= interval_b);
+        assert!(interval_b >= interval_a);
 
-        assert!(a.overlaps(&b));
-        assert!(b.overlaps(&a));
-        // assert!(!contain(&a, &b));
-        assert!(a.contains(&4));
-        assert!(a.contains(&8));
-        assert!(a.contains(&b));
-        assert_eq!(a, a);
-        assert_eq!(b, b);
-        assert_ne!(a, b);
-        assert_ne!(b, a);
-        assert!(a.overlaps(&a));
-        assert!(b.overlaps(&b));
-        assert!(a.contains(&a));
-        assert!(b.contains(&b));
-        assert!(a.overlaps(&b));
-        assert!(b.overlaps(&a));
+        assert!(interval_a.overlaps(&interval_b));
+        assert!(interval_b.overlaps(&interval_a));
+        // assert!(!contain(&interval_a, &interval_b));
+        assert!(interval_a.contains(&4));
+        assert!(interval_a.contains(&8));
+        assert!(interval_a.contains(&interval_b));
+        assert_eq!(interval_a, interval_a);
+        assert_eq!(interval_b, interval_b);
+        assert_ne!(interval_a, interval_b);
+        assert_ne!(interval_b, interval_a);
+        assert!(interval_a.overlaps(&interval_a));
+        assert!(interval_b.overlaps(&interval_b));
+        assert!(interval_a.contains(&interval_a));
+        assert!(interval_b.contains(&interval_b));
+        assert!(interval_a.overlaps(&interval_b));
+        assert!(interval_b.overlaps(&interval_a));
     }
 
     #[test]
     fn test_hull_more_cases() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(1, 7);
-        assert_eq!(a.hull_with(&b), Interval::new(1, 7));
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(1, 7);
+        assert_eq!(interval_a.hull_with(&interval_b), Interval::new(1, 7));
 
-        let c = Interval::new(-2, 2);
-        assert_eq!(a.hull_with(&c), Interval::new(-2, 5));
+        let interval_c = Interval::new(-2, 2);
+        assert_eq!(interval_a.hull_with(&interval_c), Interval::new(-2, 5));
 
-        let d = 4;
-        assert_eq!(a.hull_with(&d), Interval::new(3, 5));
+        let val_d = 4;
+        assert_eq!(interval_a.hull_with(&val_d), Interval::new(3, 5));
 
-        let e = 8;
-        assert_eq!(a.hull_with(&e), Interval::new(3, 8));
+        let val_e = 8;
+        assert_eq!(interval_a.hull_with(&val_e), Interval::new(3, 8));
 
-        let f = 0;
-        assert_eq!(a.hull_with(&f), Interval::new(0, 5));
+        let val_f = 0;
+        assert_eq!(interval_a.hull_with(&val_f), Interval::new(0, 5));
     }
 
     #[test]
     fn test_interval1() {
-        let a = Interval::new(4, 5);
-        let b = Interval::new(6, 8);
-        assert!(a < b);
-        assert!(!(b == a));
-        assert!(b != a);
+        let interval_a = Interval::new(4, 5);
+        let interval_b = Interval::new(6, 8);
+        assert!(interval_a < interval_b);
+        assert!(!(interval_b == interval_a));
+        assert!(interval_b != interval_a);
     }
 
     #[test]
     fn test_interval2() {
-        let a = Interval::new(4, 8);
-        let b = Interval::new(5, 6);
+        let interval_a = Interval::new(4, 8);
+        let interval_b = Interval::new(5, 6);
 
-        assert!(a.contains(&4));
-        assert!(a.contains(&8));
-        assert!(a.contains(&b));
-        // assert!(a.intersect_with(&8) == Interval::new(8, 8));
-        // assert!(a.intersect_with(b) == b);
-        assert!(!b.contains(&a));
-        assert!(a.overlaps(&b));
-        assert!(b.overlaps(&a));
+        assert!(interval_a.contains(&4));
+        assert!(interval_a.contains(&8));
+        assert!(interval_a.contains(&interval_b));
+        // assert!(interval_a.intersect_with(&8) == Interval::new(8, 8));
+        // assert!(interval_a.intersect_with(interval_b) == interval_b);
+        assert!(!interval_b.contains(&interval_a));
+        assert!(interval_a.overlaps(&interval_b));
+        assert!(interval_b.overlaps(&interval_a));
     }
 
     #[test]
     fn test_interval3() {
-        let a = Interval::new(3, 4);
-        assert!(a.lb == 3);
-        assert!(a.ub == 4);
-        // assert!(a.length() == 1);
-        assert!(a.contains(&3));
-        assert!(a.contains(&4));
-        assert!(!a.contains(&5));
-        assert!(a.contains(&Interval::new(3, 4)));
-        assert!(!a.contains(&Interval::new(3, 5)));
-        assert!(!a.contains(&Interval::new(2, 3)));
-        assert!(!a.contains(&2));
-        assert!(a.contains(&4));
-        assert!(!a.contains(&5));
+        let interval_a = Interval::new(3, 4);
+        assert!(interval_a.lb == 3);
+        assert!(interval_a.ub == 4);
+        // assert!(interval_a.length() == 1);
+        assert!(interval_a.contains(&3));
+        assert!(interval_a.contains(&4));
+        assert!(!interval_a.contains(&5));
+        assert!(interval_a.contains(&Interval::new(3, 4)));
+        assert!(!interval_a.contains(&Interval::new(3, 5)));
+        assert!(!interval_a.contains(&Interval::new(2, 3)));
+        assert!(!interval_a.contains(&2));
+        assert!(interval_a.contains(&4));
+        assert!(!interval_a.contains(&5));
     }
 
     #[test]
     fn test_arithmetic() {
-        let mut a = Interval::new(3, 5);
-        // b = Interval::new(5, 7);
-        // c = Interval::new(7, 8);
-        assert_eq!(a + 1, Interval::new(4, 6));
-        assert_eq!(a - 1, Interval::new(2, 4));
-        assert_eq!(a * 2, Interval::new(6, 10));
-        assert!(-a == Interval::new(-5, -3));
-        a += 1;
-        assert!(a == Interval::new(4, 6));
-        a -= 1;
-        assert!(a == Interval::new(3, 5));
-        a *= 2;
-        assert!(a == Interval::new(6, 10));
+        let mut interval_a = Interval::new(3, 5);
+        // interval_b = Interval::new(5, 7);
+        // interval_c = Interval::new(7, 8);
+        assert_eq!(interval_a + 1, Interval::new(4, 6));
+        assert_eq!(interval_a - 1, Interval::new(2, 4));
+        assert_eq!(interval_a * 2, Interval::new(6, 10));
+        assert!(-interval_a == Interval::new(-5, -3));
+        interval_a += 1;
+        assert!(interval_a == Interval::new(4, 6));
+        interval_a -= 1;
+        assert!(interval_a == Interval::new(3, 5));
+        interval_a *= 2;
+        assert!(interval_a == Interval::new(6, 10));
     }
 
     #[test]
     fn test_overlap() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(5, 7);
-        let c = Interval::new(7, 8);
-        assert!(a.overlaps(&b));
-        assert!(b.overlaps(&c));
-        assert!(!a.overlaps(&c));
-        assert!(!c.overlaps(&a));
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(5, 7);
+        let interval_c = Interval::new(7, 8);
+        assert!(interval_a.overlaps(&interval_b));
+        assert!(interval_b.overlaps(&interval_c));
+        assert!(!interval_a.overlaps(&interval_c));
+        assert!(!interval_c.overlaps(&interval_a));
 
-        let d = 4;
-        assert!(a.overlaps(&d));
-        assert!(!a.overlaps(&6));
-        assert!(d.overlaps(&a));
-        assert!(d.overlaps(&d));
+        let val_d = 4;
+        assert!(interval_a.overlaps(&val_d));
+        assert!(!interval_a.overlaps(&6));
+        assert!(val_d.overlaps(&interval_a));
+        assert!(val_d.overlaps(&val_d));
     }
 
     #[test]
     fn test_contains() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(5, 7);
-        let c = Interval::new(7, 8);
-        assert!(!a.contains(&b));
-        assert!(!b.contains(&c));
-        assert!(!a.contains(&c));
-        assert!(!c.contains(&a));
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(5, 7);
+        let interval_c = Interval::new(7, 8);
+        assert!(!interval_a.contains(&interval_b));
+        assert!(!interval_b.contains(&interval_c));
+        assert!(!interval_a.contains(&interval_c));
+        assert!(!interval_c.contains(&interval_a));
 
-        let d = 4;
-        assert!(a.contains(&d));
-        assert!(!a.contains(&6));
-        assert!(!d.contains(&a));
-        assert!(d.contains(&d));
+        let val_d = 4;
+        assert!(interval_a.contains(&val_d));
+        assert!(!interval_a.contains(&6));
+        assert!(!val_d.contains(&interval_a));
+        assert!(val_d.contains(&val_d));
     }
 
     #[test]
     fn test_intersect() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(5, 7);
-        let c = Interval::new(7, 8);
-        assert_eq!(a.intersect_with(&b), Interval::new(5, 5));
-        assert_eq!(b.intersect_with(&c), Interval::new(7, 7));
-        assert!(a.intersect_with(&c).is_invalid());
-        assert_eq!(a.intersect_with(&b), Interval::new(5, 5));
-        assert_eq!(b.intersect_with(&c), Interval::new(7, 7));
-        let d = 4;
-        assert_eq!(a.intersect_with(&d), Interval::new(4, 4));
-        assert!(a.intersect_with(&6).is_invalid());
-        assert_eq!(a.intersect_with(&d), Interval::new(4, 4));
-        assert_eq!(d.intersect_with(&a), Interval::new(4, 4));
-        assert_eq!(d.intersect_with(&d), Interval::new(4, 4));
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(5, 7);
+        let interval_c = Interval::new(7, 8);
+        assert_eq!(interval_a.intersect_with(&interval_b), Interval::new(5, 5));
+        assert_eq!(interval_b.intersect_with(&interval_c), Interval::new(7, 7));
+        assert!(interval_a.intersect_with(&interval_c).is_invalid());
+        assert_eq!(interval_a.intersect_with(&interval_b), Interval::new(5, 5));
+        assert_eq!(interval_b.intersect_with(&interval_c), Interval::new(7, 7));
+        let val_d = 4;
+        assert_eq!(interval_a.intersect_with(&val_d), Interval::new(4, 4));
+        assert!(interval_a.intersect_with(&6).is_invalid());
+        assert_eq!(interval_a.intersect_with(&val_d), Interval::new(4, 4));
+        assert_eq!(val_d.intersect_with(&interval_a), Interval::new(4, 4));
+        assert_eq!(val_d.intersect_with(&val_d), Interval::new(4, 4));
     }
 
     #[test]
     fn test_hull() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(5, 7);
-        let c = Interval::new(7, 8);
-        assert_eq!(a.hull_with(&b), Interval::new(3, 7));
-        assert_eq!(b.hull_with(&c), Interval::new(5, 8));
-        assert_eq!(a.hull_with(&c), Interval::new(3, 8));
-        let d = 4;
-        assert_eq!(a.hull_with(&d), Interval::new(3, 5));
-        assert_eq!(a.hull_with(&6), Interval::new(3, 6));
-        // assert_eq!(hull(a, d), Interval::new(3, 5));
-        // assert_eq!(hull(a, 6), Interval::new(3, 6));
-        // assert_eq!(hull(d, a), Interval::new(3, 5));
-        // assert!(hull(6, a) == Interval::new(3, 6));
-        // assert!(hull(d, 6) == Interval::new(4, 6));
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(5, 7);
+        let interval_c = Interval::new(7, 8);
+        assert_eq!(interval_a.hull_with(&interval_b), Interval::new(3, 7));
+        assert_eq!(interval_b.hull_with(&interval_c), Interval::new(5, 8));
+        assert_eq!(interval_a.hull_with(&interval_c), Interval::new(3, 8));
+        let val_d = 4;
+        assert_eq!(interval_a.hull_with(&val_d), Interval::new(3, 5));
+        assert_eq!(interval_a.hull_with(&6), Interval::new(3, 6));
+        // assert_eq!(hull(interval_a, val_d), Interval::new(3, 5));
+        // assert_eq!(hull(interval_a, 6), Interval::new(3, 6));
+        // assert_eq!(hull(val_d, interval_a), Interval::new(3, 5));
+        // assert!(hull(6, interval_a) == Interval::new(3, 6));
+        // assert!(hull(val_d, 6) == Interval::new(4, 6));
     }
 
     #[test]
     fn test_min_dist() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(5, 7);
-        let c = Interval::new(7, 8);
-        assert_eq!(a.min_dist_with(&b), 0);
-        assert_eq!(a.min_dist_with(&c), 2);
-        assert_eq!(b.min_dist_with(&c), 0);
-        let d = 4;
-        assert_eq!(a.min_dist_with(&d), 0);
-        assert_eq!(d.min_dist_with(&a), 0);
-        assert_eq!(a.min_dist_with(&6), 1);
-        assert_eq!(6.min_dist_with(&a), 1);
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(5, 7);
+        let interval_c = Interval::new(7, 8);
+        assert_eq!(interval_a.min_dist_with(&interval_b), 0);
+        assert_eq!(interval_a.min_dist_with(&interval_c), 2);
+        assert_eq!(interval_b.min_dist_with(&interval_c), 0);
+        let val_d = 4;
+        assert_eq!(interval_a.min_dist_with(&val_d), 0);
+        assert_eq!(val_d.min_dist_with(&interval_a), 0);
+        assert_eq!(interval_a.min_dist_with(&6), 1);
+        assert_eq!(6.min_dist_with(&interval_a), 1);
     }
 
     #[test]
     fn test_displacement() {
-        let a = Interval::new(3, 5);
-        let b = Interval::new(5, 7);
-        let c = Interval::new(7, 8);
-        assert_eq!(a.displace(&b), Interval::new(-2, -2));
-        assert_eq!(a.displace(&c), Interval::new(-4, -3));
-        assert_eq!(b.displace(&c), Interval::new(-2, -1));
-        let d = 4;
-        assert_eq!(d.displace(&d), 0);
-        assert_eq!(d.displace(&6), -2);
-        assert_eq!(6.displace(&d), 2);
+        let interval_a = Interval::new(3, 5);
+        let interval_b = Interval::new(5, 7);
+        let interval_c = Interval::new(7, 8);
+        assert_eq!(interval_a.displace(&interval_b), Interval::new(-2, -2));
+        assert_eq!(interval_a.displace(&interval_c), Interval::new(-4, -3));
+        assert_eq!(interval_b.displace(&interval_c), Interval::new(-2, -1));
+        let val_d = 4;
+        assert_eq!(val_d.displace(&val_d), 0);
+        assert_eq!(val_d.displace(&6), -2);
+        assert_eq!(6.displace(&val_d), 2);
     }
 
     #[test]
     fn test_enlarge() {
-        let a = Interval::new(3, 5);
-        assert!(a.enlarge_with(2) == Interval::new(1, 7));
-        let d = 4;
-        assert_eq!(d.enlarge_with(6), Interval::new(-2, 10));
-        assert_eq!(6.enlarge_with(d), Interval::new(2, 10));
+        let interval_a = Interval::new(3, 5);
+        assert!(interval_a.enlarge_with(2) == Interval::new(1, 7));
+        let val_d = 4;
+        assert_eq!(val_d.enlarge_with(6), Interval::new(-2, 10));
+        assert_eq!(6.enlarge_with(val_d), Interval::new(2, 10));
     }
 }
