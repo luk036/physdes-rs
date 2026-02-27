@@ -66,6 +66,10 @@ pub mod polygon;
 pub mod rpolygon;
 pub mod vector2;
 
+/// Logging module - available when `std` feature is enabled.
+#[cfg(feature = "std")]
+pub mod logging;
+
 pub use crate::point::Point;
 pub use crate::polygon::Polygon;
 pub use crate::rpolygon::RPolygon;
