@@ -809,3 +809,115 @@ mod tests {
         assert!(point_in_polygon(&pointset_cw, &Point::new(1, 5)));
     }
 }
+
+#[test]
+fn test_polygon_signed_area_x2() {
+    // Test signed_area_x2 for different polygons
+    let coords = [(0, 0), (4, 0), (4, 3), (0, 3)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly = Polygon::from_pointset(&pointset);
+    assert_eq!(poly.signed_area_x2(), 24); // 2 * (4*3) = 24
+}
+
+#[test]
+fn test_polygon_vertices() {
+    let coords = [(0, 0), (4, 0), (4, 3), (0, 3)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly = Polygon::from_pointset(&pointset);
+    let vertices = poly.vertices();
+    assert_eq!(vertices.len(), 4);
+}
+
+#[test]
+fn test_polygon_bounding_box() {
+    let coords = [(1, 1), (5, 1), (5, 4), (1, 4)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly = Polygon::from_pointset(&pointset);
+    let (min, max) = poly.bounding_box();
+    assert_eq!(min, Point::new(1, 1));
+    assert_eq!(max, Point::new(5, 4));
+}
+
+#[test]
+fn test_polygon_add_assign() {
+    let coords = [(0, 0), (4, 0), (4, 3), (0, 3)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let mut poly = Polygon::from_pointset(&pointset);
+    poly.add_assign(Vector2::new(1, 2));
+    assert_eq!(poly.origin, Point::new(1, 2));
+}
+
+#[test]
+fn test_polygon_sub_assign() {
+    let coords = [(1, 2), (5, 2), (5, 5), (1, 5)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let mut poly = Polygon::from_pointset(&pointset);
+    poly.sub_assign(Vector2::new(1, 2));
+    assert_eq!(poly.origin, Point::new(0, 0));
+}
+
+#[test]
+fn test_polygon_partial_eq() {
+    let coords = [(0, 0), (4, 0), (4, 3), (0, 3)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly1 = Polygon::from_pointset(&pointset);
+    let poly2 = Polygon::from_pointset(&pointset);
+    assert_eq!(poly1, poly2);
+
+    let coords2 = [(0, 0), (5, 0), (5, 3), (0, 3)];
+    let pointset2: Vec<Point<i32, i32>> = coords2.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly3 = Polygon::from_pointset(&pointset2);
+    assert_ne!(poly1, poly3);
+}
+
+#[test]
+fn test_polygon_from_origin_and_vectors() {
+    let origin = Point::new(0, 0);
+    let vecs = vec![Vector2::new(4, 0), Vector2::new(0, 3), Vector2::new(-4, 0)];
+    let poly = Polygon::from_origin_and_vectors(origin, vecs);
+    assert_eq!(poly.origin, Point::new(0, 0));
+    assert_eq!(poly.vecs.len(), 3);
+}
+
+#[test]
+fn test_polygon_default() {
+    let poly: Polygon<i32> = Polygon::default();
+    assert_eq!(poly.origin, Point::new(0, 0));
+}
+
+#[test]
+fn test_polygon_is_monotone_custom() {
+    // Test polygon_is_monotone with custom direction
+    let coords = [(0, 0), (1, 0), (2, 1), (1, 2), (0, 2)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    // x-monotone
+    assert!(polygon_is_monotone(&pointset, |pt| (pt.xcoord, pt.ycoord)));
+}
+
+#[test]
+fn test_create_mono_polygon_custom() {
+    // Test create_mono_polygon with custom function
+    let coords = [(0, 0), (2, 1), (1, 2), (3, 2)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let result = create_mono_polygon(&pointset, |pt| (pt.xcoord, pt.ycoord));
+    assert!(!result.is_empty());
+}
+
+#[test]
+fn test_polygon_empty_vecs_is_rectilinear() {
+    // Edge case: polygon with no vecs should be rectilinear
+    let origin = Point::new(0, 0);
+    let poly = Polygon::from_origin_and_vectors(origin, vec![]);
+    assert!(poly.is_rectilinear());
+}
+
+#[test]
+fn test_polygon_signed_area_x2_triangle() {
+    // Triangle area calculation
+    let coords = [(0, 0), (3, 0), (0, 4)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly = Polygon::from_pointset(&pointset);
+    // Area = 0.5 * |0*(0-4) + 3*(4-0) + 0*(0-0)| = 0.5 * 12 = 6
+    // signed_area_x2 = 2 * area = 12
+    assert_eq!(poly.signed_area_x2(), 12);
+}

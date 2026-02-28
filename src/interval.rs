@@ -1068,3 +1068,93 @@ mod tests {
         assert_eq!(6.enlarge_with(val_d), Interval::new(2, 10));
     }
 }
+
+#[test]
+fn test_interval_length() {
+    let interval = Interval::new(3, 8);
+    assert_eq!(interval.length(), 5);
+
+    let interval2 = Interval::new(-2, 3);
+    assert_eq!(interval2.length(), 5);
+}
+
+#[test]
+fn test_interval_display() {
+    let interval = Interval::new(3, 8);
+    let display_str = format!("{}", interval);
+    assert_eq!(display_str, "[3, 8]");
+
+    let interval2 = Interval::new(-5, 10);
+    let display_str2 = format!("{}", interval2);
+    assert_eq!(display_str2, "[-5, 10]");
+}
+
+#[test]
+fn test_interval_sub_interval() {
+    let interval_a = Interval::new(5, 10);
+    let interval_b = Interval::new(2, 3);
+    let result = interval_a - interval_b;
+    assert_eq!(result, Interval::new(3, 7));
+}
+
+#[test]
+fn test_interval_add_interval() {
+    let interval_a = Interval::new(1, 3);
+    let interval_b = Interval::new(2, 5);
+    let result = interval_a + interval_b;
+    assert_eq!(result, Interval::new(3, 8));
+}
+
+#[test]
+fn test_interval_is_invalid() {
+    let valid_interval = Interval::new(1, 5);
+    assert!(!valid_interval.is_invalid());
+
+    let invalid_interval = Interval::new(5, 1);
+    assert!(invalid_interval.is_invalid());
+}
+
+#[test]
+fn test_interval_sub_assign_interval() {
+    let mut interval = Interval::new(10, 20);
+    interval -= 3;
+    assert_eq!(interval, Interval::new(7, 17));
+}
+
+#[test]
+fn test_interval_hull_t_for_t() {
+    let val = 5;
+    let interval = Interval::new(3, 8);
+    // T as Hull<Interval<T>>
+    let result = val.hull_with(&interval);
+    assert_eq!(result.lb, 3);
+    assert_eq!(result.ub, 8);
+}
+
+#[test]
+fn test_interval_contains_interval_t() {
+    let interval = Interval::new(3, 8);
+    // Contain<Interval<T>> for T - always returns false
+    let val = 5;
+    assert!(!val.contains(&interval));
+}
+
+#[test]
+fn test_interval_overlap_interval_t() {
+    // Overlap<Interval<T>> for T
+    let val = 5;
+    let interval = Interval::new(3, 8);
+    assert!(val.overlaps(&interval));
+
+    let val2 = 10;
+    assert!(!val2.overlaps(&interval));
+}
+
+#[test]
+fn test_interval_partial_cmp_greater() {
+    let interval_a = Interval::new(8, 10);
+    let interval_b = Interval::new(3, 5);
+    // interval_a is greater than interval_b (no overlap, ub > other.lb)
+    let cmp = interval_a.partial_cmp(&interval_b);
+    assert_eq!(cmp, Some(std::cmp::Ordering::Greater));
+}

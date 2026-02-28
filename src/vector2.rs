@@ -914,3 +914,67 @@ mod test {
     //     }
     // }
 }
+
+#[test]
+fn test_neg_ref() {
+    let v = &Vector2::new(1, 2);
+    let neg_v = -v;
+    assert_eq!(neg_v, Vector2::new(-1, -2));
+}
+
+#[test]
+fn test_ref_add_assign_ref() {
+    let mut v1 = Vector2::new(1.0, 2.0);
+    let v2 = &Vector2::new(3.0, 4.0);
+    v1 += v2;
+    assert_eq!(v1, Vector2::new(4.0, 6.0));
+}
+
+#[test]
+fn test_ref_sub_assign_ref() {
+    let mut v1 = Vector2::new(5.0, 7.0);
+    let v2 = &Vector2::new(2.0, 3.0);
+    v1 -= v2;
+    assert_eq!(v1, Vector2::new(3.0, 4.0));
+}
+
+#[test]
+fn test_ref_mul_assign_ref() {
+    let mut v = Vector2::new(2.0, 3.0);
+    let scalar = &2.0;
+    v *= scalar;
+    assert_eq!(v, Vector2::new(4.0, 6.0));
+}
+
+#[test]
+fn test_ref_div_assign_ref() {
+    let mut v = Vector2::new(6.0, 8.0);
+    let scalar = &2.0;
+    v /= scalar;
+    assert_eq!(v, Vector2::new(3.0, 4.0));
+}
+
+#[test]
+fn test_mul_integer_types() {
+    let v = Vector2::new(2i32, 3i32);
+    assert_eq!(v * 2i32, Vector2::new(4, 6));
+
+    let v2 = Vector2::new(2u8, 3u8);
+    assert_eq!(v2 * 2u8, Vector2::new(4, 6));
+}
+
+#[test]
+fn test_neg_edge_cases() {
+    let v_zero = Vector2::new(0.0, 0.0);
+    assert_eq!(-v_zero, Vector2::new(-0.0, -0.0));
+
+    let v_neg = Vector2::new(-1.0, -2.0);
+    assert_eq!(-v_neg, Vector2::new(1.0, 2.0));
+}
+
+#[test]
+fn test_scalar_mul_i32_ref() {
+    let v = Vector2::new(2i32, 3i32);
+    let result = &v * &2i32;
+    assert_eq!(result, Vector2::new(4, 6));
+}

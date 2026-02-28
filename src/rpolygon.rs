@@ -578,3 +578,141 @@ mod test {
         assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &query_pt4));
     }
 }
+
+#[test]
+fn test_rpolygon_is_xmonotone() {
+    // Test x-monotone polygon
+    let coords = [(0, 0), (1, 0), (2, 0), (2, 1), (1, 1), (0, 1)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    assert!(rpolygon_is_xmonotone(&pointset));
+
+    // Test non-x-monotone polygon
+    let coords2 = [(0, 0), (2, 0), (1, 1), (0, 2), (2, 2)];
+    let pointset2: Vec<Point<i32, i32>> = coords2.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    assert!(!rpolygon_is_xmonotone(&pointset2));
+}
+
+#[test]
+fn test_rpolygon_is_ymonotone() {
+    // Test y-monotone polygon
+    let coords = [(0, 0), (0, 1), (0, 2), (1, 2), (1, 1), (1, 0)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    assert!(rpolygon_is_ymonotone(&pointset));
+
+    // Test non-y-monotone polygon
+    let coords2 = [(0, 0), (0, 2), (1, 1), (2, 2), (2, 0)];
+    let pointset2: Vec<Point<i32, i32>> = coords2.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    assert!(!rpolygon_is_ymonotone(&pointset2));
+}
+
+#[test]
+fn test_rpolygon_is_convex() {
+    // Test rectilinearly convex polygon
+    let coords = [(0, 0), (0, 2), (2, 2), (2, 0)];
+    let pointset: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    assert!(rpolygon_is_convex(&pointset));
+
+    // Test non-convex polygon
+    let coords2 = [(0, 0), (0, 2), (1, 1), (2, 2), (2, 0)];
+    let pointset2: Vec<Point<i32, i32>> = coords2.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    assert!(!rpolygon_is_convex(&pointset2));
+}
+
+#[test]
+fn test_rpolygon_vertices() {
+    let pt1 = Point::new(0, 0);
+    let pt2 = Point::new(1, 0);
+    let pt3 = Point::new(1, 1);
+    let poly = RPolygon::new(&[pt1, pt2, pt3]);
+    let vertices = poly.vertices();
+    assert_eq!(vertices.len(), 3);
+    assert_eq!(vertices[0], pt1);
+    assert_eq!(vertices[1], pt2);
+    assert_eq!(vertices[2], pt3);
+}
+
+#[test]
+fn test_rpolygon_bounding_box() {
+    let pt1 = Point::new(0, 0);
+    let pt2 = Point::new(2, 0);
+    let pt3 = Point::new(2, 2);
+    let pt4 = Point::new(0, 2);
+    let poly = RPolygon::new(&[pt1, pt2, pt3, pt4]);
+    let (min, max) = poly.bounding_box();
+    assert_eq!(min, Point::new(0, 0));
+    assert_eq!(max, Point::new(2, 2));
+}
+
+#[test]
+fn test_rpolygon_add_assign() {
+    let pt1 = Point::new(0, 0);
+    let pt2 = Point::new(1, 0);
+    let pt3 = Point::new(1, 1);
+    let mut poly = RPolygon::new(&[pt1, pt2, pt3]);
+    poly.add_assign(Vector2::new(1, 1));
+    let vertices = poly.vertices();
+    assert_eq!(vertices[0], Point::new(1, 1));
+}
+
+#[test]
+fn test_rpolygon_sub_assign() {
+    let pt1 = Point::new(1, 1);
+    let pt2 = Point::new(2, 1);
+    let pt3 = Point::new(2, 2);
+    let mut poly = RPolygon::new(&[pt1, pt2, pt3]);
+    poly.sub_assign(Vector2::new(1, 1));
+    let vertices = poly.vertices();
+    assert_eq!(vertices[0], Point::new(0, 0));
+}
+
+#[test]
+fn test_rpolygon_is_rectilinear() {
+    let pt1 = Point::new(0, 0);
+    let pt2 = Point::new(1, 0);
+    let pt3 = Point::new(1, 1);
+    let pt4 = Point::new(0, 1);
+    let poly = RPolygon::new(&[pt1, pt2, pt3, pt4]);
+    assert!(poly.is_rectilinear());
+}
+
+#[test]
+fn test_rpolygon_from_origin_and_vectors() {
+    let origin = Point::new(0, 0);
+    let vecs = vec![Vector2::new(1, 0), Vector2::new(1, 1), Vector2::new(0, 1)];
+    let poly = RPolygon::from_origin_and_vectors(origin, vecs);
+    assert_eq!(poly.origin, Point::new(0, 0));
+    let vertices = poly.vertices();
+    assert_eq!(vertices.len(), 4);
+}
+
+#[test]
+fn test_rpolygon_from_pointset() {
+    let pointset = [Point::new(0, 0), Point::new(1, 0), Point::new(1, 1)];
+    let poly = RPolygon::from_pointset(&pointset);
+    assert_eq!(poly.origin, Point::new(0, 0));
+}
+
+#[test]
+fn test_rpolygon_partial_eq() {
+    let pt1 = Point::new(0, 0);
+    let pt2 = Point::new(1, 0);
+    let pt3 = Point::new(1, 1);
+    let poly1 = RPolygon::new(&[pt1, pt2, pt3]);
+    let poly2 = RPolygon::new(&[pt1, pt2, pt3]);
+    assert_eq!(poly1, poly2);
+
+    let poly3 = RPolygon::new(&[pt1, pt2, Point::new(0, 1)]);
+    assert_ne!(poly1, poly3);
+}
+
+#[test]
+fn test_rpolygon_is_anticlockwise_standalone() {
+    let pointset = [Point::new(0, 0), Point::new(1, 0), Point::new(1, 1)];
+    assert!(rpolygon_is_anticlockwise(&pointset));
+}
+
+#[test]
+fn test_rpolygon_default() {
+    let poly: RPolygon<i32> = RPolygon::default();
+    assert_eq!(poly.origin, Point::new(0, 0));
+}
