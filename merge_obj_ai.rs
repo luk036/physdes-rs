@@ -1,3 +1,19 @@
+//! # Experimental AI Module for Merge Object Operations
+//!
+//! **Note**: This module is experimental and not yet integrated into the main library.
+//! It contains alternative implementations and AI-assisted designs for merge object operations.
+//!
+//! ## Status
+//! - This is a research/experimental module
+//! - Contains placeholder implementations (marked with TODO)
+//! - Not recommended for production use
+//!
+//! ## Integration Plan
+//! - Complete TODO implementations
+//! - Review and validate designs
+//! - Compare with main `merge_obj` module
+//! - Merge useful features or remove if superseded
+
 use std::ops::{Add, Sub};
 use std::fmt;
 

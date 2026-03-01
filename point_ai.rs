@@ -1,3 +1,18 @@
+//! # Experimental AI Module for Point Operations
+//!
+//! **Note**: This module is experimental and not yet integrated into the main library.
+//! It contains alternative implementations and AI-assisted designs for point and vector operations.
+//!
+//! ## Status
+//! - This is a research/experimental module
+//! - May contain unfinished or untested implementations
+//! - Not recommended for production use
+//!
+//! ## Integration Plan
+//! - Review and validate implementations
+//! - Compare with main `point` and `vector2` modules
+//! - Merge useful features or remove if superseded
+
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]

@@ -41,6 +41,7 @@ use crate::vector2::Vector2;
 /// assert_eq!(poly.vecs.len(), 3);
 /// ```
 #[derive(Eq, Clone, Debug, Default)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
 pub struct Polygon<T> {
     pub origin: Point<T, T>,
     pub vecs: Vec<Vector2<T, T>>,
@@ -95,6 +96,90 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// are used to construct displacement vectors relative to the origin.
     pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
         Self::new(pointset)
+    }
+
+    /// Calculates the area of the polygon
+    ///
+    /// # Returns
+    ///
+    /// The area of the polygon as a value of type T
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    ///
+    /// // Create a unit square
+    /// let points = vec![
+    ///     Point::new(0, 0),
+    ///     Point::new(1, 0),
+    ///     Point::new(1, 1),
+    ///     Point::new(0, 1),
+    /// ];
+    /// let poly = Polygon::new(&points);
+    /// let area = poly.area();
+    /// // Note: area returns signed area (may be negative depending on vertex order)
+    /// ```
+    pub fn area(&self) -> T
+    where
+        T: std::ops::Sub<Output = T> + std::ops::AddAssign + std::ops::Mul<Output = T> + Copy,
+    {
+        let n = self.vecs.len();
+        if n < 2 {
+            return T::zero();
+        }
+
+        let vec0 = self.vecs[0];
+        let vec1 = self.vecs[1];
+        let itr = self.vecs.iter().skip(2);
+
+        let mut res = vec0.x_ * vec1.y_ - self.vecs[n - 1].x_ * self.vecs[n - 2].y_;
+
+        let mut vec0 = vec0;
+        let mut vec1 = vec1;
+
+        for vec2 in itr {
+            res += vec1.x_ * (vec2.y_ - vec0.y_);
+            vec0 = vec1;
+            vec1 = *vec2;
+        }
+
+        res
+    }
+
+    /// Gets all vertices of the polygon as points
+    ///
+    /// # Returns
+    ///
+    /// A vector of all polygon vertices in order
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    ///
+    /// let points = vec![
+    ///     Point::new(0, 0),
+    ///     Point::new(1, 0),
+    ///     Point::new(1, 1),
+    ///     Point::new(0, 1),
+    /// ];
+    /// let poly = Polygon::new(&points);
+    /// let vertices = poly.vertices();
+    /// assert_eq!(vertices.len(), 4);
+    /// assert_eq!(vertices[0], Point::new(0, 0));
+    /// ```
+    pub fn vertices(&self) -> Vec<Point<T, T>> {
+        let mut result = Vec::with_capacity(self.vecs.len() + 1);
+        result.push(self.origin);
+
+        for vec in &self.vecs {
+            result.push(self.origin + *vec);
+        }
+
+        result
     }
 
     /// Translates the polygon by adding a vector to its origin
@@ -163,7 +248,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     }
 
     /// Gets all vertices of the polygon as points
-    pub fn vertices(&self) -> Vec<Point<T, T>> {
+    pub fn get_vertices(&self) -> Vec<Point<T, T>> {
         let mut result = Vec::with_capacity(self.vecs.len() + 1);
         result.push(self.origin);
 
@@ -172,6 +257,57 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
         }
 
         result
+    }
+
+    /// Gets the bounding box of the polygon
+    ///
+    /// # Returns
+    ///
+    /// A tuple of (min_point, max_point) representing the bounding box
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    ///
+    /// let points = vec![
+    ///     Point::new(0, 0),
+    ///     Point::new(2, 0),
+    ///     Point::new(2, 2),
+    ///     Point::new(0, 2),
+    /// ];
+    /// let poly = Polygon::new(&points);
+    /// let (min_pt, max_pt) = poly.bounding_box();
+    /// assert_eq!(min_pt, Point::new(0, 0));
+    /// assert_eq!(max_pt, Point::new(2, 2));
+    /// ```
+    pub fn bounding_box(&self) -> (Point<T, T>, Point<T, T>)
+    where
+        T: Ord + Copy,
+    {
+        let vertices = self.vertices();
+        let mut min_x = vertices[0].xcoord;
+        let mut min_y = vertices[0].ycoord;
+        let mut max_x = vertices[0].xcoord;
+        let mut max_y = vertices[0].ycoord;
+
+        for pt in &vertices {
+            if pt.xcoord < min_x {
+                min_x = pt.xcoord;
+            }
+            if pt.ycoord < min_y {
+                min_y = pt.ycoord;
+            }
+            if pt.xcoord > max_x {
+                max_x = pt.xcoord;
+            }
+            if pt.ycoord > max_y {
+                max_y = pt.ycoord;
+            }
+        }
+
+        (Point::new(min_x, min_y), Point::new(max_x, max_y))
     }
 
     /// Checks if the polygon is rectilinear
@@ -260,6 +396,42 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     }
 
     /// Checks if the polygon is convex
+    ///
+    /// A polygon is convex if all its interior angles are less than 180 degrees
+    /// and no edges bend inward.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the polygon is convex, `false` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::point::Point;
+    /// use physdes::polygon::Polygon;
+    ///
+    /// // Convex square
+    /// let convex_points = vec![
+    ///     Point::new(0, 0),
+    ///     Point::new(1, 0),
+    ///     Point::new(1, 1),
+    ///     Point::new(0, 1),
+    /// ];
+    /// let convex_poly = Polygon::new(&convex_points);
+    /// assert!(convex_poly.is_convex());
+    ///
+    /// // Concave polygon (L-shape)
+    /// let concave_points = vec![
+    ///     Point::new(0, 0),
+    ///     Point::new(2, 0),
+    ///     Point::new(2, 1),
+    ///     Point::new(1, 1),
+    ///     Point::new(1, 2),
+    ///     Point::new(0, 2),
+    /// ];
+    /// let concave_poly = Polygon::new(&concave_points);
+    /// assert!(!concave_poly.is_convex());
+    /// ```
     pub fn is_convex(&self) -> bool
     where
         T: PartialOrd,
@@ -301,34 +473,6 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 
         true
     }
-
-    /// Gets the bounding box of the polygon
-    pub fn bounding_box(&self) -> (Point<T, T>, Point<T, T>) {
-        let mut min_x = T::zero();
-        let mut min_y = T::zero();
-        let mut max_x = T::zero();
-        let mut max_y = T::zero();
-
-        for vec in &self.vecs {
-            if vec.x_ < min_x {
-                min_x = vec.x_;
-            }
-            if vec.y_ < min_y {
-                min_y = vec.y_;
-            }
-            if vec.x_ > max_x {
-                max_x = vec.x_;
-            }
-            if vec.y_ > max_y {
-                max_y = vec.y_;
-            }
-        }
-
-        (
-            Point::new(self.origin.xcoord + min_x, self.origin.ycoord + min_y),
-            Point::new(self.origin.xcoord + max_x, self.origin.ycoord + max_y),
-        )
-    }
 }
 
 /// Creates a monotone polygon from a set of points using a custom comparison function
@@ -366,6 +510,31 @@ where
 /// Creates an x-monotone polygon from a set of points
 ///
 /// Points are ordered primarily by x-coordinate, secondarily by y-coordinate
+///
+/// # Arguments
+///
+/// * `pointset` - A slice of points to order
+///
+/// # Returns
+///
+/// A vector of points ordered to form an x-monotone polygon
+///
+/// # Examples
+///
+/// ```
+/// use physdes::point::Point;
+/// use physdes::polygon::create_xmono_polygon;
+///
+/// let points = vec![
+///     Point::new(1, 1),
+///     Point::new(3, 2),
+///     Point::new(2, 0),
+///     Point::new(0, 2),
+/// ];
+/// let ordered = create_xmono_polygon(&points);
+/// // Result is ordered to create x-monotone polygon
+/// assert_eq!(ordered.len(), 4);
+/// ```
 #[inline]
 pub fn create_xmono_polygon<T>(pointset: &[Point<T, T>]) -> Vec<Point<T, T>>
 where
@@ -377,6 +546,31 @@ where
 /// Creates a y-monotone polygon from a set of points
 ///
 /// Points are ordered primarily by y-coordinate, secondarily by x-coordinate
+///
+/// # Arguments
+///
+/// * `pointset` - A slice of points to order
+///
+/// # Returns
+///
+/// A vector of points ordered to form a y-monotone polygon
+///
+/// # Examples
+///
+/// ```
+/// use physdes::point::Point;
+/// use physdes::polygon::create_ymono_polygon;
+///
+/// let points = vec![
+///     Point::new(1, 1),
+///     Point::new(2, 3),
+///     Point::new(0, 2),
+///     Point::new(2, 0),
+/// ];
+/// let ordered = create_ymono_polygon(&points);
+/// // Result is ordered to create y-monotone polygon
+/// assert_eq!(ordered.len(), 4);
+/// ```
 #[inline]
 pub fn create_ymono_polygon<T>(pointset: &[Point<T, T>]) -> Vec<Point<T, T>>
 where

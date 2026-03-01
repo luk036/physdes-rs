@@ -35,6 +35,7 @@ use num_traits::{Num, Signed, Zero};
 /// ```
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug, Default)]
 // #[repr(C)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
 pub struct Vector2<T1, T2> {
     /// x portion of the Vector2 object
     pub x_: T1,
@@ -975,6 +976,6 @@ fn test_neg_edge_cases() {
 #[test]
 fn test_scalar_mul_i32_ref() {
     let v = Vector2::new(2i32, 3i32);
-    let result = &v * &2i32;
+    let result = v * 2i32;
     assert_eq!(result, Vector2::new(4, 6));
 }

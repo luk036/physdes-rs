@@ -1,0 +1,24 @@
+[package]
+name = "physdes-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+physdes-rs = { path = "..", features = ["std"] }
+libfuzzer-sys = "0.4"
+
+[[bin]]
+name = "polygon_ops"
+path = "fuzz_targets/polygon_ops.rs"
+
+[[bin]]
+name = "interval_ops"
+path = "fuzz_targets/interval_ops.rs"
+
+[[bin]]
+name = "point_ops"
+path = "fuzz_targets/point_ops.rs"

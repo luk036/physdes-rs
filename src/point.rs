@@ -40,6 +40,7 @@ use core::hash;
 /// ```
 #[derive(PartialEq, Eq, Copy, PartialOrd, Ord, Clone, Hash, Debug, Default)]
 #[repr(C)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
 pub struct Point<T1, T2> {
     /// x portion of the Point object
     pub xcoord: T1,

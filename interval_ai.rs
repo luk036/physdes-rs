@@ -1,3 +1,18 @@
+//! # Experimental AI Module for Interval Operations
+//!
+//! **Note**: This module is experimental and not yet integrated into the main library.
+//! It contains alternative implementations and AI-assisted designs for interval operations.
+//!
+//! ## Status
+//! - This is a research/experimental module
+//! - May contain unfinished or untested implementations
+//! - Not recommended for production use
+//!
+//! ## Integration Plan
+//! - Review and validate implementations
+//! - Compare with main `interval` module
+//! - Merge useful features or remove if superseded
+
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 use std::cmp::{Eq, Ord, PartialEq, PartialOrd};
 use std::fmt::{Display, Formatter, Result as FmtResult};

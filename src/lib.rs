@@ -28,6 +28,9 @@
 //! - `Interval<T>`: A range with lower and upper bounds
 //! - `Polygon<T>`: An arbitrary polygon
 //! - `RPolygon<T>`: A rectilinear polygon
+//! - `GeomError`: Error types for geometric operations
+//! - `vlsi_ops`: VLSI-specific geometric operations
+//! - `algorithms`: Additional geometric algorithms
 //!
 //! # Examples
 //!
@@ -57,7 +60,8 @@
 //! assert_eq!(polygon.origin, Point::new(0, 0));
 //! ```
 //!
-//! pub mod halton_int;
+pub mod algorithms;
+pub mod error;
 pub mod generic;
 pub mod interval;
 pub mod merge_obj;
@@ -65,6 +69,7 @@ pub mod point;
 pub mod polygon;
 pub mod rpolygon;
 pub mod vector2;
+pub mod vlsi_ops;
 
 /// Logging module - available when `std` feature is enabled.
 #[cfg(feature = "std")]
