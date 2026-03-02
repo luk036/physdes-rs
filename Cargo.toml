@@ -33,7 +33,7 @@ serialize = ["serde"]
 quickcheck = "1"
 quickcheck_macros = "1.1.0"
 svgbobdoc = "0.3"
-criterion = "0.5"
+criterion = "0.8"
 
 [[bench]]
 name = "geometry_bench"
