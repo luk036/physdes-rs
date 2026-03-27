@@ -196,7 +196,6 @@ where
 {
     type Output = Interval<T>;
 
-    /// The `neg` function in Rust returns a new `Interval` with its lower and upper bounds negated.
     #[inline]
     fn neg(self) -> Self::Output {
         Interval {

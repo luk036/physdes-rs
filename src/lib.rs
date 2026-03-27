@@ -60,15 +60,25 @@
 //! assert_eq!(polygon.origin, Point::new(0, 0));
 //! ```
 //!
+/// Geometric algorithms module
 pub mod algorithms;
+/// Error types for geometric operations
 pub mod error;
+/// Generic traits for geometric operations
 pub mod generic;
+/// Interval operations and types
 pub mod interval;
+/// Merge object for combining geometric objects
 pub mod merge_obj;
+/// Point types and operations
 pub mod point;
+/// Polygon types and operations
 pub mod polygon;
+/// Rectilinear polygon types and operations
 pub mod rpolygon;
+/// Vector2 types and operations
 pub mod vector2;
+/// VLSI-specific geometric operations
 pub mod vlsi_ops;
 
 /// Logging module - available when `std` feature is enabled.

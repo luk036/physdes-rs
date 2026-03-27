@@ -370,6 +370,8 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
 }
 
 // Assignment operations
+
+/// Translates the point by adding a vector to its coordinates
 impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2<T1, T2>>
     for Point<T1, T2>
 {
@@ -380,6 +382,7 @@ impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2
     }
 }
 
+/// Translates the point by subtracting a vector from its coordinates
 impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2<T1, T2>>
     for Point<T1, T2>
 {
@@ -390,6 +393,7 @@ impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2
     }
 }
 
+/// Translates the point by adding a vector reference to its coordinates
 impl<'a, T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<&'a Vector2<T1, T2>>
     for Point<T1, T2>
 {
@@ -400,6 +404,7 @@ impl<'a, T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<&'a
     }
 }
 
+/// Translates the point by subtracting a vector reference from its coordinates
 impl<'a, T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<&'a Vector2<T1, T2>>
     for Point<T1, T2>
 {
