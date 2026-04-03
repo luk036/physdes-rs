@@ -144,18 +144,19 @@ let magnitude = v1.norm();
 
 ### Core Types
 
-| Type | Description | Module |
-|------|-------------|--------|
-| `Point<T1, T2>` | 2D point with x and y coordinates | `point` |
-| `Vector2<T1, T2>` | 2D vector with x and y components | `vector2` |
-| `Interval<T>` | Range [lb, ub] with interval algebra | `interval` |
-| `Polygon<T>` | Arbitrary polygon | `polygon` |
-| `RPolygon<T>` | Rectilinear (Manhattan) polygon | `rpolygon` |
+| Type               | Description                          | Module      |
+| ------------------ | ------------------------------------ | ----------- |
+| `Point<T1, T2>`    | 2D point with x and y coordinates    | `point`     |
+| `Vector2<T1, T2>`  | 2D vector with x and y components    | `vector2`   |
+| `Interval<T>`      | Range [lb, ub] with interval algebra | `interval`  |
+| `Polygon<T>`       | Arbitrary polygon                    | `polygon`   |
+| `RPolygon<T>`      | Rectilinear (Manhattan) polygon      | `rpolygon`  |
 | `MergeObj<T1, T2>` | Merge object for combining intervals | `merge_obj` |
 
 ### Key Operations
 
 #### Point Operations
+
 - Arithmetic: `+`, `-`, `+=`, `-=` with vectors
 - Comparison: `==`, `!=`, `<`, `>`
 - Distance: `dist_to()`, `dist_to_point()`
@@ -163,6 +164,7 @@ let magnitude = v1.norm();
 - Convex hull: `convex_hull()`
 
 #### Vector Operations
+
 - Arithmetic: `+`, `-`, `*`, `/` with scalars
 - Dot product: `dot()`
 - Cross product: `cross()`
@@ -170,11 +172,13 @@ let magnitude = v1.norm();
 - Normalization: `normalize()`
 
 #### Interval Operations
+
 - Overlap: `overlaps()`, `contains()`
 - Set operations: `intersect()`, `convex_hull()`
 - Properties: `length()`, `is_empty()`
 
 #### Polygon Operations
+
 - Properties: `area()`, `is_convex()`, `orientation()`
 - Bounding: `bounding_box()`
 - Validation: `is_valid()`, `is_rectilinear()`
@@ -316,3 +320,14 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 🔗 Related Projects
+
+### Polyglot Implementations
+
+- [**physdes-cpp**](https://github.com/luk036/physdes-cpp) - C++ version
+- [**physdes-py**](https://github.com/luk036/physdes-py) - Python version
+
+### Algorithm Polyglot
+
+- [**algorithm-polyglot**](https://github.com/luk036/algorithm-polyglot) - Meta-repo documenting the polyglot strategy
