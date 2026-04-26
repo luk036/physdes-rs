@@ -379,4 +379,100 @@ mod tests {
         let area = total_area(&rects);
         assert_eq!(area, 175);
     }
+
+    #[test]
+    fn test_from_dimensions() {
+        let origin = Point::new(5, 10);
+        let rect = Rectangle::from_dimensions(origin, 20, 30);
+        assert_eq!(rect.min, origin);
+        assert_eq!(rect.max, Point::new(25, 40));
+    }
+
+    #[test]
+    fn test_rectangle_contains() {
+        let rect = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let inner = Rectangle::new(Point::new(2, 2), Point::new(8, 8));
+        let outer = Rectangle::new(Point::new(-5, -5), Point::new(15, 15));
+
+        assert!(rect.contains(&inner));
+        assert!(!rect.contains(&outer));
+    }
+
+    #[test]
+    fn test_rectangle_contains_point() {
+        let rect = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let inside = Point::new(5, 5);
+        let outside = Point::new(15, 15);
+        let on_edge = Point::new(10, 5);
+
+        assert!(rect.contains_point(&inside));
+        assert!(!rect.contains_point(&outside));
+        assert!(rect.contains_point(&on_edge));
+    }
+
+    #[test]
+    fn test_bounding_rect_method() {
+        let rect1 = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let rect2 = Rectangle::new(Point::new(5, 5), Point::new(15, 15));
+        let bbox = rect1.bounding_rect(&rect2);
+
+        assert_eq!(bbox.min, Point::new(0, 0));
+        assert_eq!(bbox.max, Point::new(15, 15));
+    }
+
+    #[test]
+    fn test_to_polygon() {
+        let rect = Rectangle::new(Point::new(0, 0), Point::new(10, 20));
+        let polygon = rect.to_polygon();
+
+        assert_eq!(polygon.vertices().len(), 4);
+        assert!(polygon.is_rectilinear());
+    }
+
+    #[test]
+    fn test_bounding_rect_empty() {
+        let rects: Vec<Rectangle<i32>> = vec![];
+        assert!(bounding_rect(&rects).is_none());
+    }
+
+    #[test]
+    fn test_total_area_empty() {
+        let rects: Vec<Rectangle<i32>> = vec![];
+        assert_eq!(total_area(&rects), 0);
+    }
+
+    #[test]
+    fn test_manhattan_distance_reverse() {
+        // Test case where p2 > p1 (different branch)
+        let p1 = Point::new(5, 3);
+        let p2 = Point::new(1, 0);
+        assert_eq!(manhattan_distance(&p1, &p2), 7); // |5-1| + |3-0| = 7
+    }
+
+    #[test]
+    fn test_manhattan_distance_same() {
+        // Test case where coordinates are equal
+        let p1 = Point::new(5, 5);
+        let p2 = Point::new(5, 5);
+        assert_eq!(manhattan_distance(&p1, &p2), 0);
+    }
+
+    #[test]
+    fn test_check_spacing_vertical() {
+        // Test vertical spacing
+        let rect1 = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let rect2 = Rectangle::new(Point::new(0, 10), Point::new(10, 20));
+        assert!(!check_spacing(&rect1, &rect2, 1)); // touching
+
+        let rect3 = Rectangle::new(Point::new(0, 12), Point::new(10, 22));
+        assert!(check_spacing(&rect1, &rect3, 1)); // spacing of 2
+    }
+
+    #[test]
+    fn test_check_spacing_overlapping() {
+        // Test case where rectangles overlap
+        let rect1 = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let rect2 = Rectangle::new(Point::new(5, 5), Point::new(15, 15));
+        assert!(!check_spacing(&rect1, &rect2, 1)); // overlapping
+    }
 }
