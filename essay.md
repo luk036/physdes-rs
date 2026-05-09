@@ -112,7 +112,7 @@ graph LR
     D --> E[Understanding]
     F[Descriptive Variable] --> G[Immediate Recognition]
     G --> E
-    
+
     style A fill:#ffcccc
     style F fill:#ccffcc
     style B fill:#ffdddd
@@ -201,12 +201,12 @@ graph TD
     B --> C[Select from Suggestions]
     C --> D[Variable Inserted]
     D --> E[Continue Coding]
-    
+
     F[Modern IDE Features] --> G[Auto-completion]
     F --> H[Refactoring Tools]
     F --> I[Type Checking]
     F --> J[Documentation Generation]
-    
+
     style A fill:#e1f5fe
     style E fill:#e8f5e8
     style F fill:#fff3e0
