@@ -436,38 +436,34 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     where
         T: PartialOrd,
     {
-        let n = self.vecs.len() + 1;
-        if n < 3 {
+        let n = self.vecs.len();
+        if n < 2 {
             return false;
         }
-        if n == 3 {
+        if n == 2 {
             return true;
         }
 
-        let is_anticlockwise = self.is_anticlockwise();
+        // Compute initial cross product sign using vecs[N-2] and vecs[0].
+        // In pointset terms: pointset[N-2] = vecs[N-2], pointset[1] = vecs[0].
+        // cross = -a.x*b.y + a.y*b.x  (rearranged to avoid unary negation)
+        let cross_product_sign =
+            self.vecs[n - 2].y_ * self.vecs[0].x_ - self.vecs[n - 2].x_ * self.vecs[0].y_;
 
-        // Create extended pointset for easier edge traversal
-        let mut pointset = Vec::with_capacity(n + 2);
-        pointset.push(*self.vecs.last().unwrap());
-        pointset.push(Vector2::new(T::zero(), T::zero()));
-        pointset.extend(self.vecs.iter().cloned());
-        pointset.push(Vector2::new(T::zero(), T::zero()));
+        for i in 0..n - 1 {
+            let v0 = if i == 0 {
+                Vector2::new(T::zero(), T::zero())
+            } else {
+                self.vecs[i - 1]
+            };
+            let v1 = self.vecs[i];
+            let v2 = self.vecs[i + 1];
 
-        if is_anticlockwise {
-            for i in 1..pointset.len() - 1 {
-                let v1 = pointset[i] - pointset[i - 1];
-                let v2 = pointset[i + 1] - pointset[i];
-                if v1.cross(&v2) < T::zero() {
-                    return false;
-                }
-            }
-        } else {
-            for i in 1..pointset.len() - 1 {
-                let v1 = pointset[i] - pointset[i - 1];
-                let v2 = pointset[i + 1] - pointset[i];
-                if v1.cross(&v2) > T::zero() {
-                    return false;
-                }
+            let current_cross =
+                (v1.x_ - v0.x_) * (v2.y_ - v1.y_) - (v1.y_ - v0.y_) * (v2.x_ - v1.x_);
+
+            if (cross_product_sign > T::zero()) != (current_cross > T::zero()) {
+                return false;
             }
         }
 

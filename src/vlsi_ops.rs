@@ -140,6 +140,81 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
     }
 }
 
+/// Detects if any pair of rectangles overlap using the line sweep algorithm.
+///
+/// The algorithm uses a sweep line approach:
+/// 1. Create events for left and right edges of each rectangle
+/// 2. Sort events by x-coordinate
+/// 3. Sweep from left to right, maintaining active rectangles
+/// 4. Check y-overlap when a new rectangle becomes active
+///
+/// # Arguments
+///
+/// * `rectangles` - A slice of rectangles to check for overlaps
+///
+/// # Returns
+///
+/// The indices of two overlapping rectangles if found, otherwise `None`
+///
+/// # Examples
+///
+/// ```
+/// use physdes::{Point, vlsi_ops::{Rectangle, detect_overlap}};
+///
+/// let rects = vec![
+///     Rectangle::new(Point::new(0, 0), Point::new(10, 10)),
+///     Rectangle::new(Point::new(5, 5), Point::new(15, 15)),
+///     Rectangle::new(Point::new(20, 20), Point::new(30, 30)),
+/// ];
+/// let result = detect_overlap(&rects);
+/// assert!(result.is_some());
+/// assert_eq!(result.unwrap(), (0, 1));
+/// ```
+pub fn detect_overlap<T>(rectangles: &[Rectangle<T>]) -> Option<(usize, usize)>
+where
+    T: Copy + Ord,
+{
+    if rectangles.len() < 2 {
+        return None;
+    }
+
+    // Create events: (x_coord, is_start, rect_index)
+    let mut events: Vec<(T, bool, usize)> = Vec::with_capacity(rectangles.len() * 2);
+    for (idx, rect) in rectangles.iter().enumerate() {
+        events.push((rect.min.xcoord, true, idx));
+        events.push((rect.max.xcoord, false, idx));
+    }
+
+    events.sort_by(|a, b| a.0.cmp(&b.0));
+
+    // Active rectangles: (rect_index, y_min, y_max)
+    let mut active: Vec<(usize, T, T)> = Vec::new();
+
+    for &(_x, is_start, idx) in &events {
+        let rect = &rectangles[idx];
+
+        if is_start {
+            // Check y-overlap with all active rectangles
+            for &(other_idx, other_y_min, other_y_max) in &active {
+                if rect.min.ycoord <= other_y_max && other_y_min <= rect.max.ycoord {
+                    return Some((other_idx, idx));
+                }
+            }
+            active.push((idx, rect.min.ycoord, rect.max.ycoord));
+        } else {
+            // O(1) removal: swap with back and pop
+            for i in 0..active.len() {
+                if active[i].0 == idx {
+                    active.swap_remove(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    None
+}
+
 /// Calculates Manhattan distance between two points
 ///
 /// The Manhattan distance is the sum of the absolute differences of coordinates.
