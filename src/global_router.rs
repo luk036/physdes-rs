@@ -124,7 +124,11 @@ impl GlobalRoutingTree {
         nearest
     }
 
-    pub fn insert_steiner_node(&mut self, point: Point<i32, i32>, parent_id: Option<&str>) -> String {
+    pub fn insert_steiner_node(
+        &mut self,
+        point: Point<i32, i32>,
+        parent_id: Option<&str>,
+    ) -> String {
         let id = format!("steiner_{}", self.next_steiner_id);
         self.next_steiner_id += 1;
         let idx = self.add_node(RoutingNode::new(&id, NodeType::Steiner, point));
@@ -138,7 +142,11 @@ impl GlobalRoutingTree {
         id
     }
 
-    pub fn insert_terminal_node(&mut self, point: Point<i32, i32>, parent_id: Option<&str>) -> String {
+    pub fn insert_terminal_node(
+        &mut self,
+        point: Point<i32, i32>,
+        parent_id: Option<&str>,
+    ) -> String {
         let id = format!("terminal_{}", self.next_terminal_id);
         self.next_terminal_id += 1;
         let idx = self.add_node(RoutingNode::new(&id, NodeType::Terminal, point));
@@ -182,8 +190,7 @@ impl GlobalRoutingTree {
                 self.nodes[terminal_idx].parent = Some(nearest_idx);
                 self.nodes[nearest_idx].children.push(terminal_idx);
                 let dist = self.nodes[nearest_idx].pt.min_dist_with(&point) as i32;
-                self.nodes[terminal_idx].path_length =
-                    self.nodes[nearest_idx].path_length + dist;
+                self.nodes[terminal_idx].path_length = self.nodes[nearest_idx].path_length + dist;
             }
             Some(parent_idx) => {
                 let steiner_id = format!("steiner_{}", self.next_steiner_id);
@@ -202,8 +209,7 @@ impl GlobalRoutingTree {
                 self.nodes[parent_idx].children.push(steiner_idx);
 
                 let dist_ps = self.nodes[parent_idx].pt.min_dist_with(&nearest_pt) as i32;
-                self.nodes[steiner_idx].path_length =
-                    self.nodes[parent_idx].path_length + dist_ps;
+                self.nodes[steiner_idx].path_length = self.nodes[parent_idx].path_length + dist_ps;
 
                 self.nodes[nearest_idx].parent = Some(steiner_idx);
                 self.nodes[steiner_idx].children.push(nearest_idx);
@@ -321,7 +327,9 @@ impl GlobalRoutingTree {
             .nodes
             .iter()
             .enumerate()
-            .filter(|(_, n)| n.node_type == NodeType::Steiner && n.children.len() == 1 && n.parent.is_some())
+            .filter(|(_, n)| {
+                n.node_type == NodeType::Steiner && n.children.len() == 1 && n.parent.is_some()
+            })
             .map(|(i, _)| i)
             .collect();
 

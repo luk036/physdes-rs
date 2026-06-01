@@ -30,9 +30,13 @@ impl<T> ManhattanArc<T> {
 
 impl<T: Copy> ManhattanArc<T> {
     #[inline]
-    pub fn xcoord(&self) -> T { self.impl_p.xcoord }
+    pub fn xcoord(&self) -> T {
+        self.impl_p.xcoord
+    }
     #[inline]
-    pub fn ycoord(&self) -> T { self.impl_p.ycoord }
+    pub fn ycoord(&self) -> T {
+        self.impl_p.ycoord
+    }
 }
 
 impl<T: Copy + Neg<Output = T>> ManhattanArc<T> {
@@ -129,12 +133,16 @@ impl ManhattanArc<Interval<i32>> {
         );
 
         let mut m = center;
-        if trr.impl_p.xcoord.lb <= lb.xcoord && lb.xcoord <= trr.impl_p.xcoord.ub
-            && trr.impl_p.ycoord.lb <= lb.ycoord && lb.ycoord <= trr.impl_p.ycoord.ub
+        if trr.impl_p.xcoord.lb <= lb.xcoord
+            && lb.xcoord <= trr.impl_p.xcoord.ub
+            && trr.impl_p.ycoord.lb <= lb.ycoord
+            && lb.ycoord <= trr.impl_p.ycoord.ub
         {
             m = lb;
-        } else if trr.impl_p.xcoord.lb <= ub.xcoord && ub.xcoord <= trr.impl_p.xcoord.ub
-            && trr.impl_p.ycoord.lb <= ub.ycoord && ub.ycoord <= trr.impl_p.ycoord.ub
+        } else if trr.impl_p.xcoord.lb <= ub.xcoord
+            && ub.xcoord <= trr.impl_p.xcoord.ub
+            && trr.impl_p.ycoord.lb <= ub.ycoord
+            && ub.ycoord <= trr.impl_p.ycoord.ub
         {
             m = ub;
         }

@@ -293,19 +293,9 @@ impl DMEAlgorithm {
 
         let mut sorted = nodes.to_vec();
         if vertical {
-            sorted.sort_by(|a, b| {
-                a.borrow()
-                    .position
-                    .xcoord
-                    .cmp(&b.borrow().position.xcoord)
-            });
+            sorted.sort_by(|a, b| a.borrow().position.xcoord.cmp(&b.borrow().position.xcoord));
         } else {
-            sorted.sort_by(|a, b| {
-                a.borrow()
-                    .position
-                    .ycoord
-                    .cmp(&b.borrow().position.ycoord)
-            });
+            sorted.sort_by(|a, b| a.borrow().position.ycoord.cmp(&b.borrow().position.ycoord));
         }
 
         let mid = sorted.len() / 2;
@@ -389,10 +379,7 @@ impl DMEAlgorithm {
 
         if parent_segment.is_none() {
             // Root node: use upper corner of merging segment
-            let upper = Point::new(
-                node_segment.impl_p.xcoord.ub,
-                node_segment.impl_p.ycoord.ub,
-            );
+            let upper = Point::new(node_segment.impl_p.xcoord.ub, node_segment.impl_p.ycoord.ub);
             node.borrow_mut().position = upper;
         } else {
             let parent_pos = node.borrow().parent.as_ref().map(|p| p.borrow().position);
@@ -418,10 +405,9 @@ impl DMEAlgorithm {
     fn compute_delays(&self, node: Rc<RefCell<TreeNode>>, parent_delay: f64) {
         let has_parent = node.borrow().parent.is_some();
         if has_parent {
-            let wire_delay = self.delay_calculator.calculate_wire_delay(
-                node.borrow().wire_length,
-                node.borrow().capacitance,
-            );
+            let wire_delay = self
+                .delay_calculator
+                .calculate_wire_delay(node.borrow().wire_length, node.borrow().capacitance);
             node.borrow_mut().delay = parent_delay + wire_delay;
         } else {
             node.borrow_mut().delay = 0.0;
@@ -522,7 +508,11 @@ fn traverse_tree(
     stats.nodes.push(NodeInfo {
         name: n.name.clone(),
         position: (n.position.xcoord, n.position.ycoord),
-        node_type: if n.is_leaf() { "sink".to_string() } else { "internal".to_string() },
+        node_type: if n.is_leaf() {
+            "sink".to_string()
+        } else {
+            "internal".to_string()
+        },
         delay: n.delay,
         capacitance: n.capacitance,
     });

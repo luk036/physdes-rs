@@ -505,7 +505,10 @@ fn test_pointset() -> Vec<Point<i32, i32>> {
         (-3, -4),
         (1, 4),
     ];
-    coords.iter().map(|(x, y)| Point::<i32, i32>::new(*x, *y)).collect()
+    coords
+        .iter()
+        .map(|(x, y)| Point::<i32, i32>::new(*x, *y))
+        .collect()
 }
 
 #[cfg(test)]
@@ -794,7 +797,9 @@ fn test_rpolygon_default() {
 // ============================================================
 
 #[cfg(test)]
-use crate::rpolygon_cut::{rpolygon_cut_convex, rpolygon_cut_explicit, rpolygon_cut_implicit, rpolygon_cut_rectangle};
+use crate::rpolygon_cut::{
+    rpolygon_cut_convex, rpolygon_cut_explicit, rpolygon_cut_implicit, rpolygon_cut_rectangle,
+};
 #[cfg(test)]
 use crate::rpolygon_hull::rpolygon_make_convex_hull;
 
@@ -844,7 +849,10 @@ fn test_rpolygon_cut_convex_area_preservation() {
     let is_anticw = rpolygon_is_anticlockwise(&points);
 
     let convex_pieces = rpolygon_cut_convex(&points, is_anticw);
-    assert!(!convex_pieces.is_empty(), "Should produce at least one piece");
+    assert!(
+        !convex_pieces.is_empty(),
+        "Should produce at least one piece"
+    );
 
     let total_pieces_area: i32 = convex_pieces
         .iter()
@@ -1003,11 +1011,17 @@ fn test_square_cut_operations() {
     assert_eq!(area, total, "Convex cut of square should preserve area");
 
     let explicit = rpolygon_cut_explicit(&pts, is_anticw);
-    let total: i32 = explicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    let total: i32 = explicit
+        .iter()
+        .map(|p| RPolygon::new(p).signed_area())
+        .sum();
     assert_eq!(area, total, "Explicit cut of square should preserve area");
 
     let implicit = rpolygon_cut_implicit(&pts, is_anticw);
-    let total: i32 = implicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    let total: i32 = implicit
+        .iter()
+        .map(|p| RPolygon::new(p).signed_area())
+        .sum();
     assert_eq!(area, total, "Implicit cut of square should preserve area");
 
     let rect = rpolygon_cut_rectangle(&pts, is_anticw);
@@ -1036,11 +1050,17 @@ fn test_lshape_cut_operations() {
     assert!(!convex.is_empty());
 
     let explicit = rpolygon_cut_explicit(&pts, is_anticw);
-    let total: i32 = explicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    let total: i32 = explicit
+        .iter()
+        .map(|p| RPolygon::new(p).signed_area())
+        .sum();
     assert_eq!(area, total, "Explicit cut of L-shape should preserve area");
 
     let implicit = rpolygon_cut_implicit(&pts, is_anticw);
-    let total: i32 = implicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    let total: i32 = implicit
+        .iter()
+        .map(|p| RPolygon::new(p).signed_area())
+        .sum();
     assert_eq!(area, total, "Implicit cut of L-shape should preserve area");
 
     let rect = rpolygon_cut_rectangle(&pts, is_anticw);

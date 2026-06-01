@@ -126,8 +126,7 @@ impl RDllist {
     /// Creates an iterator starting from node `k`.
     #[inline]
     pub fn from_node(&self, k: usize) -> RDllIterator {
-        let ptr: *mut Dllink<usize> =
-            &self.cycle[k] as *const Dllink<usize> as *mut Dllink<usize>;
+        let ptr: *mut Dllink<usize> = &self.cycle[k] as *const Dllink<usize> as *mut Dllink<usize>;
         RDllIterator::new(ptr)
     }
 
@@ -208,14 +207,20 @@ mod tests {
     fn test_iterator_yields_all_nodes() {
         let list = RDllist::new(5, false);
         let count: usize = list.from_node(0).count();
-        assert_eq!(count, 5, "Iterator should yield 5 nodes for a 5-element list");
+        assert_eq!(
+            count, 5,
+            "Iterator should yield 5 nodes for a 5-element list"
+        );
     }
 
     #[test]
     fn test_iterator_yields_all_nodes_from_middle() {
         let list = RDllist::new(5, false);
         let count: usize = list.from_node(2).count();
-        assert_eq!(count, 5, "Iterator from middle should still yield all 5 nodes");
+        assert_eq!(
+            count, 5,
+            "Iterator from middle should still yield all 5 nodes"
+        );
     }
 
     #[test]
