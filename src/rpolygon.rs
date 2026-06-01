@@ -229,6 +229,50 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 }
 
+impl<T: Clone + Copy + Num + Ord + AddAssign + SubAssign> RPolygon<T> {
+    /// Converts this rectilinear polygon to a general polygon.
+    ///
+    /// Inserts intermediate axis-aligned points for any non-rectilinear
+    /// segment transitions.
+    pub fn to_polygon(&self) -> crate::polygon::Polygon<T> {
+        rpolygon_to_polygon(self)
+    }
+}
+
+/// Converts a rectilinear polygon to a general polygon.
+///
+/// Adds intermediate points for axis-aligned segments.
+pub fn rpolygon_to_polygon<T: Clone + Copy + Num + Ord + AddAssign + SubAssign>(
+    rpoly: &RPolygon<T>,
+) -> crate::polygon::Polygon<T> {
+    use crate::polygon::Polygon;
+    use crate::vector2::Vector2;
+
+    let _vecs = &rpoly.vecs;
+    if _vecs.is_empty() {
+        return Polygon::from_origin_and_vectors(rpoly.origin, vec![]);
+    }
+
+    let mut new_vecs: Vec<Vector2<T, T>> = Vec::new();
+    let mut current = Vector2::new(T::zero(), T::zero());
+
+    for &next in _vecs {
+        if current.x_ != next.x_ && current.y_ != next.y_ {
+            new_vecs.push(Vector2::new(next.x_, current.y_));
+        }
+        new_vecs.push(next);
+        current = next;
+    }
+
+    // Handle closing segment back to origin
+    let origin_vec = Vector2::new(T::zero(), T::zero());
+    if current.x_ != origin_vec.x_ && current.y_ != origin_vec.y_ {
+        new_vecs.push(Vector2::new(origin_vec.x_, current.y_));
+    }
+
+    Polygon::from_origin_and_vectors(rpoly.origin, new_vecs)
+}
+
 // Implement PartialEq for RPolygon
 impl<T: PartialEq> PartialEq for RPolygon<T> {
     fn eq(&self, other: &Self) -> bool {
@@ -442,6 +486,34 @@ where
     let current_point = *min_point;
 
     prev_point.ycoord() > current_point.ycoord()
+}
+
+// Test helpers (also used by standalone area tests below)
+#[cfg(test)]
+fn test_pointset() -> Vec<Point<i32, i32>> {
+    let coords = [
+        (-2, 2),
+        (0, -1),
+        (-5, 1),
+        (-2, 4),
+        (0, -4),
+        (-4, 3),
+        (-6, -2),
+        (5, 1),
+        (2, 2),
+        (3, -3),
+        (-3, -4),
+        (1, 4),
+    ];
+    coords.iter().map(|(x, y)| Point::<i32, i32>::new(*x, *y)).collect()
+}
+
+#[cfg(test)]
+fn make_test_rpolygon() -> (Vec<Point<i32, i32>>, RPolygon<i32>) {
+    let pointset = test_pointset();
+    let (poly_points, _is_cw) = RPolygon::<i32>::create_xmono_rpolygon(&pointset);
+    let rpoly = RPolygon::<i32>::new(&poly_points);
+    (poly_points, rpoly)
 }
 
 #[cfg(test)]
@@ -715,4 +787,263 @@ fn test_rpolygon_is_anticlockwise_standalone() {
 fn test_rpolygon_default() {
     let poly: RPolygon<i32> = RPolygon::default();
     assert_eq!(poly.origin, Point::new(0, 0));
+}
+
+// ============================================================
+// Area-based algorithm verification tests
+// ============================================================
+
+#[cfg(test)]
+use crate::rpolygon_cut::{rpolygon_cut_convex, rpolygon_cut_explicit, rpolygon_cut_implicit, rpolygon_cut_rectangle};
+#[cfg(test)]
+use crate::rpolygon_hull::{rpolygon_make_convex_hull, rpolygon_make_xmonotone_hull, rpolygon_make_ymonotone_hull};
+
+/// Test that to_polygon preserves signed area for a rectilinear polygon.
+#[test]
+fn test_to_polygon_area_preservation() {
+    let (_points, rpoly) = make_test_rpolygon();
+    let original_area = rpoly.signed_area();
+    let poly = rpoly.to_polygon();
+    let poly_area = poly.signed_area_x2();
+    // For rectilinear polygons, the polygon signed_area_x2 should be
+    // 2x the rpolygon signed_area (both use the same winding).
+    // signed_area_x2 returns the doubled signed area.
+    // RPolygon::signed_area returns area (not doubled).
+    // We verify: original_area * 2 == poly_area (for same orientation)
+    assert_eq!(
+        original_area * 2,
+        poly_area,
+        "to_polygon should preserve area: RPolygon area {} * 2 = {}, Polygon signed_area_x2 = {}",
+        original_area,
+        original_area * 2,
+        poly_area
+    );
+}
+
+/// Test that to_polygon on simple rectangles preserves area.
+#[test]
+fn test_to_polygon_rectangle_area() {
+    // Unit square (anticlockwise)
+    let pts = [
+        Point::new(0, 0),
+        Point::new(1, 0),
+        Point::new(1, 1),
+        Point::new(0, 1),
+    ];
+    let rpoly = RPolygon::new(&pts);
+    let area = rpoly.signed_area();
+    let poly = rpoly.to_polygon();
+    assert_eq!(area * 2, poly.signed_area_x2());
+}
+
+/// Test that rpolygon_cut_convex preserves total signed area.
+#[test]
+fn test_rpolygon_cut_convex_area_preservation() {
+    let (points, rpoly) = make_test_rpolygon();
+    let original_area = rpoly.signed_area();
+    let is_anticw = rpolygon_is_anticlockwise(&points);
+
+    let convex_pieces = rpolygon_cut_convex(&points, is_anticw);
+    assert!(!convex_pieces.is_empty(), "Should produce at least one piece");
+
+    let total_pieces_area: i32 = convex_pieces
+        .iter()
+        .map(|piece| RPolygon::new(piece).signed_area())
+        .sum();
+
+    assert_eq!(
+        original_area, total_pieces_area,
+        "Convex cut should preserve total signed area: original={}, total={}",
+        original_area, total_pieces_area
+    );
+}
+
+/// Test that rpolygon_cut_explicit preserves total signed area.
+#[test]
+fn test_rpolygon_cut_explicit_area_preservation() {
+    let (points, _rpoly) = make_test_rpolygon();
+    let hull = rpolygon_make_convex_hull(&points, rpolygon_is_anticlockwise(&points));
+    let hull_area = RPolygon::new(&hull).signed_area();
+    let is_anticw = rpolygon_is_anticlockwise(&hull);
+
+    let pieces = rpolygon_cut_explicit(&hull, is_anticw);
+    assert!(!pieces.is_empty(), "Should produce at least one piece");
+
+    let total_pieces_area: i32 = pieces
+        .iter()
+        .map(|piece| RPolygon::new(piece).signed_area())
+        .sum();
+
+    assert_eq!(
+        hull_area, total_pieces_area,
+        "Explicit cut should preserve hull area: hull={}, total={}",
+        hull_area, total_pieces_area
+    );
+}
+
+/// Test that rpolygon_cut_implicit preserves total signed area.
+#[test]
+fn test_rpolygon_cut_implicit_area_preservation() {
+    let (points, _rpoly) = make_test_rpolygon();
+    let hull = rpolygon_make_convex_hull(&points, rpolygon_is_anticlockwise(&points));
+    let hull_area = RPolygon::new(&hull).signed_area();
+    let is_anticw = rpolygon_is_anticlockwise(&hull);
+
+    let pieces = rpolygon_cut_implicit(&hull, is_anticw);
+    assert!(!pieces.is_empty(), "Should produce at least one piece");
+
+    let total_pieces_area: i32 = pieces
+        .iter()
+        .map(|piece| RPolygon::new(piece).signed_area())
+        .sum();
+
+    assert_eq!(
+        hull_area, total_pieces_area,
+        "Implicit cut should preserve hull area: hull={}, total={}",
+        hull_area, total_pieces_area
+    );
+}
+
+/// Test that rpolygon_cut_rectangle preserves total signed area.
+#[test]
+fn test_rpolygon_cut_rectangle_area_preservation() {
+    let (points, _rpoly) = make_test_rpolygon();
+    let hull = rpolygon_make_convex_hull(&points, rpolygon_is_anticlockwise(&points));
+    let hull_area = RPolygon::new(&hull).signed_area();
+    let is_anticw = rpolygon_is_anticlockwise(&hull);
+
+    let pieces = rpolygon_cut_rectangle(&hull, is_anticw);
+    assert!(!pieces.is_empty(), "Should produce at least one piece");
+
+    let total_pieces_area: i32 = pieces
+        .iter()
+        .map(|piece| RPolygon::new(piece).signed_area())
+        .sum();
+
+    assert_eq!(
+        hull_area, total_pieces_area,
+        "Rectangle cut should preserve hull area: hull={}, total={}",
+        hull_area, total_pieces_area
+    );
+}
+
+/// Verifies hull area is >= original area for multiple shapes.
+/// This is a fundamental property: convex hull area >= original polygon area.
+#[test]
+fn test_convex_hull_area_larger_than_original() {
+    // Test with the complex x-monotone rpolygon
+    let (points, rpoly) = make_test_rpolygon();
+    let orig_area: i32 = rpoly.signed_area();
+    let orig_abs = orig_area.unsigned_abs();
+    let hull = rpolygon_make_convex_hull(&points, rpolygon_is_anticlockwise(&points));
+    let hull_rpoly = RPolygon::new(&hull);
+    let hull_area: i32 = hull_rpoly.signed_area();
+    let hull_abs = hull_area.unsigned_abs();
+    assert!(
+        hull_abs >= orig_abs,
+        "Convex hull area ({}) should be >= original area ({}) for complex polygon",
+        hull_abs,
+        orig_abs
+    );
+
+    // Test with L-shape
+    let l_pts = [
+        Point::new(0, 0),
+        Point::new(3, 0),
+        Point::new(3, 1),
+        Point::new(1, 1),
+        Point::new(1, 2),
+        Point::new(0, 2),
+    ];
+    let l_area: i32 = RPolygon::new(&l_pts).signed_area();
+    let l_abs = l_area.unsigned_abs();
+    let l_hull = rpolygon_make_convex_hull(&l_pts, rpolygon_is_anticlockwise(&l_pts));
+    let l_hull_area: i32 = RPolygon::new(&l_hull).signed_area();
+    let l_hull_abs = l_hull_area.unsigned_abs();
+    assert!(
+        l_hull_abs >= l_abs,
+        "Convex hull area ({}) should be >= L-shape area ({})",
+        l_hull_abs,
+        l_abs
+    );
+
+    // Test with unit square (already convex, hull == original)
+    let sq_pts = [
+        Point::new(0, 0),
+        Point::new(1, 0),
+        Point::new(1, 1),
+        Point::new(0, 1),
+    ];
+    let sq_area: i32 = RPolygon::new(&sq_pts).signed_area();
+    let sq_abs = sq_area.unsigned_abs();
+    let sq_hull = rpolygon_make_convex_hull(&sq_pts, rpolygon_is_anticlockwise(&sq_pts));
+    let sq_hull_area: i32 = RPolygon::new(&sq_hull).signed_area();
+    let sq_hull_abs = sq_hull_area.unsigned_abs();
+    assert_eq!(
+        sq_hull_abs, sq_abs,
+        "Convex hull of a convex square should have same area"
+    );
+}
+
+/// Square polygon tests for cut operations.
+#[test]
+fn test_square_cut_operations() {
+    let pts = [
+        Point::new(0, 0),
+        Point::new(2, 0),
+        Point::new(2, 2),
+        Point::new(0, 2),
+    ];
+    let area = RPolygon::new(&pts).signed_area();
+    let is_anticw = rpolygon_is_anticlockwise(&pts);
+
+    // A square is already convex, so cut should return the square itself
+    let convex = rpolygon_cut_convex(&pts, is_anticw);
+    let total: i32 = convex.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Convex cut of square should preserve area");
+
+    let explicit = rpolygon_cut_explicit(&pts, is_anticw);
+    let total: i32 = explicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Explicit cut of square should preserve area");
+
+    let implicit = rpolygon_cut_implicit(&pts, is_anticw);
+    let total: i32 = implicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Implicit cut of square should preserve area");
+
+    let rect = rpolygon_cut_rectangle(&pts, is_anticw);
+    let total: i32 = rect.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Rectangle cut of square should preserve area");
+}
+
+/// L-shaped polygon tests for cut operations.
+#[test]
+fn test_lshape_cut_operations() {
+    // L-shape: a rectilinear polygon that is not convex
+    let pts = [
+        Point::new(0, 0),
+        Point::new(3, 0),
+        Point::new(3, 1),
+        Point::new(1, 1),
+        Point::new(1, 2),
+        Point::new(0, 2),
+    ];
+    let area = RPolygon::new(&pts).signed_area();
+    let is_anticw = rpolygon_is_anticlockwise(&pts);
+
+    let convex = rpolygon_cut_convex(&pts, is_anticw);
+    let total: i32 = convex.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Convex cut of L-shape should preserve area");
+    assert!(!convex.is_empty());
+
+    let explicit = rpolygon_cut_explicit(&pts, is_anticw);
+    let total: i32 = explicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Explicit cut of L-shape should preserve area");
+
+    let implicit = rpolygon_cut_implicit(&pts, is_anticw);
+    let total: i32 = implicit.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Implicit cut of L-shape should preserve area");
+
+    let rect = rpolygon_cut_rectangle(&pts, is_anticw);
+    let total: i32 = rect.iter().map(|p| RPolygon::new(p).signed_area()).sum();
+    assert_eq!(area, total, "Rectangle cut of L-shape should preserve area");
 }

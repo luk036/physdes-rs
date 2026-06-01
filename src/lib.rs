@@ -62,20 +62,34 @@
 //!
 /// Geometric algorithms module
 pub mod algorithms;
+/// Doubly-linked list node for polygon decomposition
+pub mod dllink;
+/// DME algorithm for clock tree synthesis
+pub mod dme_algorithm;
 /// Error types for geometric operations
 pub mod error;
 /// Generic traits for geometric operations
 pub mod generic;
+/// Global router for Steiner tree routing
+pub mod global_router;
 /// Interval operations and types
 pub mod interval;
+/// Manhattan arc geometry for the DME algorithm
+pub mod manhattan_arc;
 /// Merge object for combining geometric objects
 pub mod merge_obj;
 /// Point types and operations
 pub mod point;
 /// Polygon types and operations
 pub mod polygon;
+/// Circular doubly-linked list for polygon decomposition
+pub mod rdllist;
 /// Rectilinear polygon types and operations
 pub mod rpolygon;
+/// Rectilinear polygon cut (decomposition) operations
+pub mod rpolygon_cut;
+/// Rectilinear polygon hull operations
+pub mod rpolygon_hull;
 /// Vector2 types and operations
 pub mod vector2;
 /// VLSI-specific geometric operations
