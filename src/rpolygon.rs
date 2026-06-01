@@ -796,7 +796,7 @@ fn test_rpolygon_default() {
 #[cfg(test)]
 use crate::rpolygon_cut::{rpolygon_cut_convex, rpolygon_cut_explicit, rpolygon_cut_implicit, rpolygon_cut_rectangle};
 #[cfg(test)]
-use crate::rpolygon_hull::{rpolygon_make_convex_hull, rpolygon_make_xmonotone_hull, rpolygon_make_ymonotone_hull};
+use crate::rpolygon_hull::rpolygon_make_convex_hull;
 
 /// Test that to_polygon preserves signed area for a rectilinear polygon.
 #[test]

@@ -96,7 +96,7 @@ impl GlobalRoutingTree {
         &mut self.nodes[self.source_idx]
     }
 
-    fn add_node(&mut self, mut node: RoutingNode) -> usize {
+    fn add_node(&mut self, node: RoutingNode) -> usize {
         let idx = self.nodes.len();
         self.node_map.insert(node.id.clone(), idx);
         self.nodes.push(node);
@@ -155,7 +155,7 @@ impl GlobalRoutingTree {
     fn _find_nearest_insertion_with_constraints(
         &self,
         pt: Point<i32, i32>,
-        allowed_wirelength: i32,
+        _allowed_wirelength: i32,
         _keepouts: &Option<Vec<Interval<i32>>>,
     ) -> (Option<usize>, usize) {
         // Simplified: find nearest node directly
@@ -344,7 +344,7 @@ impl GlobalRoutingTree {
         let old_indices: Vec<usize> = (0..self.nodes.len()).collect();
         let mut new_map = HashMap::new();
         let mut new_nodes = Vec::new();
-        for (old_idx, node) in self.nodes.drain(..).enumerate() {
+        for node in self.nodes.drain(..) {
             let new_idx = new_nodes.len();
             new_map.insert(node.id.clone(), new_idx);
             new_nodes.push(node);
@@ -370,7 +370,6 @@ impl GlobalRoutingTree {
 
 /// High-level global router that constructs a routing tree.
 pub struct GlobalRouter {
-    source_position: Point<i32, i32>,
     terminal_positions: Vec<Point<i32, i32>>,
     tree: GlobalRoutingTree,
     worst_wirelength: i32,
@@ -397,7 +396,6 @@ impl GlobalRouter {
         };
 
         GlobalRouter {
-            source_position: source_pos,
             terminal_positions: sorted,
             tree: GlobalRoutingTree::new(source_pos),
             worst_wirelength: worst,

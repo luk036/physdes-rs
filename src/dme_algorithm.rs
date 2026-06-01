@@ -113,7 +113,7 @@ impl DelayCalculator for LinearDelayCalculator {
     ) -> (i32, f64) {
         let skew = node_right.delay - node_left.delay;
         let extend_left = ((skew / self.delay_per_unit + distance as f64) / 2.0).round() as i32;
-        let mut delay_left = node_left.delay + extend_left as f64 * self.delay_per_unit;
+        let delay_left = node_left.delay + extend_left as f64 * self.delay_per_unit;
 
         node_left.wire_length = extend_left;
         node_right.wire_length = distance - extend_left;
@@ -182,7 +182,7 @@ impl DelayCalculator for ElmoreDelayCalculator {
         let extend_left = (z * distance as f64).round() as i32;
         let r_left = extend_left as f64 * self.unit_resistance;
         let c_left = extend_left as f64 * self.unit_capacitance;
-        let mut delay_left = node_left.delay + r_left * (c_left / 2.0 + node_left.capacitance);
+        let delay_left = node_left.delay + r_left * (c_left / 2.0 + node_left.capacitance);
 
         node_left.wire_length = extend_left;
         node_right.wire_length = distance - extend_left;
@@ -345,7 +345,7 @@ impl DMEAlgorithm {
                 Interval::new(ms1.xcoord(), ms1.xcoord()),
                 Interval::new(ms1.ycoord(), ms1.ycoord()),
             );
-            segments.insert(node_ptr, ms.clone());
+            segments.insert(node_ptr, ms);
             return ms;
         }
 
@@ -360,14 +360,14 @@ impl DMEAlgorithm {
         let distance = left_ms.min_dist_with(&right_ms) as i32;
 
         let (extend_left, delay_left) = self.delay_calculator.calculate_tapping_point(
-            &mut *left.borrow_mut(),
-            &mut *right.borrow_mut(),
+            &mut left.borrow_mut(),
+            &mut right.borrow_mut(),
             distance,
         );
         node.borrow_mut().delay = delay_left;
 
         let merged_segment = left_ms.merge_with(&right_ms, extend_left);
-        segments.insert(node_ptr, merged_segment.clone());
+        segments.insert(node_ptr, merged_segment);
 
         let wire_cap = self.delay_calculator.calculate_wire_capacitance(distance);
         node.borrow_mut().capacitance =
@@ -455,6 +455,7 @@ impl DMEAlgorithm {
         let min_delay = sink_delays.iter().cloned().fold(f64::INFINITY, f64::min);
         let skew = max_delay - min_delay;
         let total_wl = total_wirelength(&root);
+        #[allow(clippy::incompatible_msrv)]
         let delay_model = std::any::type_name_of_val(&*self.delay_calculator).to_string();
 
         SkewAnalysis {
@@ -462,7 +463,7 @@ impl DMEAlgorithm {
             min_delay,
             skew,
             sink_delays,
-            total_wirelength: total_wl as i32,
+            total_wirelength: total_wl,
             delay_model,
         }
     }

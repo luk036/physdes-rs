@@ -77,7 +77,7 @@ impl ManhattanArc<i32> {
     }
 
     pub fn merge_with(&self, other: &Self, alpha: i32) -> ManhattanArc<Interval<i32>> {
-        let distance = self.min_dist_with(&other) as i32;
+        let distance = self.min_dist_with(other) as i32;
         let trr1 = self.enlarge_with(alpha);
         let trr2 = other.enlarge_with(distance - alpha);
         let x_intersect = Interval::new(
@@ -142,7 +142,7 @@ impl ManhattanArc<Interval<i32>> {
     }
 
     pub fn merge_with(&self, other: &Self, alpha: i32) -> Self {
-        let distance = self.min_dist_with(&other) as i32;
+        let distance = self.min_dist_with(other) as i32;
         let trr1 = self.enlarge_with(alpha);
         let trr2 = other.enlarge_with(distance - alpha);
         let x_intersect = Interval::new(

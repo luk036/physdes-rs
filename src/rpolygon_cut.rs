@@ -88,7 +88,7 @@ where
 #[allow(unused_variables)]
 fn rpolygon_cut_convex_recur<T>(
     v1: *mut Dllink<usize>,
-    lst: &mut Vec<Point<T, T>>,
+    lst: &mut [Point<T, T>],
     is_anticlockwise: bool,
     rdll: &mut RDllist,
 ) -> Vec<Vec<usize>>
@@ -114,7 +114,7 @@ where
 #[allow(unused_variables)]
 fn rpolygon_cut_explicit_recur<T>(
     v1: *mut Dllink<usize>,
-    lst: &mut Vec<Point<T, T>>,
+    lst: &mut [Point<T, T>],
     is_anticlockwise: bool,
     rdll: &mut RDllist,
 ) -> Vec<Vec<usize>>
@@ -138,7 +138,7 @@ where
 #[allow(unused_variables)]
 fn rpolygon_cut_implicit_recur<T>(
     v1: *mut Dllink<usize>,
-    lst: &mut Vec<Point<T, T>>,
+    lst: &mut [Point<T, T>],
     is_anticlockwise: bool,
     rdll: &mut RDllist,
 ) -> Vec<Vec<usize>>
