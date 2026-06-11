@@ -31,7 +31,7 @@ serialize = ["serde"]
 
 [dev-dependencies]
 quickcheck = "1"
-quickcheck_macros = "1.1.0"
+quickcheck_macros = "1.2.0"
 svgbobdoc = "0.3"
 criterion = "0.5"
 
