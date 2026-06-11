@@ -446,6 +446,35 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
     }
 }
 
+impl Point<Interval<i32>, Interval<i32>> {
+    /// Returns the point on this rectangle that is nearest to `other`.
+    /// Clips each coordinate to the interval bounds.
+    pub fn nearest_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
+        Point::new(
+            self.xcoord.lb.max(other.xcoord.min(self.xcoord.ub)),
+            self.ycoord.lb.max(other.ycoord.min(self.ycoord.ub)),
+        )
+    }
+
+    /// Checks if this rectangle blocks the path represented by `other` rectangle.
+    /// A rectangle `self` blocks `other` if:
+    ///   self.x contains other.x AND other.y contains self.y
+    ///   OR
+    ///   self.y contains other.y AND other.x contains self.x
+    /// This matches the Python `blocks` method semantics and is distinct from
+    /// simple rectangle overlap — it catches paths that must cross the keepout
+    /// regardless of L-shape choice.
+    pub fn blocks(&self, other: &Self) -> bool {
+        let x_contain = self.xcoord.lb <= other.xcoord.lb && self.xcoord.ub >= other.xcoord.ub;
+        let y_contain = self.ycoord.lb <= other.ycoord.lb && self.ycoord.ub >= other.ycoord.ub;
+        let other_x_contain =
+            other.xcoord.lb <= self.xcoord.lb && other.xcoord.ub >= self.xcoord.ub;
+        let other_y_contain =
+            other.ycoord.lb <= self.ycoord.lb && other.ycoord.ub >= self.ycoord.ub;
+        (x_contain && other_y_contain) || (y_contain && other_x_contain)
+    }
+}
+
 #[cfg(test)]
 pub fn hash<T: hash::Hash>(item: &T) -> u64 {
     use std::collections::hash_map::RandomState;
