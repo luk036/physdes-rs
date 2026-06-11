@@ -185,15 +185,29 @@ pub fn create_comparison_visualization(
             td.analysis.as_ref(),
         );
 
-        // Extract content between <g class="clock-tree"> and </g>
+        // Extract content between <g class="clock-tree"> and its matching </g>
         if let Some(start) = inner.find(r#"<g class="clock-tree">"#) {
             let body_start = start + r#"<g class="clock-tree">"#.len();
-            if let Some(end) = inner[body_start..].find("</g>") {
-                let content = &inner[body_start..body_start + end];
-                svg.push_str(&format!(r#"<g transform="translate({}, {})">"#, ox + 10, oy + 40));
-                svg.push_str(content);
-                svg.push_str("</g>");
+            let mut depth = 1u32;
+            let mut end = body_start;
+            for (i, _b) in inner.as_bytes()[body_start..].iter().enumerate() {
+                if inner[body_start + i..].starts_with("</g>") {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = body_start + i;
+                        break;
+                    }
+                    // Skip past </g>
+                    continue;
+                }
+                if inner[body_start + i..].starts_with("<g ") || inner[body_start + i..].starts_with("<g>") {
+                    depth += 1;
+                }
             }
+            let content = &inner[body_start..end];
+            svg.push_str(&format!(r#"<g transform="translate({}, {})">"#, ox + 10, oy + 40));
+            svg.push_str(content);
+            svg.push_str("</g>");
         }
     }
 
