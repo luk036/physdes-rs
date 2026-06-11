@@ -88,11 +88,9 @@ impl ClockTreeVisualizer {
             10, self.text_color, 8, self.text_color
         ));
         svg.push_str(r#"<rect width="100%" height="100%" fill="white"/>"#);
+        svg.push_str(r#"<g class="clock-tree">"#);
 
-        // Wires
         svg.push_str(&draw_wires(&root, &sc, &self.wire_color, self.wire_width));
-
-        // Nodes
         svg.push_str(&draw_nodes(
             &root,
             sinks,
@@ -103,12 +101,11 @@ impl ClockTreeVisualizer {
             self.node_radius,
         ));
 
-        // Analysis panel
         if let Some(a) = analysis {
             svg.push_str(&create_analysis_box(a));
         }
 
-        svg.push_str("</svg>");
+        svg.push_str("</g></svg>");
 
         if !filename.is_empty() {
             let _ = std::fs::write(filename, &svg);
@@ -116,6 +113,106 @@ impl ClockTreeVisualizer {
         }
         svg
     }
+}
+
+/// Data for a single tree in a comparison visualization.
+pub struct TreeData {
+    pub tree: Rc<RefCell<TreeNode>>,
+    pub sinks: Vec<crate::dme_algorithm::Sink>,
+    pub analysis: Option<SkewAnalysis>,
+    pub title: String,
+}
+
+impl TreeData {
+    pub fn new(
+        tree: Rc<RefCell<TreeNode>>,
+        sinks: Vec<crate::dme_algorithm::Sink>,
+        analysis: Option<SkewAnalysis>,
+        title: &str,
+    ) -> Self {
+        TreeData { tree, sinks, analysis, title: title.to_string() }
+    }
+}
+
+/// Create a side-by-side comparison SVG of multiple clock trees.
+///
+/// `trees_data` — list of trees to render; laid out in a grid (up to 2 columns).
+pub fn create_comparison_visualization(
+    trees_data: &[TreeData],
+    filename: &str,
+    width: u32,
+    height: u32,
+) -> String {
+    assert!(!trees_data.is_empty(), "No tree data provided");
+
+    let num = trees_data.len();
+    let cols = num.min(2) as u32;
+    let rows = ((num as u32) + cols - 1) / cols;
+    let sub_w = width / cols;
+    let sub_h = height / rows;
+
+    let mut svg = String::new();
+    svg.push_str(&format!(
+        r#"<svg width="{}" height="{}" xmlns="http://www.w3.org/2000/svg">"#,
+        width, height
+    ));
+    svg.push_str(r#"<rect width="100%" height="100%" fill="white"/>"#);
+    svg.push_str(
+        "<style>.nl{font:8px sans-serif;fill:#333}.dl{font:7px sans-serif;fill:#666}</style>",
+    );
+
+    let viz = ClockTreeVisualizer {
+        margin: 40,
+        node_radius: 6,
+        wire_width: 2,
+        ..Default::default()
+    };
+
+    for (i, td) in trees_data.iter().enumerate() {
+        let row = (i as u32) / cols;
+        let col = (i as u32) % cols;
+        let ox = col * sub_w;
+        let oy = row * sub_h;
+
+        svg.push_str(&format!("<text x=\"{}\" y=\"{}\" font-family=\"sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"{}333\" text-anchor=\"middle\">{}</text>", ox + sub_w / 2, oy + 20, '#', td.title));
+
+        let inner = viz.visualize_tree(
+            Rc::clone(&td.tree),
+            &td.sinks,
+            "",
+            sub_w - 20,
+            sub_h - 40,
+            td.analysis.as_ref(),
+        );
+
+        // Extract content between <g class="clock-tree"> and </g>
+        if let Some(start) = inner.find(r#"<g class="clock-tree">"#) {
+            let body_start = start + r#"<g class="clock-tree">"#.len();
+            if let Some(end) = inner[body_start..].find("</g>") {
+                let content = &inner[body_start..body_start + end];
+                svg.push_str(&format!(r#"<g transform="translate({}, {})">"#, ox + 10, oy + 40));
+                svg.push_str(content);
+                svg.push_str("</g>");
+            }
+        }
+    }
+
+    svg.push_str("</svg>");
+
+    if !filename.is_empty() {
+        let _ = std::fs::write(filename, &svg);
+        eprintln!("Comparison SVG saved to {}", filename);
+    }
+    svg
+}
+
+/// Convenience wrapper: compare linear vs Elmore delay model trees side by side.
+pub fn create_delay_model_comparison(
+    linear: TreeData,
+    elmore: TreeData,
+    filename: &str,
+) -> String {
+    create_comparison_visualization(&[linear, elmore], filename, 1200, 600)
 }
 
 // --- helper helpers (non-allocating DFS helpers) ---
@@ -387,6 +484,52 @@ mod tests {
             analysis.skew,
             pct
         );
+    }
+
+    #[test]
+    fn test_visualizer_clock_tree_group_wrapper() {
+        let sinks = sample_sinks();
+        let (dme, root) = build_test_tree(sinks.clone());
+        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let viz = ClockTreeVisualizer::new();
+        let svg = viz.visualize_tree(root, &sinks, "", 400, 300, Some(&analysis));
+        assert!(svg.contains(r#"<g class="clock-tree">"#));
+        assert!(svg.contains("</g>"));
+    }
+
+    #[test]
+    fn test_create_comparison_visualization() {
+        let sinks = sample_sinks();
+        let (dme, root) = build_test_tree(sinks.clone());
+        let analysis = dme.analyze_skew(Rc::clone(&root));
+
+        let td = TreeData::new(root, sinks, Some(analysis), "Test Tree");
+        let svg = create_comparison_visualization(&[td], "", 800, 400);
+        assert!(svg.starts_with("<svg"));
+        assert!(svg.ends_with("</svg>"));
+        assert!(svg.contains("Test Tree"));
+    }
+
+    #[test]
+    fn test_create_delay_model_comparison() {
+        use crate::dme_algorithm::ElmoreDelayCalculator;
+
+        let sinks = sample_sinks();
+        let calc = Box::new(LinearDelayCalculator::new(0.5, 0.1));
+        let mut dme = DMEAlgorithm::new(sinks.clone(), calc);
+        let root = dme.build_clock_tree();
+        let analysis = dme.analyze_skew(Rc::clone(&root));
+
+        let ecalc = Box::new(ElmoreDelayCalculator::new(0.1, 0.1));
+        let mut edme = DMEAlgorithm::new(sinks.clone(), ecalc);
+        let eroot = edme.build_clock_tree();
+        let eanalysis = edme.analyze_skew(Rc::clone(&eroot));
+
+        let linear = TreeData::new(root, sinks.clone(), Some(analysis), "Linear Delay");
+        let elmore = TreeData::new(eroot, sinks, Some(eanalysis), "Elmore Delay");
+        let svg = create_delay_model_comparison(linear, elmore, "");
+        assert!(svg.contains("Linear Delay"));
+        assert!(svg.contains("Elmore Delay"));
     }
 
     #[test]
