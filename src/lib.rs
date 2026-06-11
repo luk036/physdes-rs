@@ -66,6 +66,8 @@ pub mod algorithms;
 pub mod dllink;
 /// DME algorithm for clock tree synthesis
 pub mod dme_algorithm;
+/// SVG visualizer for DME clock trees
+pub mod dme_visualizer;
 /// Error types for geometric operations
 pub mod error;
 /// Generic traits for geometric operations
