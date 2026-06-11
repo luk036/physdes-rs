@@ -252,4 +252,14 @@ mod tests {
         // Verify node 3 now points to node 1
         assert_eq!(unsafe { (*list.cycle[3].prev).data }, 1);
     }
+
+    #[test]
+    fn test_iter_method() {
+        let list: RDllist = RDllist::new(3, false);
+        let mut count = 0;
+        for _ in list.iter() {
+            count += 1;
+        }
+        assert_eq!(count, 3);
+    }
 }

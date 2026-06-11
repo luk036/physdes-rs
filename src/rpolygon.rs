@@ -652,6 +652,12 @@ mod test {
         let query_pt4 = Point::new(1, 0);
         assert!(!RPolygon::<i32>::point_in_rpolygon(pointset, &query_pt4));
     }
+
+    #[test]
+    fn test_rpolygon_is_xmonotone_few_points() {
+        let pts = [Point::new(0, 0), Point::new(1, 0), Point::new(1, 1)];
+        assert!(rpolygon_is_xmonotone(&pts));
+    }
 }
 
 #[test]
@@ -1066,4 +1072,27 @@ fn test_lshape_cut_operations() {
     let rect = rpolygon_cut_rectangle(&pts, is_anticw);
     let total: i32 = rect.iter().map(|p| RPolygon::new(p).signed_area()).sum();
     assert_eq!(area, total, "Rectangle cut of L-shape should preserve area");
+}
+
+#[test]
+#[should_panic(expected = "Polygon must have at least 2 points")]
+fn test_rpolygon_is_anticlockwise_panics_less_than_2() {
+    let pts = [Point::new(0, 0)];
+    let rpoly = RPolygon::new(&pts);
+    rpoly.is_anticlockwise();
+}
+
+#[test]
+fn test_rpolygon_bounding_box_with_neg_vecs() {
+    let origin = Point::new(10, 10);
+    let vecs = vec![
+        Vector2::new(-5, 0),
+        Vector2::new(0, -3),
+        Vector2::new(5, 0),
+        Vector2::new(0, 3),
+    ];
+    let rpoly = RPolygon::from_origin_and_vectors(origin, vecs);
+    let (min_pt, max_pt) = rpoly.bounding_box();
+    assert_eq!(min_pt, Point::new(5, 7));
+    assert_eq!(max_pt, Point::new(15, 13));
 }

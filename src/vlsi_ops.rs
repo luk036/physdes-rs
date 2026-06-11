@@ -550,4 +550,66 @@ mod tests {
         let rect2 = Rectangle::new(Point::new(5, 5), Point::new(15, 15));
         assert!(!check_spacing(&rect1, &rect2, 1)); // overlapping
     }
+
+    #[test]
+    fn test_rectangle_intersect_non_overlapping() {
+        let r1 = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let r2 = Rectangle::new(Point::new(20, 20), Point::new(30, 30));
+        assert!(r1.intersect(&r2).is_none());
+    }
+
+    #[test]
+    fn test_detect_overlap_empty() {
+        let rects: Vec<Rectangle<i32>> = vec![];
+        assert!(detect_overlap(&rects).is_none());
+    }
+
+    #[test]
+    fn test_detect_overlap_single() {
+        let rects = vec![Rectangle::new(Point::new(0, 0), Point::new(10, 10))];
+        assert!(detect_overlap(&rects).is_none());
+    }
+
+    #[test]
+    fn test_detect_overlap_non_overlapping() {
+        let rects = vec![
+            Rectangle::new(Point::new(0, 0), Point::new(10, 10)),
+            Rectangle::new(Point::new(20, 20), Point::new(30, 30)),
+        ];
+        assert!(detect_overlap(&rects).is_none());
+    }
+
+    #[test]
+    fn test_detect_overlap_three_rects() {
+        // First and third overlap, second is in between
+        let rects = vec![
+            Rectangle::new(Point::new(0, 0), Point::new(10, 10)),
+            Rectangle::new(Point::new(15, 15), Point::new(25, 25)),
+            Rectangle::new(Point::new(5, 5), Point::new(12, 12)), // overlaps with first
+        ];
+        let result = detect_overlap(&rects);
+        assert!(result.is_some());
+        // Should find overlap between 0 and 2 (or 2 and 0)
+        let (i, j) = result.unwrap();
+        assert!((i == 0 && j == 2) || (i == 2 && j == 0));
+    }
+
+    #[test]
+    fn test_check_spacing_x_overlap_y_separate() {
+        // Rectangles that overlap in x but are separated in y
+        let r1 = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let r2 = Rectangle::new(Point::new(5, 20), Point::new(15, 30));
+        // x: [0,10] and [5,15] overlap; y: [0,10] and [20,30] separated by 10
+        assert!(check_spacing(&r1, &r2, 10));
+        assert!(!check_spacing(&r1, &r2, 11));
+    }
+
+    #[test]
+    fn test_check_spacing_vertical_overlap_horizontal_separate() {
+        // Rectangles that overlap in y but are separated in x
+        let r1 = Rectangle::new(Point::new(0, 0), Point::new(10, 10));
+        let r2 = Rectangle::new(Point::new(20, 5), Point::new(30, 15));
+        assert!(check_spacing(&r1, &r2, 10));
+        assert!(!check_spacing(&r1, &r2, 11));
+    }
 }

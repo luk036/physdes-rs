@@ -1067,6 +1067,28 @@ mod tests {
         assert_eq!(val_d.enlarge_with(6), Interval::new(-2, 10));
         assert_eq!(6.enlarge_with(val_d), Interval::new(2, 10));
     }
+
+    #[test]
+    fn test_min_dist_with_interval_other_ub_less_self_lb() {
+        use crate::generic::MinDist;
+        let a = Interval::new(10, 20);
+        let b = Interval::new(0, 5);
+        assert_eq!(a.min_dist_with(&b), 5);
+    }
+
+    #[test]
+    fn test_min_dist_with_scalar_other_less_self_lb() {
+        use crate::generic::MinDist;
+        let a = Interval::new(10, 20);
+        assert_eq!(a.min_dist_with(&5), 5);
+    }
+
+    #[test]
+    fn test_min_dist_with_scalar_self_less_interval_lb() {
+        let val = 3;
+        let other = Interval::new(10, 20);
+        assert_eq!(val.min_dist_with(&other), 7);
+    }
 }
 
 #[test]

@@ -85,4 +85,16 @@ mod tests {
             "Degenerate polygon: insufficient vertices (2 vertices, minimum 3 required)"
         );
     }
+
+    #[test]
+    fn test_numerical_error_display() {
+        let err = GeomError::NumericalError("division by zero".to_string());
+        assert_eq!(format!("{}", err), "Numerical error: division by zero");
+    }
+
+    #[test]
+    fn test_invalid_point_display() {
+        let err = GeomError::InvalidPoint("negative coordinates".to_string());
+        assert_eq!(format!("{}", err), "Invalid point: negative coordinates");
+    }
 }

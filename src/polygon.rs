@@ -998,6 +998,35 @@ mod tests {
             .collect();
         assert!(point_in_polygon(&pointset_cw, &Point::new(1, 5)));
     }
+
+    #[test]
+    fn test_is_rectilinear_non_rectilinear_last_edge() {
+        // Last edge from last vec to origin is diagonal, not axis-aligned
+        let coords = [(0, 0), (4, 0), (4, 4), (1, 3)];
+        let points: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+        let poly = Polygon::from_pointset(&points);
+        assert!(!poly.is_rectilinear());
+    }
+
+    #[test]
+    fn test_is_convex_less_than_two_vecs() {
+        // Polygon with only 1 vec (2 vertices), is_convex should return false
+        let origin = Point::new(0, 0);
+        let vecs = vec![Vector2::new(4, 0)];
+        let poly = Polygon::from_origin_and_vectors(origin, vecs);
+        assert!(!poly.is_convex());
+    }
+
+    #[test]
+    fn test_bounding_box_branches() {
+        // Polygon where y varies both decreasing and increasing to test min/max branches
+        let coords = [(3, 5), (8, 2), (10, 7), (6, 9), (1, 4)];
+        let points: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+        let poly = Polygon::from_pointset(&points);
+        let (min_pt, max_pt) = poly.bounding_box();
+        assert_eq!(min_pt, Point::new(1, 2));
+        assert_eq!(max_pt, Point::new(10, 9));
+    }
 }
 
 #[test]
@@ -1110,4 +1139,23 @@ fn test_polygon_signed_area_x2_triangle() {
     // Area = 0.5 * |0*(0-4) + 3*(4-0) + 0*(0-0)| = 0.5 * 12 = 6
     // signed_area_x2 = 2 * area = 12
     assert_eq!(poly.signed_area_x2(), 12);
+}
+
+#[test]
+fn test_polygon_signed_area_x2_single_vec() {
+    // Polygon with just 1 vec (2 vertices), signed_area_x2 should return 0 (n < 2)
+    let origin = Point::new(0, 0);
+    let vecs = vec![Vector2::new(4, 0)];
+    let poly = Polygon::from_origin_and_vectors(origin, vecs);
+    assert_eq!(poly.signed_area_x2(), 0);
+}
+
+#[test]
+fn test_polygon_area_multi_vertex() {
+    // Pentagon to exercise the area() calculation loop body
+    let coords = [(0, 0), (4, 0), (5, 3), (2, 5), (-1, 2)];
+    let points: Vec<Point<i32, i32>> = coords.iter().map(|(x, y)| Point::new(*x, *y)).collect();
+    let poly = Polygon::from_pointset(&points);
+    // area is signed, should be nonzero for a valid polygon
+    assert_ne!(poly.area(), 0);
 }

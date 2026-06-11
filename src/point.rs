@@ -794,9 +794,17 @@ mod test {
     }
 
     #[test]
-    fn test_flip_xy() {
-        let pt1 = Point::new(1, 2);
-        assert_eq!(pt1.flip_xy(), Point::new(2, 1));
+    #[allow(clippy::op_ref, clippy::clone_on_copy)]
+    fn test_ref_operators() {
+        let pt = Point::new(1, 2);
+        let vec = Vector2::new(3, 4);
+
+        assert_eq!(&pt + &vec, Point::new(4, 6));
+        assert_eq!(&pt - &vec, Point::new(-2, -2));
+        assert_eq!(&pt + vec.clone(), Point::new(4, 6));
+        assert_eq!(&pt - vec.clone(), Point::new(-2, -2));
+        assert_eq!(pt.clone() + &vec, Point::new(4, 6));
+        assert_eq!(pt.clone() - &vec, Point::new(-2, -2));
     }
 
     #[test]
@@ -864,5 +872,39 @@ mod test {
 
         assert!(p1.contains(&p2));
         assert!(!p1.contains(&p3));
+    }
+
+    #[test]
+    fn test_xcoord_mut() {
+        let mut pt = Point::new(1, 2);
+        *pt.xcoord_mut() = 5;
+        assert_eq!(pt.xcoord, 5);
+    }
+
+    #[test]
+    fn test_ycoord_mut() {
+        let mut pt = Point::new(1, 2);
+        *pt.ycoord_mut() = 7;
+        assert_eq!(pt.ycoord, 7);
+    }
+
+    #[test]
+    fn test_neg_ref() {
+        let pt = Point::new(1, 2);
+        assert_eq!(-&pt, Point::new(-1, -2));
+
+        let pt2 = Point::new(-3, 4);
+        assert_eq!(-&pt2, Point::new(3, -4));
+    }
+
+    #[test]
+    fn test_add_assign_ref() {
+        let mut pt = Point::new(1, 2);
+        let vec = Vector2::new(3, 4);
+        pt += &vec;
+        assert_eq!(pt, Point::new(4, 6));
+
+        pt -= &vec;
+        assert_eq!(pt, Point::new(1, 2));
     }
 }

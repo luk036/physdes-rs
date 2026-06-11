@@ -914,6 +914,28 @@ mod test {
     //         assert_eq!(c.scale(2.0).unscale(2.0), c);
     //     }
     // }
+
+    #[test]
+    #[allow(clippy::op_ref, clippy::clone_on_copy)]
+    fn test_mul_ref_scalar() {
+        let v = Vector2::new(3, 4);
+        let s = 2i32;
+
+        assert_eq!(v.clone() * &s, Vector2::new(6, 8));
+        assert_eq!(&v * s, Vector2::new(6, 8));
+        assert_eq!(&v * &s, Vector2::new(6, 8));
+    }
+
+    #[test]
+    #[allow(clippy::op_ref, clippy::clone_on_copy)]
+    fn test_scalar_mul_vec_ref() {
+        let v = Vector2::new(3, 4);
+        let s = 2i32;
+
+        assert_eq!(s * &v, Vector2::new(6, 8));
+        assert_eq!(&s * v.clone(), Vector2::new(6, 8));
+        assert_eq!(&s * &v, Vector2::new(6, 8));
+    }
 }
 
 #[test]

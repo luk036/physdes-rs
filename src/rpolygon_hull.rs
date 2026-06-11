@@ -141,3 +141,51 @@ where
     lower.append(&mut upper);
     lower
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make_convex_hull_triangle() {
+        let pts = vec![Point::new(0, 0), Point::new(1, 0), Point::new(0, 1)];
+        let result = rpolygon_make_convex_hull(&pts, true);
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn test_make_convex_hull_square() {
+        let pts = vec![
+            Point::new(0, 0),
+            Point::new(1, 0),
+            Point::new(1, 1),
+            Point::new(0, 1),
+        ];
+        let result = rpolygon_make_convex_hull(&pts, true);
+        assert!(!result.is_empty());
+    }
+
+    #[test]
+    fn test_make_xmonotone_hull_simple() {
+        let pts = vec![
+            Point::new(0, 0),
+            Point::new(2, 0),
+            Point::new(2, 2),
+            Point::new(0, 2),
+        ];
+        let result = rpolygon_make_xmonotone_hull(&pts, true);
+        assert!(!result.is_empty());
+    }
+
+    #[test]
+    fn test_make_ymonotone_hull_simple() {
+        let pts = vec![
+            Point::new(0, 0),
+            Point::new(2, 0),
+            Point::new(2, 2),
+            Point::new(0, 2),
+        ];
+        let result = rpolygon_make_ymonotone_hull(&pts, true);
+        assert!(!result.is_empty());
+    }
+}

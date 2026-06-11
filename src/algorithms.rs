@@ -248,4 +248,27 @@ mod tests {
         let perimeter = polygon_perimeter(&polygon);
         assert_eq!(perimeter, 14);
     }
+
+    #[test]
+    fn test_point_in_polygon_less_than_3_points() {
+        let pts = vec![crate::Point::new(0, 0), crate::Point::new(1, 0)];
+        let polygon = Polygon::new(&pts);
+        assert!(!point_in_polygon(&crate::Point::new(0, 0), &polygon));
+    }
+
+    #[test]
+    fn test_polygon_centroid_empty() {
+        let polygon = Polygon::from_origin_and_vectors(crate::Point::new(0, 0), vec![]);
+        let result = polygon_centroid(&polygon);
+        assert_eq!(result, crate::Point::new(0, 0));
+    }
+
+    #[test]
+    fn test_polygon_perimeter_less_than_2_points() {
+        let polygon = Polygon::from_origin_and_vectors(crate::Point::new(0, 0), vec![]);
+        assert_eq!(polygon_perimeter(&polygon), 0);
+
+        let polygon2 = Polygon::new(&[crate::Point::new(0, 0)]);
+        assert_eq!(polygon_perimeter(&polygon2), 0);
+    }
 }

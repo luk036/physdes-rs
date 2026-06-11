@@ -214,4 +214,12 @@ mod test {
             MergeObj::new(Interval::new(100, 100), Interval::new(100, 100))
         );
     }
+
+    #[test]
+    fn test_get_impl() {
+        let mo = MergeObj::new(3, 5);
+        let impl_ref = mo.get_impl();
+        assert_eq!(impl_ref.xcoord, 3);
+        assert_eq!(impl_ref.ycoord, 5);
+    }
 }

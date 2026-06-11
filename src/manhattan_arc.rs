@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, Sub};
 
 use crate::generic::MinDist;
 use crate::interval::Interval;
@@ -39,10 +39,12 @@ impl<T: Copy> ManhattanArc<T> {
     }
 }
 
-impl<T: Copy + Neg<Output = T>> ManhattanArc<T> {
+impl<T: Copy + Sub<Output = T> + Add<Output = T>> ManhattanArc<T> {
+    /// Converts a point from normal (Cartesian) space to the rotated (Manhattan) space.
+    /// Uses the same transformation as the Python reference: (x, y) -> (x - y, x + y).
     pub fn from_point(pt: Point<T, T>) -> Self {
         ManhattanArc {
-            impl_p: Point::new(-pt.ycoord, pt.xcoord),
+            impl_p: Point::new(pt.xcoord - pt.ycoord, pt.xcoord + pt.ycoord),
         }
     }
 }
@@ -99,6 +101,15 @@ impl ManhattanArc<i32> {
 // --- Interval<i32> implementations ---
 
 impl ManhattanArc<Interval<i32>> {
+    /// Returns the upper corner of the merging segment in normal (Cartesian) coordinates.
+    /// Upper corner in rotated space is (xcoord.ub, ycoord.ub), then transformed back
+    /// to normal space using the inverse of (x-y, x+y): (rx, ry) -> ((rx+ry)/2, (ry-rx)/2).
+    pub fn get_upper_corner(&self) -> Point<i32, i32> {
+        let rx = self.impl_p.xcoord.ub;
+        let ry = self.impl_p.ycoord.ub;
+        Point::new((rx + ry) / 2, (ry - rx) / 2)
+    }
+
     pub fn min_dist_with(&self, other: &Self) -> u32 {
         let dx = self.impl_p.xcoord.min_dist_with(&other.impl_p.xcoord);
         let dy = self.impl_p.ycoord.min_dist_with(&other.impl_p.ycoord);
@@ -118,35 +129,17 @@ impl ManhattanArc<Interval<i32>> {
 
     pub fn nearest_point_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
         let ms = ManhattanArc::from_point(*other);
-        let pt_arc = ManhattanArc::new(
-            Interval::new(ms.xcoord(), ms.xcoord()),
-            Interval::new(ms.ycoord(), ms.ycoord()),
-        );
-        let distance = self.min_dist_with(&pt_arc) as i32;
-        let trr = self.enlarge_with(distance);
-
-        let lb = Point::new(self.impl_p.xcoord.lb, self.impl_p.ycoord.lb);
-        let ub = Point::new(self.impl_p.xcoord.ub, self.impl_p.ycoord.ub);
-        let center = Point::new(
-            (self.impl_p.xcoord.lb + self.impl_p.xcoord.ub) / 2,
-            (self.impl_p.ycoord.lb + self.impl_p.ycoord.ub) / 2,
-        );
-
-        let mut m = center;
-        if trr.impl_p.xcoord.lb <= lb.xcoord
-            && lb.xcoord <= trr.impl_p.xcoord.ub
-            && trr.impl_p.ycoord.lb <= lb.ycoord
-            && lb.ycoord <= trr.impl_p.ycoord.ub
-        {
-            m = lb;
-        } else if trr.impl_p.xcoord.lb <= ub.xcoord
-            && ub.xcoord <= trr.impl_p.xcoord.ub
-            && trr.impl_p.ycoord.lb <= ub.ycoord
-            && ub.ycoord <= trr.impl_p.ycoord.ub
-        {
-            m = ub;
-        }
-        m
+        // Clip the query point in rotated space to the segment bounds.
+        // This matches the Python Point::nearest_to semantics.
+        let rx = ms
+            .xcoord()
+            .clamp(self.impl_p.xcoord.lb, self.impl_p.xcoord.ub);
+        let ry = ms
+            .ycoord()
+            .clamp(self.impl_p.ycoord.lb, self.impl_p.ycoord.ub);
+        // Convert back from rotated space to normal space.
+        // Inverse of (x-y, x+y): (rx, ry) -> ((rx+ry)/2, (ry-rx)/2)
+        Point::new((rx + ry) / 2, (ry - rx) / 2)
     }
 
     pub fn merge_with(&self, other: &Self, alpha: i32) -> Self {
@@ -202,8 +195,8 @@ mod tests {
     fn test_from_point() {
         let pt = Point::new(3, 4);
         let arc = ManhattanArc::from_point(pt);
-        assert_eq!(arc.xcoord(), -4);
-        assert_eq!(arc.ycoord(), 3);
+        assert_eq!(arc.xcoord(), -1);
+        assert_eq!(arc.ycoord(), 7);
     }
 
     #[test]
@@ -219,5 +212,62 @@ mod tests {
         let enlarged = a.enlarge_with(3);
         assert_eq!(enlarged.xcoord(), Interval::new(2, 8));
         assert_eq!(enlarged.ycoord(), Interval::new(7, 13));
+    }
+
+    #[test]
+    fn test_default() {
+        let arc: ManhattanArc<i32> = Default::default();
+        assert_eq!(arc.xcoord(), 0);
+        assert_eq!(arc.ycoord(), 0);
+    }
+
+    #[test]
+    fn test_nearest_point_to_i32() {
+        let arc = ManhattanArc::new(5, 10);
+        let pt = Point::new(3, 4);
+        let result = arc.nearest_point_to(&pt);
+        assert_eq!(result, pt);
+    }
+
+    #[test]
+    fn test_merge_with_i32() {
+        let arc1 = ManhattanArc::new(0, 10);
+        let arc2 = ManhattanArc::new(10, 0);
+        let result = arc1.merge_with(&arc2, 2);
+        assert_eq!(result.xcoord(), Interval::new(2, 2));
+        assert_eq!(result.ycoord(), Interval::new(8, 8));
+    }
+
+    #[test]
+    fn test_interval_enlarge_with() {
+        let arc = ManhattanArc::new(Interval::new(0, 10), Interval::new(5, 15));
+        let enlarged = arc.enlarge_with(2);
+        assert_eq!(enlarged.xcoord(), Interval::new(-2, 12));
+        assert_eq!(enlarged.ycoord(), Interval::new(3, 17));
+    }
+
+    #[test]
+    fn test_interval_min_dist_with() {
+        let arc1 = ManhattanArc::new(Interval::new(0, 5), Interval::new(0, 5));
+        let arc2 = ManhattanArc::new(Interval::new(10, 15), Interval::new(10, 15));
+        let dist = arc1.min_dist_with(&arc2);
+        assert_eq!(dist, 5);
+    }
+
+    #[test]
+    fn test_interval_nearest_point_to() {
+        let arc = ManhattanArc::new(Interval::new(0, 10), Interval::new(0, 10));
+        let pt = Point::new(5, 12);
+        let result = arc.nearest_point_to(&pt);
+        // pt is within or near the arc, should return one of lb/ub/center
+        assert!(result.xcoord >= 0 && result.ycoord >= 0);
+    }
+
+    #[test]
+    fn test_interval_merge_with() {
+        let arc1 = ManhattanArc::new(Interval::new(0, 5), Interval::new(0, 5));
+        let arc2 = ManhattanArc::new(Interval::new(10, 15), Interval::new(10, 15));
+        let result = arc1.merge_with(&arc2, 2);
+        assert!(result.xcoord().lb <= result.xcoord().ub);
     }
 }

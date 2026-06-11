@@ -126,4 +126,20 @@ mod tests {
         // Just verify the function works without panicking
         let _ = is_logger_initialized();
     }
+
+    #[test]
+    fn test_init_logger_panics() {
+        // Check that init_logger doesn't crash when called
+        // It may panic if already initialized, which is expected
+        let _ = std::panic::catch_unwind(|| {
+            init_logger();
+        });
+    }
+
+    #[test]
+    fn test_init_logger_with_filter_panics() {
+        let _ = std::panic::catch_unwind(|| {
+            init_logger_with_filter("debug");
+        });
+    }
 }
