@@ -16,35 +16,53 @@ use crate::point::Point;
 /// A clock sink with name, position, and capacitance.
 #[derive(Debug, Clone)]
 pub struct Sink {
+    /// The name of this sink (e.g. "s1", "FF_1")
     pub name: String,
+    /// The physical position of the sink in the layout
     pub position: Point<i32, i32>,
+    /// The load capacitance of this sink
     pub capacitance: f64,
 }
 
 impl Sink {
+    /// Creates a new sink with the given name, position, and capacitance.
     pub fn new(name: &str, position: Point<i32, i32>, capacitance: f64) -> Self {
         Sink { name: name.to_string(), position, capacitance }
     }
 }
 
-/// Node index used throughout the DME algorithm.
+/// Node index used throughout the DME algorithm to reference nodes in the
+/// arena-allocated `Tree`.
 pub type NodeIdx = usize;
 
 /// A node in the clock tree, stored in a `Tree` arena.
 #[derive(Debug, Clone)]
 pub struct TreeNode {
+    /// The name of this node (e.g. "s0", "n1")
     pub name: String,
+    /// The embedded position of this node in the layout
     pub position: Point<i32, i32>,
+    /// Index of the left child node, if any
     pub left: Option<NodeIdx>,
+    /// Index of the right child node, if any
     pub right: Option<NodeIdx>,
+    /// Index of the parent node, if any
     pub parent: Option<NodeIdx>,
+    /// Wire segment length from this node to its parent
     pub wire_length: i32,
+    /// Signal delay at this node
     pub delay: f64,
+    /// Load capacitance at this node
     pub capacitance: f64,
+    /// Whether this node's wire needs elongation to satisfy timing
     pub need_elongation: bool,
 }
 
 impl TreeNode {
+    /// Creates a new tree node with the given name and position.
+    ///
+    /// All other fields are initialized to their default values
+    /// (no children, no parent, zero delay/capacitance/wire length).
     pub fn new(name: &str, position: Point<i32, i32>) -> Self {
         TreeNode {
             name: name.to_string(),
@@ -59,6 +77,7 @@ impl TreeNode {
         }
     }
 
+    /// Returns `true` if this node is a leaf (has no children).
     pub fn is_leaf(&self) -> bool {
         self.left.is_none() && self.right.is_none()
     }
@@ -69,39 +88,52 @@ impl TreeNode {
 /// Nodes are stored in a `Vec` and referenced by their index.
 /// This avoids `Rc<RefCell<>>` while still allowing safe mutation
 /// during bottom-up merging and top-down embedding phases.
+/// Arena-allocated tree of `TreeNode`s.
+///
+/// Nodes are stored in a `Vec` and referenced by their index.
+/// This avoids `Rc<RefCell<>>` while still allowing safe mutation
+/// during bottom-up merging and top-down embedding phases.
 #[derive(Debug, Clone, Default)]
 pub struct Tree {
     nodes: Vec<TreeNode>,
+    /// Index of the root node, if the tree has been built.
     pub root: Option<NodeIdx>,
 }
 
 impl Tree {
+    /// Creates an empty tree with no nodes.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Adds a node to the tree, returning its index.
     pub fn add(&mut self, node: TreeNode) -> NodeIdx {
         let idx = self.nodes.len();
         self.nodes.push(node);
         idx
     }
 
+    /// Returns a shared reference to the node at the given index.
     pub fn get(&self, idx: NodeIdx) -> &TreeNode {
         &self.nodes[idx]
     }
 
+    /// Returns a mutable reference to the node at the given index.
     pub fn get_mut(&mut self, idx: NodeIdx) -> &mut TreeNode {
         &mut self.nodes[idx]
     }
 
+    /// Returns the number of nodes in the tree.
     pub fn len(&self) -> usize {
         self.nodes.len()
     }
 
+    /// Returns `true` if the tree contains no nodes.
     pub fn is_empty(&self) -> bool {
         self.nodes.is_empty()
     }
 
+    /// Returns an iterator over all nodes in the tree.
     pub fn iter(&self) -> impl Iterator<Item = &TreeNode> {
         self.nodes.iter()
     }
@@ -121,10 +153,14 @@ impl Tree {
 
 /// Abstract delay model for wire delay calculation.
 pub trait DelayCalculator {
+    /// Calculates the total wire delay for a given length and load capacitance.
     fn calculate_wire_delay(&self, length: i32, load_capacitance: f64) -> f64;
+    /// Calculates the wire delay per unit length for a given load capacitance.
     fn calculate_wire_delay_per_unit(&self, load_capacitance: f64) -> f64;
+    /// Calculates the total wire capacitance for a given length.
     fn calculate_wire_capacitance(&self, length: i32) -> f64;
-    /// Compute tapping point from delay/capacitance values (no &mut TreeNode needed).
+    /// Computes the tapping point (split location) between two subtrees to
+    /// achieve prescribed skew, given their delays and capacitances.
     fn calculate_tapping_point(
         &self,
         distance: i32,
@@ -135,13 +171,18 @@ pub trait DelayCalculator {
     ) -> (i32, f64);
 }
 
-/// Linear delay model: delay = k * length.
+/// Linear delay model where wire delay is proportional to wire length.
+///
+/// `delay = delay_per_unit * length`
 pub struct LinearDelayCalculator {
+    /// Delay per unit length of wire
     pub delay_per_unit: f64,
+    /// Capacitance per unit length of wire
     pub capacitance_per_unit: f64,
 }
 
 impl LinearDelayCalculator {
+    /// Creates a linear delay calculator with the given parameters.
     pub fn new(delay_per_unit: f64, capacitance_per_unit: f64) -> Self {
         LinearDelayCalculator { delay_per_unit, capacitance_per_unit }
     }
@@ -183,13 +224,20 @@ impl DelayCalculator for LinearDelayCalculator {
     }
 }
 
-/// Elmore delay model: considers wire resistance and capacitance.
+/// Elmore delay model: considers distributed wire resistance and capacitance.
+///
+/// `delay = R * (C / 2 + load_capacitance)` where `R` and `C` are
+/// the total resistance and capacitance of the wire segment.
 pub struct ElmoreDelayCalculator {
+    /// Resistance per unit length of wire
     pub unit_resistance: f64,
+    /// Capacitance per unit length of wire
     pub unit_capacitance: f64,
 }
 
 impl ElmoreDelayCalculator {
+    /// Creates an Elmore delay calculator with the given resistance and
+    /// capacitance per unit length.
     pub fn new(unit_resistance: f64, unit_capacitance: f64) -> Self {
         ElmoreDelayCalculator { unit_resistance, unit_capacitance }
     }
@@ -242,40 +290,64 @@ impl DelayCalculator for ElmoreDelayCalculator {
 /// Results of clock skew analysis.
 #[derive(Debug, Clone)]
 pub struct SkewAnalysis {
+    /// Maximum signal delay among all sinks
     pub max_delay: f64,
+    /// Minimum signal delay among all sinks
     pub min_delay: f64,
+    /// Clock skew = max_delay - min_delay
     pub skew: f64,
+    /// Individual delays for each sink
     pub sink_delays: Vec<f64>,
+    /// Total wire length of the clock tree
     pub total_wirelength: i32,
+    /// Name of the delay model used (e.g. "LinearDelayCalculator")
     pub delay_model: String,
 }
 
-/// Detailed tree statistics.
+/// Detailed tree statistics collected from a clock tree.
 #[derive(Debug, Clone)]
 pub struct TreeStatistics {
+    /// List of all nodes with their info
     pub nodes: Vec<NodeInfo>,
+    /// List of all wires with their info
     pub wires: Vec<WireInfo>,
+    /// Names of all sink nodes
     pub sinks: Vec<String>,
+    /// Total number of nodes in the tree
     pub total_nodes: i32,
+    /// Total number of sink (leaf) nodes
     pub total_sinks: i32,
+    /// Total number of wire segments
     pub total_wires: i32,
 }
 
+/// Information about a single node in the clock tree.
 #[derive(Debug, Clone)]
 pub struct NodeInfo {
+    /// Node name
     pub name: String,
+    /// Node position as `(x, y)` coordinates
     pub position: (i32, i32),
+    /// Node type: "sink" or "internal"
     pub node_type: String,
+    /// Signal delay at this node
     pub delay: f64,
+    /// Load capacitance at this node
     pub capacitance: f64,
 }
 
+/// Information about a wire segment in the clock tree.
 #[derive(Debug, Clone)]
 pub struct WireInfo {
+    /// Name of the source (parent) node
     pub from_node: String,
+    /// Name of the destination (child) node
     pub to_node: String,
+    /// Wire length
     pub length: i32,
+    /// Source node position as `(x, y)` coordinates
     pub from_pos: (i32, i32),
+    /// Destination node position as `(x, y)` coordinates
     pub to_pos: (i32, i32),
 }
 
@@ -283,11 +355,15 @@ pub struct WireInfo {
 // DME algorithm
 // ---------------------------------------------------------------------------
 
-/// The DME algorithm for clock tree synthesis.
+/// The DME (Deferred Merge Embedding) algorithm for clock tree synthesis.
 ///
-/// Builds a prescribed-skew clock tree using an arena-allocated node
-/// representation (`Tree`). The constructed tree is retained and can be
-/// queried via `get_tree()`.
+/// Builds a prescribed-skew clock tree using a bottom-up merging phase and
+/// a top-down embedding phase. Uses an arena-allocated node representation
+/// (`Tree`) for cache efficiency. The constructed tree can be queried
+/// via `get_tree()`.
+///
+/// Supports both linear and Elmore delay models via the `DelayCalculator`
+/// trait.
 pub struct DMEAlgorithm {
     sinks: Vec<Sink>,
     delay_calculator: Box<dyn DelayCalculator>,
@@ -297,11 +373,21 @@ pub struct DMEAlgorithm {
 }
 
 impl DMEAlgorithm {
+    /// Creates a new DME algorithm instance with the given sinks and delay model.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `sinks` is empty.
     pub fn new(sinks: Vec<Sink>, calculator: Box<dyn DelayCalculator>) -> Self {
         assert!(!sinks.is_empty(), "No sinks provided");
         DMEAlgorithm { sinks, delay_calculator: calculator, node_id: 0, source: None, tree: Tree::new() }
     }
 
+    /// Creates a new DME algorithm with a specified clock source position.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `sinks` is empty.
     pub fn with_source(
         sinks: Vec<Sink>,
         calculator: Box<dyn DelayCalculator>,
@@ -316,6 +402,7 @@ impl DMEAlgorithm {
         &self.tree
     }
 
+    /// Returns a mutable reference to the constructed tree.
     pub fn get_tree_mut(&mut self) -> &mut Tree {
         &mut self.tree
     }
