@@ -1,7 +1,4 @@
-/// The `trait Overlap<T>` defines a method `overlaps` that checks if two objects of type `T` overlap
-/// with each other. The `overlaps` method takes a reference to another object of type `T` as a
-/// parameter and returns a boolean value indicating whether the two objects overlap or not. This trait
-/// can be implemented for any type that needs to support the `overlaps` functionality.
+/// Trait for checking whether two values overlap.
 ///
 /// # Examples
 ///
@@ -22,8 +19,6 @@ pub trait Overlap<T> {
 
 /// Checks if two `i32` values are equal.
 ///
-/// This implementation of the `Overlap` trait for `i32` simply checks if the two values are equal.
-///
 /// # Examples
 ///
 /// ```
@@ -38,28 +33,14 @@ pub trait Overlap<T> {
 /// assert!(!a.overlaps(&b));
 /// ```
 impl Overlap<i32> for i32 {
-    /// The `overlaps` function in Rust checks if two references to `i32` values point to the same
-    /// memory location.
-    ///
-    /// Arguments:
-    ///
-    /// * `other`: The `other` parameter in the `overlaps` function is a reference to an `i32` value.
-    ///
-    /// Returns:
-    ///
-    /// The `overlaps` function is returning a boolean value indicating whether the value of `self` is
-    /// equal to the value of `other`.
+    /// Checks if two `i32` values are equal.
     #[inline]
     fn overlaps(&self, other: &i32) -> bool {
         self == other
     }
 }
 
-/// The `trait Contain<T>` defines a method `contains` that checks if an object of type `T` is
-/// contained within another object. The `contains` method takes a reference to another object of type
-/// `T` as a parameter and returns a boolean value indicating whether the object is contained within the
-/// other object or not. This trait can be implemented for any type that needs to support the `contains`
-/// functionality.
+/// Trait for checking if one value contains another.
 ///
 /// # Examples
 ///
@@ -78,9 +59,7 @@ pub trait Contain<T> {
     fn contains(&self, other: &T) -> bool;
 }
 
-/// Checks if the current `i32` value is equal to the provided `i32` value.
-///
-/// This implementation of the `Contain` trait for `i32` simply compares the two values for equality.
+/// `Contain` implementation for `i32`: returns true when values are equal.
 ///
 /// # Examples
 ///
@@ -96,27 +75,14 @@ pub trait Contain<T> {
 /// assert!(!a.contains(&b));
 /// ```
 impl Contain<i32> for i32 {
-    /// The function checks if a given value is equal to another value.
-    ///
-    /// Arguments:
-    ///
-    /// * `other`: The `other` parameter in the `contains` function is a reference to an `i32` value
-    ///   that is being compared with `self`.
-    ///
-    /// Returns:
-    ///
-    /// The `contains` function is returning a boolean value indicating whether the value of `self` is
-    /// equal to the value of the reference `other`.
+    /// Checks if the current `i32` value equals the provided value.
     #[inline]
     fn contains(&self, other: &i32) -> bool {
         self == other
     }
 }
 
-/// Defines a trait for calculating the minimum distance between two values of type `T`.
-///
-/// This trait provides a single method, `min_dist_with`, which takes a reference to another value of type `T`
-/// and returns the minimum distance between the two values as a `u32`.
+/// Trait for calculating the minimum distance between two values.
 ///
 /// # Examples
 ///
@@ -125,11 +91,6 @@ impl Contain<i32> for i32 {
 ///
 /// let a: i32 = 10;
 /// let b: i32 = 5;
-/// let distance = a.min_dist_with(&b);
-/// assert_eq!(distance, 5);
-///
-/// let a: i32 = 5;
-/// let b: i32 = 10;
 /// let distance = a.min_dist_with(&b);
 /// assert_eq!(distance, 5);
 /// ```
@@ -146,10 +107,6 @@ pub trait MinDist<T> {
 
 /// Computes the absolute difference between two `i32` values.
 ///
-/// This implementation of the `MinDist` trait for `i32` calculates the unsigned
-/// absolute difference between the current `i32` value and the provided `other`
-/// `i32` value.
-///
 /// # Examples
 ///
 /// ```
@@ -157,11 +114,6 @@ pub trait MinDist<T> {
 ///
 /// let a: i32 = 10;
 /// let b: i32 = 5;
-/// let distance = a.min_dist_with(&b);
-/// assert_eq!(distance, 5);
-///
-/// let a: i32 = 5;
-/// let b: i32 = 10;
 /// let distance = a.min_dist_with(&b);
 /// assert_eq!(distance, 5);
 /// ```
@@ -172,10 +124,7 @@ impl MinDist<i32> for i32 {
     }
 }
 
-/// The `Displacement` trait defines a way to displace a value of type `T` by another value of type `T`.
-///
-/// The `displace` method takes a reference to a `T` and returns a new value of the associated `Output` type,
-/// which represents the displaced value.
+/// Trait for computing the displacement between two values.
 ///
 /// # Examples
 ///
@@ -186,11 +135,6 @@ impl MinDist<i32> for i32 {
 /// let b: i32 = 5;
 /// let displacement = a.displace(&b);
 /// assert_eq!(displacement, 5);
-///
-/// let a: i32 = 5;
-/// let b: i32 = 10;
-/// let displacement = a.displace(&b);
-/// assert_eq!(displacement, -5);
 /// ```
 pub trait Displacement<T: ?Sized> {
     type Output;
@@ -199,8 +143,7 @@ pub trait Displacement<T: ?Sized> {
     fn displace(&self, other: &T) -> Self::Output;
 }
 
-/// Implements the `Displacement` trait for `i32` types, providing a `displace` method that subtracts
-/// the given `i32` value from the current `i32` value.
+/// Computes the displacement (difference) between two `i32` values: `self - other`.
 ///
 /// # Examples
 ///
@@ -211,11 +154,6 @@ pub trait Displacement<T: ?Sized> {
 /// let b: i32 = 5;
 /// let displacement = a.displace(&b);
 /// assert_eq!(displacement, 5);
-///
-/// let a: i32 = 5;
-/// let b: i32 = 10;
-/// let displacement = a.displace(&b);
-/// assert_eq!(displacement, -5);
 /// ```
 impl Displacement<i32> for i32 {
     type Output = i32;

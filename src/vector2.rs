@@ -1,7 +1,7 @@
 use core::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use num_traits::{Num, Signed, Zero};
 
-/// The code defines a generic struct called Vector2 with two fields, x_ and y_.
+/// A 2D vector with x and y components.
 ///
 /// ```svgbob
 ///        y
@@ -16,13 +16,6 @@ use num_traits::{Num, Signed, Zero};
 ///   *----+-----> x
 ///  (0,0) x_
 /// ```
-///
-/// Properties:
-///
-/// * `x_`: The `x_` property represents the x-coordinate of the Vector2 object. It is of type `T`,
-///   which means it can be any type specified when creating an instance of the Vector2 struct.
-/// * `y_`: The `y_` property is the y-coordinate of the `Vector2` object. It represents the vertical
-///   position of the vector in a 2D coordinate system.
 ///
 /// # Examples
 ///
@@ -44,18 +37,7 @@ pub struct Vector2<T1, T2> {
 }
 
 impl<T1, T2> Vector2<T1, T2> {
-    /// The function `new` creates a new Vector2 with the given x and y values.
-    ///
-    /// Arguments:
-    ///
-    /// * `x_`: The parameter `x_` represents the x-coordinate of the Vector2.
-    /// * `y_`: The parameter `y_` represents the y-coordinate of the Vector2. It is of type `T`, which
-    ///   means it can be any type that is specified when the Vector2 is created.
-    ///
-    /// Returns:
-    ///
-    /// The `new` function is returning a new instance of the `Vector2` struct with the provided `x_`
-    /// and `y_` values.
+    /// Creates a new Vector2 with the given x and y values.
     ///
     /// # Example
     ///
@@ -72,16 +54,7 @@ impl<T1, T2> Vector2<T1, T2> {
 }
 
 impl<T1: Clone + Num> Vector2<T1, T1> {
-    /// The `dot` function calculates the dot product of two vectors.
-    ///
-    /// Arguments:
-    ///
-    /// * `other`: The `other` parameter is of the same type as `self`, which means it is an instance of
-    ///   the same struct or class that the `dot` method is defined in.
-    ///
-    /// Returns:
-    ///
-    /// The dot product of two vectors is being returned.
+    /// Computes the dot product of two vectors.
     ///
     /// # Example
     ///
@@ -96,12 +69,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
         self.x_.clone() * other.x_.clone() + self.y_.clone() * other.y_.clone()
     }
 
-    /// The `cross` function calculates the cross product of two vectors.
-    ///
-    /// Arguments:
-    ///
-    /// * `other`: The `other` parameter is of type `Self`, which means it is the same type as the
-    ///   current object.
+    /// Computes the cross product (2D scalar) of two vectors.
     ///
     /// # Example
     ///
@@ -121,17 +89,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     //     self.dot(self)
     // }
 
-    /// The `scale` function multiplies the vector by a scalar value.
-    ///
-    /// Arguments:
-    ///
-    /// * `factor`: The parameter `factor` is a scalar value that will be used to multiply each component of
-    ///   `self`.
-    ///
-    /// Returns:
-    ///
-    /// The `scale` method returns a new instance of the same type as `self`.
-    /// Multiplies `self` by the scalar `factor`.
+    /// Multiplies the vector by a scalar factor.
     ///
     /// # Example
     ///
@@ -146,18 +104,7 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
         Self::new(self.x_.clone() * factor.clone(), self.y_.clone() * factor)
     }
 
-    /// The `unscale` function divides the coordinates of a vector by a scalar value.
-    ///
-    /// Arguments:
-    ///
-    /// * `factor`: The parameter `factor` is a scalar value that is used to divide the `self` object. It is of
-    ///   type `T`, which is a generic type parameter. The division operation is performed on the `x_` and
-    ///   `y_` fields of the `self` object.
-    ///
-    /// Returns:
-    ///
-    /// The `unscale` method returns a new instance of the same type as `self`.
-    /// Divides `self` by the scalar `factor`.
+    /// Divides the vector by a scalar factor.
     ///
     /// # Example
     ///
@@ -174,14 +121,9 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
 }
 
 impl<T1: Clone + Signed> Vector2<T1, T1> {
-    /// The `l1_norm` function calculates the Manhattan distance from the origin.
+    /// Computes the L1 norm (Manhattan distance from origin): `|x_| + |y_|`.
     ///
     /// [Manhattan distance]: https://en.wikipedia.org/wiki/Taxicab_geometry
-    ///
-    /// Returns:
-    ///
-    /// The L1 norm, which is the Manhattan distance from the origin.
-    /// Returns the L1 norm `|x_| + |y_|` -- the [Manhattan distance] from the origin.
     ///
     /// # Example
     ///
@@ -198,12 +140,9 @@ impl<T1: Clone + Signed> Vector2<T1, T1> {
 }
 
 impl<T1: Clone + PartialOrd> Vector2<T1, T1> {
-    /// The `norm_inf` function returns the maximum absolute value between `x_` and `y_`.
+    /// Computes the Chebyshev (infinity) norm: `max(x_, y_)`.
     ///
-    /// Returns:
-    ///
-    /// The `norm_inf` function returns the maximum value between `|x_|` and `|y_|`.
-    /// Returns the infinity norm `max(|x_| + |y_|)`
+    /// Assumes non-negative coordinate values (does not take absolute values internally).
     ///
     /// # Example
     ///
@@ -227,21 +166,14 @@ impl<T1: Clone + PartialOrd> Vector2<T1, T1> {
 impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> {
     type Output = Self;
 
-    /// The function `add` takes two values of the same type and returns their sum.
-    ///
-    /// Arguments:
-    ///
-    /// * `other`: The `other` parameter is of the same type as `self` and represents the other object
-    ///   that you want to add to `self`.
+    /// Adds two vectors component-wise.
     ///
     /// # Example
     ///
     /// ```
     /// use physdes::vector2::Vector2;
-    /// use std::ops::Add;
     ///
-    /// assert_eq!(Vector2::new(1, 2).add(Vector2::new(3, 4)), Vector2::new(4, 6));
-    /// assert_eq!(Vector2::new(3, 4).add(Vector2::new(1, 2)), Vector2::new(4, 6));
+    /// assert_eq!(Vector2::new(1, 2) + Vector2::new(3, 4), Vector2::new(4, 6));
     /// ```
     #[inline]
     fn add(self, other: Self) -> Self::Output {
@@ -253,21 +185,14 @@ impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> 
 impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Vector2<T1, T2> {
     type Output = Self;
 
-    /// The function subtracts the coordinates of two points and returns a new point.
-    ///
-    /// Arguments:
-    ///
-    /// * `other`: The `other` parameter is of the same type as `self` and represents the other value
-    ///   that you want to subtract from `self`.
+    /// Subtracts two vectors component-wise.
     ///
     /// # Example
     ///
     /// ```
     /// use physdes::vector2::Vector2;
-    /// use std::ops::Sub;
     ///
-    /// assert_eq!(Vector2::new(1, 2).sub(Vector2::new(3, 4)), Vector2::new(-2, -2));
-    /// assert_eq!(Vector2::new(3, 4).sub(Vector2::new(1, 2)), Vector2::new(2, 2));
+    /// assert_eq!(Vector2::new(1, 2) - Vector2::new(3, 4), Vector2::new(-2, -2));
     /// ```
     #[inline]
     fn sub(self, other: Self) -> Self::Output {
@@ -285,15 +210,7 @@ mod opassign {
     use crate::Vector2;
 
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> AddAssign for Vector2<T1, T2> {
-        /// The function `add_assign` adds the values of `other.x_` and `other.y_` to `self.x_` and
-        /// `self.y_` respectively.
-        ///
-        /// Arguments:
-        ///
-        /// * `other`: The "other" parameter is of type Self, which means it is a reference to another
-        ///   instance of the same struct or class that the method is defined in. In this case, it
-        ///   represents another instance of the struct or class that has the same fields or properties as
-        ///   self.
+        /// Adds another vector to this one component-wise.
         ///
         /// # Example
         ///
@@ -313,14 +230,7 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> SubAssign for Vector2<T1, T2> {
-        /// The function subtracts the values of another object from the values of the current object.
-        ///
-        /// Arguments:
-        ///
-        /// * `other`: The parameter "other" is of type Self, which means it is a reference to another
-        ///   instance of the same struct or class that the method is defined in. In this case, it is a
-        ///   reference to another instance of the struct or class that has the same fields as self
-        ///   (x_ and y_)
+        /// Subtracts another vector from this one component-wise.
         ///
         /// # Example
         ///
@@ -339,12 +249,7 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign> MulAssign<T1> for Vector2<T1, T1> {
-        /// The function multiplies the values of self.x_ and self.y_ by the value of other.
-        ///
-        /// Arguments:
-        ///
-        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
-        ///   implements the `Clone` trait.
+        /// Multiplies each component of the vector by a scalar.
         ///
         /// # Example
         ///
@@ -363,12 +268,7 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign> DivAssign<T1> for Vector2<T1, T1> {
-        /// The function divides the values of self.x_ and self.y_ by the value of other.
-        ///
-        /// Arguments:
-        ///
-        /// * `other`: The parameter `other` is of type `T`, which means it can be any type that
-        ///   implements the `Clone` trait.
+        /// Divides each component of the vector by a scalar.
         ///
         /// # Example
         ///
@@ -421,14 +321,12 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 {
     type Output = Self;
 
-    /// The `neg` function returns a new instance of the same type with the negated values of `x_` and
-    /// `y_`.
+    /// Negates both components of the vector.
     ///
     /// # Example
     ///
     /// ```
     /// use physdes::vector2::Vector2;
-    /// use std::ops::Neg;
     ///
     /// let v = Vector2::new(1, 2);
     /// assert_eq!(-v, Vector2::new(-1, -2));
@@ -444,6 +342,7 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 {
     type Output = Vector2<T1, T2>;
 
+    /// Negates both components of a borrowed vector.
     #[inline]
     fn neg(self) -> Self::Output {
         -self.clone()

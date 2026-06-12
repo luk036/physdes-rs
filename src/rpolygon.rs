@@ -275,6 +275,7 @@ pub fn rpolygon_to_polygon<T: Clone + Copy + Num + Ord + AddAssign + SubAssign>(
 
 // Implement PartialEq for RPolygon
 impl<T: PartialEq> PartialEq for RPolygon<T> {
+    /// Returns `true` if two rectilinear polygons have the same origin and vectors.
     fn eq(&self, other: &Self) -> bool {
         self.origin == other.origin && self.vecs == other.vecs
     }
@@ -386,7 +387,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     }
 }
 
-/// Checks if a polygon is monotone in a given direction
+/// Returns `true` if the polygon is monotone in the given direction.
 pub fn rpolygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -433,7 +434,7 @@ where
     true
 }
 
-/// Checks if a polygon is x-monotone
+/// Returns `true` if the polygon is x-monotone.
 pub fn rpolygon_is_xmonotone<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -441,7 +442,7 @@ where
     rpolygon_is_monotone(lst, |pt| (pt.xcoord, pt.ycoord))
 }
 
-/// Checks if a polygon is y-monotone
+/// Returns `true` if the polygon is y-monotone.
 pub fn rpolygon_is_ymonotone<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -449,7 +450,7 @@ where
     rpolygon_is_monotone(lst, |pt| (pt.ycoord, pt.xcoord))
 }
 
-/// Checks if a polygon is rectilinearly convex
+/// Returns `true` if the polygon is rectilinearly convex (both x- and y-monotone).
 pub fn rpolygon_is_convex<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -457,7 +458,7 @@ where
     rpolygon_is_xmonotone(lst) && rpolygon_is_ymonotone(lst)
 }
 
-/// Determines if a polygon represented by points is oriented anticlockwise
+/// Returns `true` if the polygon is oriented anticlockwise.
 pub fn rpolygon_is_anticlockwise<T>(pointset: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,

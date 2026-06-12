@@ -4,10 +4,13 @@
 
 use crate::{Point, Polygon};
 
-/// Represents a rectangle in 2D space
+/// Represents a rectangle in 2D space defined by its minimum (bottom-left)
+/// and maximum (top-right) corner points.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rectangle<T> {
+    /// The minimum (bottom-left) corner point
     pub min: Point<T, T>,
+    /// The maximum (top-right) corner point
     pub max: Point<T, T>,
 }
 

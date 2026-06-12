@@ -755,12 +755,16 @@ impl GlobalRouter {
         }
     }
 
+    /// Routes terminals by directly connecting each terminal to the nearest
+    /// node in the existing tree (simple nearest-neighbor heuristic).
     pub fn route_simple(&mut self) {
         for &terminal in &self.terminal_positions {
             self.tree.insert_terminal_node(terminal, None);
         }
     }
 
+    /// Routes terminals with Steiner point insertion to reduce total
+    /// wirelength while avoiding keepout regions.
     pub fn route_with_steiners(&mut self) {
         self.tree.worst_wirelength = self.worst_wirelength;
         for &terminal in &self.terminal_positions {
@@ -769,6 +773,9 @@ impl GlobalRouter {
         }
     }
 
+    /// Routes terminals with Steiner points and wirelength constraints.
+    /// The `multiplier` scales the worst-case wirelength to determine the
+    /// allowed path length for each terminal.
     pub fn route_with_constraints(&mut self, multiplier: f64) {
         let allowed = (self.worst_wirelength as f64 * multiplier).round() as i32;
         self.tree.worst_wirelength = self.worst_wirelength;
@@ -778,6 +785,7 @@ impl GlobalRouter {
         }
     }
 
+    /// Returns a reference to the constructed routing tree.
     pub fn get_tree(&self) -> &GlobalRoutingTree {
         &self.tree
     }

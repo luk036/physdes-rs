@@ -55,7 +55,7 @@ impl fmt::Display for GeomError {
 
 impl std::error::Error for GeomError {}
 
-/// Result type for geometric operations that may return a `GeomError`.
+/// A specialized `Result` type for geometric operations that may return a `GeomError`.
 pub type GeomResult<T> = Result<T, GeomError>;
 
 #[cfg(test)]

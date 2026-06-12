@@ -140,6 +140,7 @@ impl<T1, T2> Point<T1, T2> {
 }
 
 impl<T1: std::fmt::Display, T2: std::fmt::Display> std::fmt::Display for Point<T1, T2> {
+    /// Formats the point as `(x, y)`.
     #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.xcoord, self.ycoord)

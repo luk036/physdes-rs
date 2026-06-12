@@ -182,7 +182,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
         result
     }
 
-    /// Translates the polygon by adding a vector to its origin
+    /// Translates the polygon by adding a vector to its origin.
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: AddAssign,
@@ -190,7 +190,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
         self.origin += rhs;
     }
 
-    /// Translates the polygon by subtracting a vector from its origin
+    /// Translates the polygon by subtracting a vector from its origin.
     pub fn sub_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: SubAssign,
@@ -247,7 +247,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
         res
     }
 
-    /// Gets all vertices of the polygon as points
+    /// Returns all vertices of the polygon as points.
     pub fn get_vertices(&self) -> Vec<Point<T, T>> {
         let mut result = Vec::with_capacity(self.vecs.len() + 1);
         result.push(self.origin);
@@ -703,6 +703,7 @@ where
 
 // Implement PartialEq for Polygon
 impl<T: PartialEq> PartialEq for Polygon<T> {
+    /// Returns `true` if two polygons have the same origin and vectors.
     fn eq(&self, other: &Self) -> bool {
         self.origin == other.origin && self.vecs == other.vecs
     }
@@ -710,12 +711,14 @@ impl<T: PartialEq> PartialEq for Polygon<T> {
 
 // Implement AddAssign and SubAssign for Polygon
 impl<T: AddAssign + Clone + Num> AddAssign<Vector2<T, T>> for Polygon<T> {
+    /// Translates the polygon by adding a vector to its origin.
     fn add_assign(&mut self, rhs: Vector2<T, T>) {
         self.origin += rhs;
     }
 }
 
 impl<T: SubAssign + Clone + Num> SubAssign<Vector2<T, T>> for Polygon<T> {
+    /// Translates the polygon by subtracting a vector from its origin.
     fn sub_assign(&mut self, rhs: Vector2<T, T>) {
         self.origin -= rhs;
     }

@@ -88,11 +88,6 @@ impl TreeNode {
 /// Nodes are stored in a `Vec` and referenced by their index.
 /// This avoids `Rc<RefCell<>>` while still allowing safe mutation
 /// during bottom-up merging and top-down embedding phases.
-/// Arena-allocated tree of `TreeNode`s.
-///
-/// Nodes are stored in a `Vec` and referenced by their index.
-/// This avoids `Rc<RefCell<>>` while still allowing safe mutation
-/// during bottom-up merging and top-down embedding phases.
 #[derive(Debug, Clone, Default)]
 pub struct Tree {
     nodes: Vec<TreeNode>,

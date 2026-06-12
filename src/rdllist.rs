@@ -111,7 +111,7 @@ impl RDllist {
         RDllist { cycle }
     }
 
-    /// Returns a reference to the node at index `k`.
+    /// Returns a shared reference to the node at index `k`.
     #[inline]
     pub fn get(&self, k: usize) -> &Dllink<usize> {
         &self.cycle[k]
