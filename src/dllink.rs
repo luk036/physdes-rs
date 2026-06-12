@@ -36,6 +36,8 @@ impl<T> Dllink<T> {
     /// Creates a new locked (detached) `Dllink` with the given data.
     ///
     /// A locked node has null pointers and is not part of any list.
+    /// Use `new_linked` for an alias, or manually set `next`/`prev` to
+    /// link the node into a list.
     #[inline]
     pub const fn new(data: T) -> Self {
         Dllink {

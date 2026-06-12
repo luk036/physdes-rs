@@ -20,6 +20,12 @@ impl<T: Default> Default for ManhattanArc<T> {
 }
 
 impl<T> ManhattanArc<T> {
+    /// Creates a new `ManhattanArc` from coordinates in the rotated (Manhattan) space.
+    ///
+    /// # Arguments
+    ///
+    /// * `xcoord` - The x-coordinate in rotated space (x - y of original)
+    /// * `ycoord` - The y-coordinate in rotated space (x + y of original)
     #[inline]
     pub const fn new(xcoord: T, ycoord: T) -> Self {
         ManhattanArc {
@@ -29,10 +35,12 @@ impl<T> ManhattanArc<T> {
 }
 
 impl<T: Copy> ManhattanArc<T> {
+    /// Returns the x-coordinate in rotated (Manhattan) space.
     #[inline]
     pub fn xcoord(&self) -> T {
         self.impl_p.xcoord
     }
+    /// Returns the y-coordinate in rotated (Manhattan) space.
     #[inline]
     pub fn ycoord(&self) -> T {
         self.impl_p.ycoord
@@ -50,6 +58,13 @@ impl<T: Copy + Sub<Output = T> + Add<Output = T>> ManhattanArc<T> {
 }
 
 impl<T: Copy + Add<Output = T> + Sub<Output = T>> ManhattanArc<T> {
+    /// Constructs a `ManhattanArc` from Cartesian coordinates by applying the
+    /// rotation `(x - y, x + y)`.
+    ///
+    /// # Arguments
+    ///
+    /// * `xcoord` - The x-coordinate in Cartesian space
+    /// * `ycoord` - The y-coordinate in Cartesian space
     pub fn construct(xcoord: T, ycoord: T) -> Self {
         ManhattanArc {
             impl_p: Point::new(xcoord - ycoord, xcoord + ycoord),
@@ -66,22 +81,43 @@ impl<T: fmt::Display> fmt::Display for ManhattanArc<T> {
 // --- i32 implementations ---
 
 impl ManhattanArc<i32> {
+    /// Computes the Chebyshev distance to another arc in rotated space.
+    ///
+    /// Returns the maximum of the component-wise absolute differences,
+    /// which corresponds to Manhattan distance in the original Cartesian space.
     pub fn min_dist_with(&self, other: &Self) -> u32 {
         let dx = self.impl_p.xcoord.min_dist_with(&other.impl_p.xcoord);
         let dy = self.impl_p.ycoord.min_dist_with(&other.impl_p.ycoord);
         dx.max(dy)
     }
 
+    /// Enlarges this point arc by `alpha` in all directions, producing an
+    /// arc with interval-valued coordinates in rotated space.
+    ///
+    /// # Arguments
+    ///
+    /// * `alpha` - The margin to add around the arc
     pub fn enlarge_with(&self, alpha: i32) -> ManhattanArc<Interval<i32>> {
         let x = Interval::new(self.impl_p.xcoord - alpha, self.impl_p.xcoord + alpha);
         let y = Interval::new(self.impl_p.ycoord - alpha, self.impl_p.ycoord + alpha);
         ManhattanArc::new(x, y)
     }
 
+    /// Returns the nearest Cartesian point to `other` (identity for point arcs).
     pub fn nearest_point_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
         *other
     }
 
+    /// Merges this arc with another by computing the intersection of their
+    /// enlarged regions in rotated space.
+    ///
+    /// This is the core merging step of the DME algorithm for point-valued
+    /// merging segments.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The other arc to merge with
+    /// * `alpha` - The amount to extend this arc before intersecting
     pub fn merge_with(&self, other: &Self, alpha: i32) -> ManhattanArc<Interval<i32>> {
         let distance = self.min_dist_with(other) as i32;
         let trr1 = self.enlarge_with(alpha);
@@ -102,14 +138,18 @@ impl ManhattanArc<i32> {
 
 impl ManhattanArc<Interval<i32>> {
     /// Returns the upper corner of the merging segment in normal (Cartesian) coordinates.
-    /// Upper corner in rotated space is (xcoord.ub, ycoord.ub), then transformed back
-    /// to normal space using the inverse of (x-y, x+y): (rx, ry) -> ((rx+ry)/2, (ry-rx)/2).
+    ///
+    /// The upper corner in rotated space is `(xcoord.ub, ycoord.ub)`, then
+    /// transformed back to normal space using the inverse of the rotation
+    /// `(x-y, x+y)` → `(rx, ry)` → `((rx+ry)/2, (ry-rx)/2)`.
     pub fn get_upper_corner(&self) -> Point<i32, i32> {
         let rx = self.impl_p.xcoord.ub;
         let ry = self.impl_p.ycoord.ub;
         Point::new((rx + ry) / 2, (ry - rx) / 2)
     }
 
+    /// Computes the Chebyshev distance between two interval-valued arcs
+    /// in rotated space.
     pub fn min_dist_with(&self, other: &Self) -> u32 {
         let dx = self.impl_p.xcoord.min_dist_with(&other.impl_p.xcoord);
         let dy = self.impl_p.ycoord.min_dist_with(&other.impl_p.ycoord);
@@ -120,6 +160,7 @@ impl ManhattanArc<Interval<i32>> {
         Interval::new(iv.lb - alpha, iv.ub + alpha)
     }
 
+    /// Enlarges this interval-valued arc by `alpha` in all directions.
     pub fn enlarge_with(&self, alpha: i32) -> Self {
         ManhattanArc::new(
             Self::enlarge_interval(self.impl_p.xcoord, alpha),
@@ -127,6 +168,10 @@ impl ManhattanArc<Interval<i32>> {
         )
     }
 
+    /// Finds the nearest point on this interval arc to a given Cartesian point.
+    ///
+    /// The query point is first rotated into Manhattan space, then clamped
+    /// to the arc bounds, and finally rotated back to Cartesian coordinates.
     pub fn nearest_point_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
         let ms = ManhattanArc::from_point(*other);
         // Clip the query point in rotated space to the segment bounds.
@@ -142,6 +187,9 @@ impl ManhattanArc<Interval<i32>> {
         Point::new((rx + ry) / 2, (ry - rx) / 2)
     }
 
+    /// Merges this interval arc with another by intersecting their enlarged
+    /// regions in rotated space. This is the interval-arc version of the
+    /// DME algorithm's merge step.
     pub fn merge_with(&self, other: &Self, alpha: i32) -> Self {
         let distance = self.min_dist_with(other) as i32;
         let trr1 = self.enlarge_with(alpha);
