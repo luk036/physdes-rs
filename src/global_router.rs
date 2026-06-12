@@ -33,17 +33,26 @@ impl fmt::Display for NodeType {
 /// A node in the routing tree.
 #[derive(Debug, Clone)]
 pub struct RoutingNode {
+    /// Unique identifier for this node
     pub id: String,
+    /// Type of this node (Source, Steiner, or Terminal)
     pub node_type: NodeType,
+    /// Position of this node in the layout
     pub pt: Point<i32, i32>,
+    /// Indices of child nodes in the tree
     pub children: Vec<usize>,
+    /// Index of the parent node, if any
     pub parent: Option<usize>,
+    /// Load capacitance at this node
     pub capacitance: f64,
+    /// Signal delay at this node
     pub delay: f64,
+    /// Path length from source to this node
     pub path_length: i32,
 }
 
 impl RoutingNode {
+    /// Creates a new routing node with the given id, type, and position.
     pub fn new(id: &str, node_type: NodeType, pt: Point<i32, i32>) -> Self {
         RoutingNode {
             id: id.to_string(),
@@ -57,6 +66,7 @@ impl RoutingNode {
         }
     }
 
+    /// Computes the Manhattan distance to another routing node.
     pub fn manhattan_distance(&self, other: &RoutingNode) -> i32 {
         self.pt.min_dist_with(&other.pt) as i32
     }
@@ -69,6 +79,7 @@ pub struct GlobalRoutingTree {
     source_idx: usize,
     next_steiner_id: i32,
     next_terminal_id: i32,
+    /// The worst-case (longest) wirelength among all source-to-terminal paths
     pub worst_wirelength: i32,
 }
 
@@ -89,10 +100,12 @@ impl GlobalRoutingTree {
         }
     }
 
+    /// Returns a shared reference to the source node.
     pub fn get_source(&self) -> &RoutingNode {
         &self.nodes[self.source_idx]
     }
 
+    /// Returns a mutable reference to the source node.
     pub fn get_source_mut(&mut self) -> &mut RoutingNode {
         &mut self.nodes[self.source_idx]
     }
@@ -377,6 +390,7 @@ impl GlobalRoutingTree {
         self._insert_terminal_impl(point, allowed_wirelength, keepouts);
     }
 
+    /// Calculates the total wirelength of the entire routing tree.
     pub fn calculate_total_wirelength(&self) -> i32 {
         let mut total = 0;
         for node in &self.nodes {
@@ -387,6 +401,7 @@ impl GlobalRoutingTree {
         total
     }
 
+    /// Calculates the worst-case (maximum) source-to-terminal wirelength.
     pub fn calculate_worst_wirelength(&self) -> i32 {
         fn traverse(tree: &GlobalRoutingTree, idx: usize) -> i32 {
             let node = &tree.nodes[idx];
@@ -401,6 +416,9 @@ impl GlobalRoutingTree {
         traverse(self, self.source_idx)
     }
 
+    /// Finds the path from a node back to the source.
+    ///
+    /// Returns the nodes along the path in order from source to the target node.
     pub fn find_path_to_source(&self, node_id: &str) -> Vec<&RoutingNode> {
         let mut idx = *self.node_map.get(node_id).expect("Node not found");
         let mut path = Vec::new();
@@ -415,6 +433,7 @@ impl GlobalRoutingTree {
         path
     }
 
+    /// Returns all terminal nodes in the routing tree.
     pub fn get_all_terminals(&self) -> Vec<&RoutingNode> {
         self.nodes
             .iter()
@@ -422,6 +441,7 @@ impl GlobalRoutingTree {
             .collect()
     }
 
+    /// Returns all Steiner nodes in the routing tree.
     pub fn get_all_steiner_nodes(&self) -> Vec<&RoutingNode> {
         self.nodes
             .iter()
@@ -429,6 +449,7 @@ impl GlobalRoutingTree {
             .collect()
     }
 
+    /// Returns a formatted string representation of the tree structure.
     pub fn get_tree_structure(&self) -> String {
         fn fmt_node(tree: &GlobalRoutingTree, idx: usize, level: usize) -> String {
             let node = &tree.nodes[idx];
@@ -458,6 +479,10 @@ impl GlobalRoutingTree {
         println!("Steiner points: {}", self.get_all_steiner_nodes().len());
     }
 
+    /// Removes redundant Steiner points that have only one child.
+    ///
+    /// After optimization, the remaining Steiner points have at least two
+    /// children and are topologically significant.
     pub fn optimize_steiner_points(&mut self) {
         let to_remove: Vec<usize> = self
             .nodes
@@ -694,7 +719,8 @@ impl GlobalRoutingTree {
     }
 }
 
-/// High-level global router that constructs a routing tree.
+/// High-level global router that constructs a routing tree from a source
+/// and a set of terminal points, with optional keepout avoidance.
 pub struct GlobalRouter {
     terminal_positions: Vec<Point<i32, i32>>,
     tree: GlobalRoutingTree,
