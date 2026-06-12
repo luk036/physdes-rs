@@ -45,7 +45,11 @@ where
         .collect()
 }
 
-/// Decomposes a rectilinear polygon using explicit cut.
+/// Decomposes a rectilinear polygon into convex pieces using explicit
+/// (vertex-insertion) cuts.
+///
+/// This algorithm inserts intermediate vertices at concave corners to
+/// partition the polygon into rectilinearly convex sub-polygons.
 pub fn rpolygon_cut_explicit<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -72,7 +76,12 @@ where
         .collect()
 }
 
-/// Decomposes a rectilinear polygon using implicit cut.
+/// Decomposes a rectilinear polygon into convex pieces using implicit
+/// (non-vertex-insertion) cuts.
+///
+/// Unlike the explicit variant, this algorithm partitions the polygon
+/// without inserting new vertices — cuts are made along existing
+/// grid lines.
 pub fn rpolygon_cut_implicit<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -100,6 +109,10 @@ where
 }
 
 /// Decomposes a rectilinear polygon into rectangles.
+///
+/// This is a two-stage decomposition: first the polygon is cut using
+/// the implicit strategy, then each resulting piece is further decomposed
+/// into rectangles using the explicit strategy.
 pub fn rpolygon_cut_rectangle<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,

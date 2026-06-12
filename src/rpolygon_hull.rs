@@ -1,6 +1,21 @@
 use crate::point::Point;
 
-/// Removes concave vertices iteratively until polygon becomes monotone in `dir`.
+/// Removes concave vertices iteratively until the polygon becomes monotone
+/// in a given direction.
+///
+/// Repeatedly scans the polygon vertices and removes any vertex whose
+/// cross-product sign indicates concavity (relative to the polygon's
+/// winding direction). Stops when no more concave vertices remain.
+///
+/// # Arguments
+///
+/// * `pointset` - The input polygon vertices
+/// * `is_anticlockwise` - Whether the polygon is oriented anti-clockwise
+/// * `dir` - A closure defining the monotone direction (e.g. x or y)
+///
+/// # Type Parameters
+///
+/// * `F` - A closure `Fn(&Point<T, T>) -> (T, T)` used to order points
 pub fn rpolygon_make_monotone_hull<T, F>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -50,6 +65,8 @@ where
     pts
 }
 
+/// Computes an x-monotone hull of a polygon by removing concave vertices
+/// with respect to the x-direction.
 pub fn rpolygon_make_xmonotone_hull<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -69,6 +86,8 @@ where
     })
 }
 
+/// Computes a y-monotone hull of a polygon by removing concave vertices
+/// with respect to the y-direction.
 pub fn rpolygon_make_ymonotone_hull<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -88,8 +107,16 @@ where
     })
 }
 
-/// Convex hull via monotone chain (Andrew's algorithm).
-/// Area property: convex hull area >= original polygon area.
+/// Computes the convex hull of a rectilinear polygon using Andrew's
+/// monotone chain algorithm.
+///
+/// The resulting hull satisfies: `convex_hull_area >= original_polygon_area`.
+/// For convex polygons the hull equals the original.
+///
+/// # Arguments
+///
+/// * `pointset` - The input polygon vertices
+/// * `_is_anticlockwise` - Ignored (the algorithm determines orientation)
 pub fn rpolygon_make_convex_hull<T>(
     pointset: &[Point<T, T>],
     _is_anticlockwise: bool,
