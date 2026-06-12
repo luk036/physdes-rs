@@ -24,12 +24,46 @@ pub struct MergeObj<T1, T2> {
 }
 
 impl<T1, T2> MergeObj<T1, T2> {
+    /// Creates a new `MergeObj` with the given x and y coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `xcoord` - The x-coordinate value
+    /// * `ycoord` - The y-coordinate value
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::merge_obj::MergeObj;
+    /// let obj = MergeObj::new(3, 4);
+    /// assert_eq!(obj.get_impl().xcoord, 3);
+    /// ```
     pub const fn new(xcoord: T1, ycoord: T2) -> MergeObj<T1, T2> {
         MergeObj {
             impl_: Point::new(xcoord, ycoord),
         }
     }
 
+    /// Constructs a `MergeObj<i32, i32>` from raw coordinates by applying
+    /// the transform `(x+y, x-y)` to the internal point.
+    ///
+    /// This transform maps the point into a rotated coordinate space used
+    /// for Manhattan-distance-based merging operations.
+    ///
+    /// # Arguments
+    ///
+    /// * `xcoord` - The x-coordinate in the original space
+    /// * `ycoord` - The y-coordinate in the original space
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::merge_obj::MergeObj;
+    /// let obj = MergeObj::<i32, i32>::construct(4, 5);
+    /// let internal = obj.get_impl();
+    /// assert_eq!(internal.xcoord, 9);  // 4 + 5
+    /// assert_eq!(internal.ycoord, -1); // 4 - 5
+    /// ```
     pub const fn construct(xcoord: i32, ycoord: i32) -> MergeObj<i32, i32> {
         let impl_ = Point::new(xcoord + ycoord, xcoord - ycoord);
         MergeObj { impl_ }
@@ -57,6 +91,22 @@ where
     T1: MinDist<T1>,
     T2: MinDist<T2>,
 {
+    /// Computes the minimum Manhattan distance between two `MergeObj` values.
+    ///
+    /// Returns the component-wise maximum of the individual coordinate distances.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The other merge object to measure distance to
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use physdes::merge_obj::MergeObj;
+    /// let a = MergeObj::<i32, i32>::construct(0, 0);
+    /// let b = MergeObj::<i32, i32>::construct(3, 4);
+    /// assert_eq!(a.min_dist_with(&b), 7);
+    /// ```
     pub fn min_dist_with(&self, other: &MergeObj<T1, T2>) -> u32 {
         cmp::max(
             self.impl_.xcoord.min_dist_with(&other.impl_.xcoord),
@@ -70,17 +120,44 @@ where
     T1: MinDist<T1> + Enlarge<i32, Output = T1> + Intersect<T1, Output = T1>,
     T2: MinDist<T2> + Enlarge<i32, Output = T2> + Intersect<T2, Output = T2>,
 {
+    /// Enlarges this merge object by a given margin, producing a new `MergeObj`
+    /// whose coordinates are expanded outward by `alpha` in all directions.
+    ///
+    /// # Arguments
+    ///
+    /// * `alpha` - The margin to add around each coordinate
     pub fn enlarge_with(&self, alpha: i32) -> MergeObj<T1, T2> {
         let xcoord = self.impl_.xcoord.enlarge_with(alpha);
         let ycoord = self.impl_.ycoord.enlarge_with(alpha);
         MergeObj::new(xcoord, ycoord)
     }
 
+    /// Computes the intersection of this merge object with another.
+    ///
+    /// Returns a new `MergeObj` whose coordinates are the component-wise
+    /// intersection of the two operands.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The other merge object to intersect with
     pub fn intersect_with(&self, other: &MergeObj<T1, T2>) -> MergeObj<T1, T2> {
         let point = self.impl_.intersect_with(&other.impl_);
         MergeObj::new(point.xcoord, point.ycoord)
     }
 
+    /// Merges this merge object with another by computing the midpoint
+    /// region between them.
+    ///
+    /// The merge is performed by:
+    /// 1. Computing the minimum distance between the two objects
+    /// 2. Enlarging each by a portion of that distance
+    /// 3. Intersecting the enlarged regions to find the merge result
+    ///
+    /// This is the core operation of the DME (Deferred Merge Embedding) algorithm.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The other merge object to merge with
     pub fn merge_with(&self, other: &MergeObj<T1, T2>) -> MergeObj<T1, T2> {
         let alpha = self.min_dist_with(other);
         let half = alpha / 2;
