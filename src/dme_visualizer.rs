@@ -4,10 +4,7 @@
 //! graphics with node coloring (root/internal/sink), wire length labels,
 //! delay and capacitance annotations, and an optional analysis info panel.
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
-use crate::dme_algorithm::{SkewAnalysis, TreeNode};
+use crate::dme_algorithm::{NodeIdx, SkewAnalysis, Tree};
 
 /// SVG visualizer for DME clock trees.
 ///
@@ -45,24 +42,26 @@ impl ClockTreeVisualizer {
         Self::default()
     }
 
+    #[allow(clippy::too_many_arguments)]
     /// Produce an SVG string visualizing the clock tree rooted at `root`.
     ///
-    /// * `root` — root of the clock tree (from `DMEAlgorithm::build_clock_tree`)
+    /// * `tree` — the arena-allocated clock tree (from `DMEAlgorithm::get_tree()`)
+    /// * `root` — root node index (returned by `DMEAlgorithm::build_clock_tree`)
     /// * `sinks` — original sink list (used to identify leaf nodes)
     /// * `filename` — if non-empty, save the SVG to this path
     /// * `width`, `height` — SVG canvas dimensions
     /// * `analysis` — optional `SkewAnalysis` to display in an info panel
     pub fn visualize_tree(
         &self,
-        root: Rc<RefCell<TreeNode>>,
+        tree: &Tree,
+        root: NodeIdx,
         sinks: &[crate::dme_algorithm::Sink],
         filename: &str,
         width: u32,
         height: u32,
         analysis: Option<&SkewAnalysis>,
     ) -> String {
-        let all_nodes = collect_all_nodes(&root);
-        let (min_x, min_y, max_x, max_y) = calculate_bounds(&all_nodes, sinks);
+        let (min_x, min_y, max_x, max_y) = calculate_bounds(tree, root, sinks);
 
         let range_x = (max_x - min_x).max(1) as f64;
         let range_y = (max_y - min_y).max(1) as f64;
@@ -90,11 +89,9 @@ impl ClockTreeVisualizer {
         svg.push_str(r#"<rect width="100%" height="100%" fill="white"/>"#);
         svg.push_str(r#"<g class="clock-tree">"#);
 
-        svg.push_str(&draw_wires(&root, &sc, &self.wire_color, self.wire_width));
+        svg.push_str(&draw_wires(tree, root, &sc, &self.wire_color, self.wire_width));
         svg.push_str(&draw_nodes(
-            &root,
-            sinks,
-            &sc,
+            tree, root, sinks, &sc,
             self.root_color.as_str(),
             self.internal_color.as_str(),
             self.sink_color.as_str(),
@@ -117,7 +114,8 @@ impl ClockTreeVisualizer {
 
 /// Data for a single tree in a comparison visualization.
 pub struct TreeData {
-    pub tree: Rc<RefCell<TreeNode>>,
+    pub tree: Tree,
+    pub root: NodeIdx,
     pub sinks: Vec<crate::dme_algorithm::Sink>,
     pub analysis: Option<SkewAnalysis>,
     pub title: String,
@@ -125,12 +123,13 @@ pub struct TreeData {
 
 impl TreeData {
     pub fn new(
-        tree: Rc<RefCell<TreeNode>>,
+        tree: Tree,
+        root: NodeIdx,
         sinks: Vec<crate::dme_algorithm::Sink>,
         analysis: Option<SkewAnalysis>,
         title: &str,
     ) -> Self {
-        TreeData { tree, sinks, analysis, title: title.to_string() }
+        TreeData { tree, root, sinks, analysis, title: title.to_string() }
     }
 }
 
@@ -177,7 +176,8 @@ pub fn create_comparison_visualization(
         svg.push_str(&format!("<text x=\"{}\" y=\"{}\" font-family=\"sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"{}333\" text-anchor=\"middle\">{}</text>", ox + sub_w / 2, oy + 20, '#', td.title));
 
         let inner = viz.visualize_tree(
-            Rc::clone(&td.tree),
+            &td.tree,
+            td.root,
             &td.sinks,
             "",
             sub_w - 20,
@@ -197,7 +197,6 @@ pub fn create_comparison_visualization(
                         end = body_start + i;
                         break;
                     }
-                    // Skip past </g>
                     continue;
                 }
                 if inner[body_start + i..].starts_with("<g ") || inner[body_start + i..].starts_with("<g>") {
@@ -229,26 +228,11 @@ pub fn create_delay_model_comparison(
     create_comparison_visualization(&[linear, elmore], filename, 1200, 600)
 }
 
-// --- helper helpers (non-allocating DFS helpers) ---
-
-fn collect_all_nodes(root: &Rc<RefCell<TreeNode>>) -> Vec<Rc<RefCell<TreeNode>>> {
-    let mut nodes = Vec::new();
-    let mut stack = vec![Rc::clone(root)];
-    while let Some(node) = stack.pop() {
-        nodes.push(Rc::clone(&node));
-        let n = node.borrow();
-        if let Some(ref r) = n.right {
-            stack.push(Rc::clone(r));
-        }
-        if let Some(ref l) = n.left {
-            stack.push(Rc::clone(l));
-        }
-    }
-    nodes
-}
+// --- helper helpers (work with &Tree + NodeIdx) ---
 
 fn calculate_bounds(
-    nodes: &[Rc<RefCell<TreeNode>>],
+    tree: &Tree,
+    root: NodeIdx,
     sinks: &[crate::dme_algorithm::Sink],
 ) -> (i32, i32, i32, i32) {
     let mut min_x = i32::MAX;
@@ -256,12 +240,15 @@ fn calculate_bounds(
     let mut max_x = i32::MIN;
     let mut max_y = i32::MIN;
 
-    for node in nodes {
-        let n = node.borrow();
+    let mut stack = vec![root];
+    while let Some(idx) = stack.pop() {
+        let n = tree.get(idx);
         min_x = min_x.min(n.position.xcoord);
         min_y = min_y.min(n.position.ycoord);
         max_x = max_x.max(n.position.xcoord);
         max_y = max_y.max(n.position.ycoord);
+        if let Some(r) = n.right { stack.push(r); }
+        if let Some(l) = n.left { stack.push(l); }
     }
     for sink in sinks {
         min_x = min_x.min(sink.position.xcoord);
@@ -275,30 +262,26 @@ fn calculate_bounds(
     }
 
     let padding = ((max_x - min_x).max(max_y - min_y) as f64 * 0.1).max(10.0) as i32;
-    (
-        min_x - padding,
-        min_y - padding,
-        max_x + padding,
-        max_y + padding,
-    )
+    (min_x - padding, min_y - padding, max_x + padding, max_y + padding)
 }
 
-fn sink_positions(sinks: &[crate::dme_algorithm::Sink]) -> Vec<(i32, i32)> {
+fn sink_positions(sinks: &[crate::dme_algorithm::Sink]) -> std::collections::HashSet<(i32, i32)> {
     sinks.iter().map(|s| (s.position.xcoord, s.position.ycoord)).collect()
 }
 
 fn draw_wires(
-    root: &Rc<RefCell<TreeNode>>,
+    tree: &Tree,
+    root: NodeIdx,
     sc: &dyn Fn(i32, i32) -> (f64, f64),
     color: &str,
     width: u32,
 ) -> String {
     let mut out = String::new();
-    let mut stack = vec![(Rc::clone(root), false)];
-    while let Some((node, _)) = stack.pop() {
-        let n = node.borrow();
-        if let Some(ref parent) = n.parent {
-            let pb = parent.borrow();
+    let mut stack = vec![root];
+    while let Some(idx) = stack.pop() {
+        let n = tree.get(idx);
+        if let Some(p) = n.parent {
+            let pb = tree.get(p);
             let (x1, y1) = sc(pb.position.xcoord, pb.position.ycoord);
             let (x2, y2) = sc(n.position.xcoord, n.position.ycoord);
             out.push_str(&format!(
@@ -314,18 +297,16 @@ fn draw_wires(
                 ));
             }
         }
-        if let Some(ref r) = n.right {
-            stack.push((Rc::clone(r), false));
-        }
-        if let Some(ref l) = n.left {
-            stack.push((Rc::clone(l), false));
-        }
+        if let Some(r) = n.right { stack.push(r); }
+        if let Some(l) = n.left { stack.push(l); }
     }
     out
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_nodes(
-    root: &Rc<RefCell<TreeNode>>,
+    tree: &Tree,
+    root: NodeIdx,
     sinks: &[crate::dme_algorithm::Sink],
     sc: &dyn Fn(i32, i32) -> (f64, f64),
     root_color: &str,
@@ -333,12 +314,11 @@ fn draw_nodes(
     sink_color: &str,
     radius: u32,
 ) -> String {
-    let sink_set: std::collections::HashSet<(i32, i32)> =
-        sink_positions(sinks).into_iter().collect();
+    let sink_set = sink_positions(sinks);
     let mut out = String::new();
-    let mut stack = vec![(Rc::clone(root), 0u32)];
-    while let Some((node, depth)) = stack.pop() {
-        let n = node.borrow();
+    let mut stack = vec![(root, 0u32)];
+    while let Some((idx, _depth)) = stack.pop() {
+        let n = tree.get(idx);
         let (x, y) = sc(n.position.xcoord, n.position.ycoord);
         let is_root = n.parent.is_none();
         let is_sink = sink_set.contains(&(n.position.xcoord, n.position.ycoord));
@@ -356,39 +336,23 @@ fn draw_nodes(
             "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"{}\" stroke=\"{}333\" stroke-width=\"1\"/>",
             x, y, r, color, '#'
         ));
-        // Name label
         out.push_str(&format!(
             r#"<text x="{}" y="{}" class="nl" text-anchor="middle">{}</text>"#,
-            x,
-            y - r - 5.0,
-            n.name
+            x, y - r - 5.0, n.name
         ));
-        // Delay
         out.push_str(&format!(
             r#"<text x="{}" y="{}" class="dl" text-anchor="middle">d:{:.1}</text>"#,
-            x,
-            y + r + 12.0,
-            n.delay
+            x, y + r + 12.0, n.delay
         ));
-        // Capacitance for sinks
         if is_sink {
             out.push_str(&format!(
                 r#"<text x="{}" y="{}" class="dl" text-anchor="middle">c:{:.1}</text>"#,
-                x,
-                y + r + 22.0,
-                n.capacitance
+                x, y + r + 22.0, n.capacitance
             ));
         }
 
-        let right = n.right.as_ref().map(Rc::clone);
-        let left = n.left.as_ref().map(Rc::clone);
-        drop(n);
-        if let Some(rn) = right {
-            stack.push((rn, depth + 1));
-        }
-        if let Some(ln) = left {
-            stack.push((ln, depth + 1));
-        }
+        if let Some(rn) = n.right { stack.push((rn, _depth + 1)); }
+        if let Some(ln) = n.left { stack.push((ln, _depth + 1)); }
     }
     out
 }
@@ -448,7 +412,7 @@ mod tests {
         ]
     }
 
-    fn build_test_tree(sinks: Vec<Sink>) -> (DMEAlgorithm, Rc<RefCell<TreeNode>>) {
+    fn build_test_tree(sinks: Vec<Sink>) -> (DMEAlgorithm, NodeIdx) {
         let calc = Box::new(LinearDelayCalculator::new(0.5, 0.1));
         let mut dme = DMEAlgorithm::new(sinks, calc);
         let root = dme.build_clock_tree();
@@ -459,9 +423,9 @@ mod tests {
     fn test_visualizer_produces_valid_svg() {
         let sinks = sample_sinks();
         let (dme, root) = build_test_tree(sinks.clone());
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
         let viz = ClockTreeVisualizer::new();
-        let svg = viz.visualize_tree(root, &sinks, "", 400, 300, Some(&analysis));
+        let svg = viz.visualize_tree(dme.get_tree(), root, &sinks, "", 400, 300, Some(&analysis));
 
         assert!(svg.starts_with("<svg"));
         assert!(svg.ends_with("</svg>"));
@@ -474,11 +438,10 @@ mod tests {
     fn test_visualizer_svg_contains_all_nodes() {
         let sinks = sample_sinks();
         let (dme, root) = build_test_tree(sinks.clone());
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
         let viz = ClockTreeVisualizer::new();
-        let svg = viz.visualize_tree(root, &sinks, "", 400, 300, Some(&analysis));
+        let svg = viz.visualize_tree(dme.get_tree(), root, &sinks, "", 400, 300, Some(&analysis));
 
-        // All sink names should appear in the SVG
         for sink in &sinks {
             assert!(svg.contains(&sink.name), "Missing node: {}", sink.name);
         }
@@ -488,25 +451,20 @@ mod tests {
     fn test_visualizer_skew_within_two_percent() {
         let sinks = sample_sinks();
         let (dme, root) = build_test_tree(sinks.clone());
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
 
         assert!(analysis.max_delay > 0.0);
         let pct = analysis.skew / analysis.max_delay * 100.0;
-        assert!(
-            pct < 2.0,
-            "Skew {:.4} ({:.2}%) exceeds 2%",
-            analysis.skew,
-            pct
-        );
+        assert!(pct < 2.0, "Skew {:.4} ({:.2}%) exceeds 2%", analysis.skew, pct);
     }
 
     #[test]
     fn test_visualizer_clock_tree_group_wrapper() {
         let sinks = sample_sinks();
         let (dme, root) = build_test_tree(sinks.clone());
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
         let viz = ClockTreeVisualizer::new();
-        let svg = viz.visualize_tree(root, &sinks, "", 400, 300, Some(&analysis));
+        let svg = viz.visualize_tree(dme.get_tree(), root, &sinks, "", 400, 300, Some(&analysis));
         assert!(svg.contains(r#"<g class="clock-tree">"#));
         assert!(svg.contains("</g>"));
     }
@@ -515,9 +473,9 @@ mod tests {
     fn test_create_comparison_visualization() {
         let sinks = sample_sinks();
         let (dme, root) = build_test_tree(sinks.clone());
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
 
-        let td = TreeData::new(root, sinks, Some(analysis), "Test Tree");
+        let td = TreeData::new(dme.get_tree().clone(), root, sinks, Some(analysis), "Test Tree");
         let svg = create_comparison_visualization(&[td], "", 800, 400);
         assert!(svg.starts_with("<svg"));
         assert!(svg.ends_with("</svg>"));
@@ -532,15 +490,15 @@ mod tests {
         let calc = Box::new(LinearDelayCalculator::new(0.5, 0.1));
         let mut dme = DMEAlgorithm::new(sinks.clone(), calc);
         let root = dme.build_clock_tree();
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
 
         let ecalc = Box::new(ElmoreDelayCalculator::new(0.1, 0.1));
         let mut edme = DMEAlgorithm::new(sinks.clone(), ecalc);
         let eroot = edme.build_clock_tree();
-        let eanalysis = edme.analyze_skew(Rc::clone(&eroot));
+        let eanalysis = edme.analyze_skew(eroot);
 
-        let linear = TreeData::new(root, sinks.clone(), Some(analysis), "Linear Delay");
-        let elmore = TreeData::new(eroot, sinks, Some(eanalysis), "Elmore Delay");
+        let linear = TreeData::new(dme.get_tree().clone(), root, sinks.clone(), Some(analysis), "Linear Delay");
+        let elmore = TreeData::new(edme.get_tree().clone(), eroot, sinks, Some(eanalysis), "Elmore Delay");
         let svg = create_delay_model_comparison(linear, elmore, "");
         assert!(svg.contains("Linear Delay"));
         assert!(svg.contains("Elmore Delay"));
@@ -550,10 +508,10 @@ mod tests {
     fn test_visualizer_generates_svg_file() {
         let sinks = sample_sinks();
         let (dme, root) = build_test_tree(sinks.clone());
-        let analysis = dme.analyze_skew(Rc::clone(&root));
+        let analysis = dme.analyze_skew(root);
         let viz = ClockTreeVisualizer::new();
         let path = "test_clock_tree.svg";
-        let svg = viz.visualize_tree(root, &sinks, path, 800, 600, Some(&analysis));
+        let svg = viz.visualize_tree(dme.get_tree(), root, &sinks, path, 800, 600, Some(&analysis));
 
         assert!(std::path::Path::new(path).exists());
         let saved = std::fs::read_to_string(path).unwrap();
