@@ -27,7 +27,11 @@ pub struct Sink {
 impl Sink {
     /// Creates a new sink with the given name, position, and capacitance.
     pub fn new(name: &str, position: Point<i32, i32>, capacitance: f64) -> Self {
-        Sink { name: name.to_string(), position, capacitance }
+        Sink {
+            name: name.to_string(),
+            position,
+            capacitance,
+        }
     }
 }
 
@@ -146,6 +150,21 @@ impl Tree {
     }
 }
 
+/// Result of a tapping-point calculation.
+///
+/// Carries both the clamped `extend_left` (guaranteed to lie in [0, distance])
+/// and the **raw** (pre-clamp) value so the caller can compute the exact
+/// wire lengths for the two children and the `need_elongation` flags.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TappingResult {
+    /// Tapping-point offset from the left child, clamped to [0, distance].
+    pub extend_left: i32,
+    /// Raw (pre-clamp) tapping-point offset.
+    pub raw_extend_left: i32,
+    /// Signal delay at the tapping point.
+    pub delay_left: f64,
+}
+
 /// Abstract delay model for wire delay calculation.
 pub trait DelayCalculator {
     /// Calculates the total wire delay for a given length and load capacitance.
@@ -156,6 +175,10 @@ pub trait DelayCalculator {
     fn calculate_wire_capacitance(&self, length: i32) -> f64;
     /// Computes the tapping point (split location) between two subtrees to
     /// achieve prescribed skew, given their delays and capacitances.
+    ///
+    /// Returns a `TappingResult` containing both the clamped `extend_left`
+    /// (in [0, distance]) and the raw pre-clamp value, enabling the caller
+    /// to implement the full elongation logic.
     fn calculate_tapping_point(
         &self,
         distance: i32,
@@ -163,7 +186,7 @@ pub trait DelayCalculator {
         right_delay: f64,
         left_capacitance: f64,
         right_capacitance: f64,
-    ) -> (i32, f64);
+    ) -> TappingResult;
 }
 
 /// Linear delay model where wire delay is proportional to wire length.
@@ -179,7 +202,10 @@ pub struct LinearDelayCalculator {
 impl LinearDelayCalculator {
     /// Creates a linear delay calculator with the given parameters.
     pub fn new(delay_per_unit: f64, capacitance_per_unit: f64) -> Self {
-        LinearDelayCalculator { delay_per_unit, capacitance_per_unit }
+        LinearDelayCalculator {
+            delay_per_unit,
+            capacitance_per_unit,
+        }
     }
 }
 
@@ -200,22 +226,29 @@ impl DelayCalculator for LinearDelayCalculator {
         right_delay: f64,
         _left_capacitance: f64,
         _right_capacitance: f64,
-    ) -> (i32, f64) {
+    ) -> TappingResult {
         if distance == 0 {
-            return (0, left_delay.max(right_delay));
+            return TappingResult {
+                extend_left: 0,
+                raw_extend_left: 0,
+                delay_left: left_delay.max(right_delay),
+            };
         }
         let skew = right_delay - left_delay;
-        let extend_left = ((skew / self.delay_per_unit + distance as f64) / 2.0).round() as i32;
-        let delay_left = left_delay + extend_left as f64 * self.delay_per_unit;
-        let extend_left = extend_left.clamp(0, distance);
-        let delay_left = if extend_left == 0 {
-            left_delay
-        } else if extend_left == distance {
-            right_delay
+        let raw = ((skew / self.delay_per_unit + distance as f64) / 2.0).round() as i32;
+        let delay_left = left_delay + raw as f64 * self.delay_per_unit;
+        let (extend_left, delay_left) = if raw < 0 {
+            (0, left_delay)
+        } else if raw > distance {
+            (distance, right_delay)
         } else {
-            delay_left
+            (raw, delay_left)
         };
-        (extend_left, delay_left)
+        TappingResult {
+            extend_left,
+            raw_extend_left: raw,
+            delay_left,
+        }
     }
 }
 
@@ -234,7 +267,10 @@ impl ElmoreDelayCalculator {
     /// Creates an Elmore delay calculator with the given resistance and
     /// capacitance per unit length.
     pub fn new(unit_resistance: f64, unit_capacitance: f64) -> Self {
-        ElmoreDelayCalculator { unit_resistance, unit_capacitance }
+        ElmoreDelayCalculator {
+            unit_resistance,
+            unit_capacitance,
+        }
     }
 }
 
@@ -257,28 +293,35 @@ impl DelayCalculator for ElmoreDelayCalculator {
         right_delay: f64,
         left_capacitance: f64,
         right_capacitance: f64,
-    ) -> (i32, f64) {
+    ) -> TappingResult {
         if distance == 0 {
-            return (0, left_delay.max(right_delay));
+            return TappingResult {
+                extend_left: 0,
+                raw_extend_left: 0,
+                delay_left: left_delay.max(right_delay),
+            };
         }
         let skew = right_delay - left_delay;
         let r = distance as f64 * self.unit_resistance;
-        let c = distance as f64 * self.unit_capacitance;
-        let z = (skew + r * (right_capacitance + c / 2.0))
-            / (r * (c + right_capacitance + left_capacitance));
-        let extend_left = (z * distance as f64).round() as i32;
-        let r_left = extend_left as f64 * self.unit_resistance;
-        let c_left = extend_left as f64 * self.unit_capacitance;
+        let c_w = distance as f64 * self.unit_capacitance;
+        let z = (skew + r * (right_capacitance + c_w / 2.0))
+            / (r * (c_w + right_capacitance + left_capacitance));
+        let raw = (z * distance as f64).round() as i32;
+        let r_left = raw as f64 * self.unit_resistance;
+        let c_left = raw as f64 * self.unit_capacitance;
         let delay_left = left_delay + r_left * (c_left / 2.0 + left_capacitance);
-        let extend_left = extend_left.clamp(0, distance);
-        let delay_left = if extend_left == 0 {
-            left_delay
-        } else if extend_left == distance {
-            right_delay
+        let (extend_left, delay_left) = if raw < 0 {
+            (0, left_delay)
+        } else if raw > distance {
+            (distance, right_delay)
         } else {
-            delay_left
+            (raw, delay_left)
         };
-        (extend_left, delay_left)
+        TappingResult {
+            extend_left,
+            raw_extend_left: raw,
+            delay_left,
+        }
     }
 }
 
@@ -375,7 +418,13 @@ impl DMEAlgorithm {
     /// Panics if `sinks` is empty.
     pub fn new(sinks: Vec<Sink>, calculator: Box<dyn DelayCalculator>) -> Self {
         assert!(!sinks.is_empty(), "No sinks provided");
-        DMEAlgorithm { sinks, delay_calculator: calculator, node_id: 0, source: None, tree: Tree::new() }
+        DMEAlgorithm {
+            sinks,
+            delay_calculator: calculator,
+            node_id: 0,
+            source: None,
+            tree: Tree::new(),
+        }
     }
 
     /// Creates a new DME algorithm with a specified clock source position.
@@ -389,7 +438,13 @@ impl DMEAlgorithm {
         source: Point<i32, i32>,
     ) -> Self {
         assert!(!sinks.is_empty(), "No sinks provided");
-        DMEAlgorithm { sinks, delay_calculator: calculator, node_id: 0, source: Some(source), tree: Tree::new() }
+        DMEAlgorithm {
+            sinks,
+            delay_calculator: calculator,
+            node_id: 0,
+            source: Some(source),
+            tree: Tree::new(),
+        }
     }
 
     /// Returns a reference to the constructed tree.
@@ -433,9 +488,21 @@ impl DMEAlgorithm {
 
         let mut sorted: Vec<NodeIdx> = node_ids.to_vec();
         if vertical {
-            sorted.sort_by(|&a, &b| self.tree.get(a).position.xcoord.cmp(&self.tree.get(b).position.xcoord));
+            sorted.sort_by(|&a, &b| {
+                self.tree
+                    .get(a)
+                    .position
+                    .xcoord
+                    .cmp(&self.tree.get(b).position.xcoord)
+            });
         } else {
-            sorted.sort_by(|&a, &b| self.tree.get(a).position.ycoord.cmp(&self.tree.get(b).position.ycoord));
+            sorted.sort_by(|&a, &b| {
+                self.tree
+                    .get(a)
+                    .position
+                    .ycoord
+                    .cmp(&self.tree.get(b).position.ycoord)
+            });
         }
 
         let mid = sorted.len() / 2;
@@ -471,8 +538,16 @@ impl DMEAlgorithm {
             return ms;
         }
 
-        let left = self.tree.get(node).left.expect("Internal node missing left child");
-        let right = self.tree.get(node).right.expect("Internal node missing right child");
+        let left = self
+            .tree
+            .get(node)
+            .left
+            .expect("Internal node missing left child");
+        let right = self
+            .tree
+            .get(node)
+            .right
+            .expect("Internal node missing right child");
 
         let left_ms = self.compute_merging_segment(left, segments);
         let right_ms = self.compute_merging_segment(right, segments);
@@ -490,24 +565,47 @@ impl DMEAlgorithm {
             (ln.capacitance, rn.capacitance)
         };
 
-        let (extend_left, delay_left) = self.delay_calculator.calculate_tapping_point(
-            distance, left_delay, right_delay, left_cap, right_cap,
+        let tp = self.delay_calculator.calculate_tapping_point(
+            distance,
+            left_delay,
+            right_delay,
+            left_cap,
+            right_cap,
         );
 
+        // Apply node side-effects: wire_length and need_elongation.
+        // When the raw extend_left falls outside [0, distance], the elongated
+        // branch gets the raw (pre-clamp) value so its wire exceeds the
+        // segment distance.
         {
             let (l_node, r_node) = self.tree.get_pair_mut(left, right);
-            l_node.wire_length = extend_left;
-            r_node.wire_length = distance - extend_left;
-            if extend_left == 0 {
+            l_node.wire_length = tp.extend_left;
+            r_node.wire_length = distance - tp.raw_extend_left;
+
+            if tp.raw_extend_left < 0 {
+                l_node.wire_length = 0;
+                r_node.wire_length = distance - tp.raw_extend_left;
                 r_node.need_elongation = true;
-            } else if extend_left == distance {
+                #[cfg(feature = "std")]
+                log::warn!(
+                    "Warning: Right node needs elongation: extend_left < 0  => extend_left \
+                     set to 0"
+                );
+            } else if tp.raw_extend_left > distance {
+                r_node.wire_length = 0;
+                l_node.wire_length = tp.raw_extend_left;
                 l_node.need_elongation = true;
+                #[cfg(feature = "std")]
+                log::warn!(
+                    "Warning: Left node needs elongation: extend_left > distance => \
+                     extend_left set to distance"
+                );
             }
         }
 
-        self.tree.get_mut(node).delay = delay_left;
+        self.tree.get_mut(node).delay = tp.delay_left;
 
-        let merged_segment = left_ms.merge_with(&right_ms, extend_left);
+        let merged_segment = left_ms.merge_with(&right_ms, tp.extend_left);
         segments.insert(node, merged_segment);
 
         let wire_cap = self.delay_calculator.calculate_wire_capacitance(distance);
@@ -526,7 +624,9 @@ impl DMEAlgorithm {
         parent_segment: Option<&ManhattanArc<Interval<i32>>>,
         segments: &HashMap<NodeIdx, ManhattanArc<Interval<i32>>>,
     ) {
-        let node_segment = segments.get(&node).expect("Merging segment not found for node");
+        let node_segment = segments
+            .get(&node)
+            .expect("Merging segment not found for node");
 
         if parent_segment.is_none() {
             if let Some(src) = self.source {
@@ -537,7 +637,11 @@ impl DMEAlgorithm {
                 self.tree.get_mut(node).position = upper;
             }
         } else {
-            let parent_pos = self.tree.get(node).parent.map(|p| self.tree.get(p).position);
+            let parent_pos = self
+                .tree
+                .get(node)
+                .parent
+                .map(|p| self.tree.get(p).position);
             if let Some(pp) = parent_pos {
                 let nearest = node_segment.nearest_point_to(&pp);
                 self.tree.get_mut(node).position = nearest;
@@ -589,14 +693,24 @@ impl DMEAlgorithm {
             panic!("No sink delays collected");
         }
 
-        let max_delay = sink_delays.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let max_delay = sink_delays
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
         let min_delay = sink_delays.iter().cloned().fold(f64::INFINITY, f64::min);
         let skew = max_delay - min_delay;
         let total_wl = total_wirelength(&self.tree, root);
         #[allow(clippy::incompatible_msrv)]
         let delay_model = std::any::type_name_of_val(&*self.delay_calculator).to_string();
 
-        SkewAnalysis { max_delay, min_delay, skew, sink_delays, total_wirelength: total_wl, delay_model }
+        SkewAnalysis {
+            max_delay,
+            min_delay,
+            skew,
+            sink_delays,
+            total_wirelength: total_wl,
+            delay_model,
+        }
     }
 }
 
@@ -644,17 +758,16 @@ pub fn get_tree_statistics(tree: &Tree, root: NodeIdx) -> TreeStatistics {
     stats
 }
 
-fn traverse_tree(
-    tree: &Tree,
-    node: NodeIdx,
-    parent: Option<NodeIdx>,
-    stats: &mut TreeStatistics,
-) {
+fn traverse_tree(tree: &Tree, node: NodeIdx, parent: Option<NodeIdx>, stats: &mut TreeStatistics) {
     let n = tree.get(node);
     stats.nodes.push(NodeInfo {
         name: n.name.clone(),
         position: (n.position.xcoord, n.position.ycoord),
-        node_type: if n.is_leaf() { "sink".to_string() } else { "internal".to_string() },
+        node_type: if n.is_leaf() {
+            "sink".to_string()
+        } else {
+            "internal".to_string()
+        },
         delay: n.delay,
         capacitance: n.capacitance,
     });
@@ -699,7 +812,11 @@ mod tests {
             .map(|i| {
                 let x = (i * 37) % 100;
                 let y = (i * 53) % 100;
-                Sink::new(&format!("s{}", i), Point::new(x, y), 1.0 + (i % 5) as f64 * 0.2)
+                Sink::new(
+                    &format!("s{}", i),
+                    Point::new(x, y),
+                    1.0 + (i % 5) as f64 * 0.2,
+                )
             })
             .collect()
     }
@@ -718,7 +835,12 @@ mod tests {
         let (_, analysis) = run_tree(sinks, calc);
         assert!(analysis.max_delay > 0.0);
         let pct = analysis.skew / analysis.max_delay * 100.0;
-        assert!(pct < 2.0, "Skew {:.4} ({:.2}%) exceeds 2%", analysis.skew, pct);
+        assert!(
+            pct < 2.0,
+            "Skew {:.4} ({:.2}%) exceeds 2%",
+            analysis.skew,
+            pct
+        );
     }
 
     #[test]
@@ -728,7 +850,12 @@ mod tests {
         let (_, analysis) = run_tree(sinks, calc);
         assert!(analysis.max_delay > 0.0);
         let pct = analysis.skew / analysis.max_delay * 100.0;
-        assert!(pct < 2.0, "Skew {:.4} ({:.2}%) exceeds 2%", analysis.skew, pct);
+        assert!(
+            pct < 2.0,
+            "Skew {:.4} ({:.2}%) exceeds 2%",
+            analysis.skew,
+            pct
+        );
     }
 
     #[test]
@@ -738,7 +865,10 @@ mod tests {
             Sink::new("s2", Point::new(10, 0), 1.0),
         ];
         let (_, analysis) = run_tree(sinks, Box::new(LinearDelayCalculator::new(1.0, 0.1)));
-        assert_eq!(analysis.skew, 0.0, "Two symmetric sinks should have zero skew");
+        assert_eq!(
+            analysis.skew, 0.0,
+            "Two symmetric sinks should have zero skew"
+        );
         assert_eq!(analysis.total_wirelength, 10);
     }
 
@@ -765,7 +895,12 @@ mod tests {
         let analysis = dme.analyze_skew(root);
         assert!(analysis.max_delay > 0.0);
         let pct = analysis.skew / analysis.max_delay * 100.0;
-        assert!(pct < 2.0, "Skew {:.4} ({:.2}%) exceeds 2%", analysis.skew, pct);
+        assert!(
+            pct < 2.0,
+            "Skew {:.4} ({:.2}%) exceeds 2%",
+            analysis.skew,
+            pct
+        );
     }
 
     #[test]
@@ -780,5 +915,121 @@ mod tests {
         assert_eq!(stats.total_nodes, 3);
         assert_eq!(stats.total_sinks, 2);
         assert_eq!(stats.total_wires, 2);
+    }
+
+    // -----------------------------------------------------------------------
+    // Elongation unit tests (caller-side logic matching C++ TappingResult)
+    // -----------------------------------------------------------------------
+
+    /// Simulate the caller-side elongation logic from compute_merging_segment.
+    fn apply_elongation(distance: i32, tp: &TappingResult) -> (i32, i32, bool, bool) {
+        let mut left_wl = tp.extend_left;
+        let mut right_wl = distance - tp.raw_extend_left;
+        let mut left_el = false;
+        let mut right_el = false;
+        if tp.raw_extend_left < 0 {
+            left_wl = 0;
+            right_wl = distance - tp.raw_extend_left;
+            right_el = true;
+        } else if tp.raw_extend_left > distance {
+            right_wl = 0;
+            left_wl = tp.raw_extend_left;
+            left_el = true;
+        }
+        (left_wl, right_wl, left_el, right_el)
+    }
+
+    #[test]
+    fn test_linear_tapping_point_balanced() {
+        let calc = LinearDelayCalculator::new(0.5, 0.2);
+        let tp = calc.calculate_tapping_point(10, 1.0, 1.0, 0.0, 0.0);
+        assert_eq!(tp.extend_left, 5);
+        assert_eq!(tp.raw_extend_left, 5);
+        approx_eq(tp.delay_left, 1.0 + 5.0 * 0.5);
+    }
+
+    #[test]
+    fn test_linear_tapping_point_right_slower() {
+        let calc = LinearDelayCalculator::new(0.5, 0.2);
+        let tp = calc.calculate_tapping_point(10, 1.0, 3.0, 0.0, 0.0);
+        assert_eq!(tp.extend_left, 7);
+        approx_eq(tp.delay_left, 1.0 + 7.0 * 0.5);
+    }
+
+    #[test]
+    fn test_linear_tapping_point_left_slower() {
+        let calc = LinearDelayCalculator::new(0.5, 0.2);
+        let tp = calc.calculate_tapping_point(10, 3.0, 1.0, 0.0, 0.0);
+        assert_eq!(tp.extend_left, 3);
+        approx_eq(tp.delay_left, 3.0 + 3.0 * 0.5);
+    }
+
+    #[test]
+    fn test_linear_elongation_right_branch() {
+        // left.delay=10, right.delay=1, distance=10
+        // raw = -4, clamped to 0
+        let calc = LinearDelayCalculator::new(0.5, 0.2);
+        let tp = calc.calculate_tapping_point(10, 10.0, 1.0, 0.0, 0.0);
+        assert_eq!(tp.extend_left, 0);
+        assert_eq!(tp.raw_extend_left, -4);
+        approx_eq(tp.delay_left, 10.0);
+
+        let (l_wl, r_wl, l_el, r_el) = apply_elongation(10, &tp);
+        assert_eq!(l_wl, 0);
+        assert_eq!(r_wl, 14); // distance - raw = 10 - (-4) = 14
+        assert!(!l_el);
+        assert!(r_el);
+    }
+
+    #[test]
+    fn test_linear_elongation_left_branch() {
+        // left.delay=1, right.delay=10, distance=10
+        // raw = 14, clamped to 10
+        let calc = LinearDelayCalculator::new(0.5, 0.2);
+        let tp = calc.calculate_tapping_point(10, 1.0, 10.0, 0.0, 0.0);
+        assert_eq!(tp.extend_left, 10);
+        assert_eq!(tp.raw_extend_left, 14);
+        approx_eq(tp.delay_left, 10.0);
+
+        let (l_wl, r_wl, l_el, r_el) = apply_elongation(10, &tp);
+        assert_eq!(l_wl, 14); // raw = 14
+        assert_eq!(r_wl, 0);
+        assert!(l_el);
+        assert!(!r_el);
+    }
+
+    #[test]
+    fn test_elmore_elongation_right_branch() {
+        let calc = ElmoreDelayCalculator::new(0.1, 0.2);
+        let tp = calc.calculate_tapping_point(10, 10.0, 1.0, 1.0, 1.0);
+        assert_eq!(tp.extend_left, 0);
+        assert_eq!(tp.raw_extend_left, -18);
+        approx_eq(tp.delay_left, 10.0);
+
+        let (l_wl, r_wl, l_el, r_el) = apply_elongation(10, &tp);
+        assert_eq!(l_wl, 0);
+        assert_eq!(r_wl, 28); // distance - raw = 10 - (-18) = 28
+        assert!(!l_el);
+        assert!(r_el);
+    }
+
+    #[test]
+    fn test_elmore_elongation_left_branch() {
+        let calc = ElmoreDelayCalculator::new(0.1, 0.2);
+        let tp = calc.calculate_tapping_point(10, 1.0, 10.0, 1.0, 1.0);
+        assert_eq!(tp.extend_left, 10);
+        assert_eq!(tp.raw_extend_left, 28);
+        approx_eq(tp.delay_left, 10.0);
+
+        let (l_wl, r_wl, l_el, r_el) = apply_elongation(10, &tp);
+        assert_eq!(l_wl, 28); // raw = 28
+        assert_eq!(r_wl, 0);
+        assert!(l_el);
+        assert!(!r_el);
+    }
+
+    /// Helper: approximate float equality within 1e-9.
+    fn approx_eq(a: f64, b: f64) {
+        assert!((a - b).abs() < 1e-9, "left={}, right={}", a, b);
     }
 }

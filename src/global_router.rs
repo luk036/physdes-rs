@@ -335,30 +335,30 @@ impl GlobalRoutingTree {
                 self.nodes[terminal_idx].parent = Some(nearest_idx);
                 self.nodes[nearest_idx].children.push(terminal_idx);
                 let dist = self.nodes[nearest_idx].pt.min_dist_with(&point) as i32;
-                self.nodes[terminal_idx].path_length =
-                    self.nodes[nearest_idx].path_length + dist;
+                self.nodes[terminal_idx].path_length = self.nodes[nearest_idx].path_length + dist;
             }
             Some(parent_idx) => {
                 let steiner_id = format!("steiner_{}", self.next_steiner_id);
                 self.next_steiner_id += 1;
 
-                let possible_path =
-                    self.nodes[parent_idx].pt.hull_with(&self.nodes[nearest_idx].pt);
+                let possible_path = self.nodes[parent_idx]
+                    .pt
+                    .hull_with(&self.nodes[nearest_idx].pt);
                 let nearest_pt = possible_path.nearest_to(&point);
                 let steiner_idx =
                     self.add_node(RoutingNode::new(&steiner_id, NodeType::Steiner, nearest_pt));
 
                 // Rewire: parent -> nearest  becomes  parent -> steiner -> nearest
-                self.nodes[parent_idx].children.retain(|c| *c != nearest_idx);
+                self.nodes[parent_idx]
+                    .children
+                    .retain(|c| *c != nearest_idx);
                 self.nodes[nearest_idx].parent = None;
 
                 self.nodes[steiner_idx].parent = Some(parent_idx);
                 self.nodes[parent_idx].children.push(steiner_idx);
 
-                let dist_ps =
-                    self.nodes[parent_idx].pt.min_dist_with(&nearest_pt) as i32;
-                self.nodes[steiner_idx].path_length =
-                    self.nodes[parent_idx].path_length + dist_ps;
+                let dist_ps = self.nodes[parent_idx].pt.min_dist_with(&nearest_pt) as i32;
+                self.nodes[steiner_idx].path_length = self.nodes[parent_idx].path_length + dist_ps;
 
                 self.nodes[nearest_idx].parent = Some(steiner_idx);
                 self.nodes[steiner_idx].children.push(nearest_idx);
@@ -666,11 +666,15 @@ impl GlobalRoutingTree {
         for (text, color, lx, ly) in &items {
             svg.push_str(&format!(
                 r#"<circle cx="{}" cy="{}" r="4" fill="{}" stroke="black"/>"#,
-                lx, ly - 4, color
+                lx,
+                ly - 4,
+                color
             ));
             svg.push_str(&format!(
                 r#"<text x="{}" y="{}" font-family="Arial" font-size="10">{}</text>"#,
-                lx + 10, ly, text
+                lx + 10,
+                ly,
+                text
             ));
         }
 
@@ -872,12 +876,7 @@ mod tests {
         let mut tree = GlobalRoutingTree::new(Point::new(0, 0));
         let s1 = tree.insert_steiner_node(Point::new(1, 1), None);
         let t1 = tree.insert_terminal_node(Point::new(2, 2), Some(&s1));
-        let new_id = tree.insert_node_on_branch(
-            NodeType::Steiner,
-            Point::new(1, 2),
-            &s1,
-            &t1,
-        );
+        let new_id = tree.insert_node_on_branch(NodeType::Steiner, Point::new(1, 2), &s1, &t1);
         // new_id should be steiner_2
         assert_eq!(new_id, "steiner_2");
         // Path length should still work

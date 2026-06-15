@@ -1,13 +1,11 @@
-/// Example: generate DME clock tree SVGs with various sink configurations.
-///
-/// Run:  cargo run --example gen_dme_svgs
-///
-/// Produces: dme_diamond.svg, dme_circle.svg, dme_elbow.svg,
-///           dme_random.svg, dme_long.svg, dme_varicap.svg
+//! Example: generate DME clock tree SVGs with various sink configurations.
+//!
+//! Run:  cargo run --example gen_dme_svgs
+//!
+//! Produces: dme_diamond.svg, dme_circle.svg, dme_elbow.svg,
+//!           dme_random.svg, dme_long.svg, dme_varicap.svg
 
-use physdes::dme_algorithm::{
-    DMEAlgorithm, LinearDelayCalculator, Sink,
-};
+use physdes::dme_algorithm::{DMEAlgorithm, LinearDelayCalculator, Sink};
 use physdes::dme_visualizer::ClockTreeVisualizer;
 use physdes::point::Point;
 
@@ -25,8 +23,21 @@ fn main() {
     let mut d1 = DMEAlgorithm::new(s1.clone(), calc());
     let r1 = d1.build_clock_tree();
     let a1 = d1.analyze_skew(r1);
-    viz.visualize_tree(d1.get_tree(), r1, &s1, "dme_diamond.svg", 800, 600, Some(&a1));
-    println!("Diamond: skew={:.3} ({:.2}%) wl={}", a1.skew, a1.skew / a1.max_delay * 100.0, a1.total_wirelength);
+    viz.visualize_tree(
+        d1.get_tree(),
+        r1,
+        &s1,
+        "dme_diamond.svg",
+        800,
+        600,
+        Some(&a1),
+    );
+    println!(
+        "Diamond: skew={:.3} ({:.2}%) wl={}",
+        a1.skew,
+        a1.skew / a1.max_delay * 100.0,
+        a1.total_wirelength
+    );
 
     // Dataset 2: 8 sinks on a circle
     let s2 = (0..8)
@@ -40,8 +51,21 @@ fn main() {
     let mut d2 = DMEAlgorithm::new(s2.clone(), calc());
     let r2 = d2.build_clock_tree();
     let a2 = d2.analyze_skew(r2);
-    viz.visualize_tree(d2.get_tree(), r2, &s2, "dme_circle.svg", 800, 600, Some(&a2));
-    println!("Circle:  skew={:.3} ({:.2}%) wl={}", a2.skew, a2.skew / a2.max_delay * 100.0, a2.total_wirelength);
+    viz.visualize_tree(
+        d2.get_tree(),
+        r2,
+        &s2,
+        "dme_circle.svg",
+        800,
+        600,
+        Some(&a2),
+    );
+    println!(
+        "Circle:  skew={:.3} ({:.2}%) wl={}",
+        a2.skew,
+        a2.skew / a2.max_delay * 100.0,
+        a2.total_wirelength
+    );
 
     // Dataset 3: 3 sinks in an L-shape
     let s3 = vec![
@@ -53,7 +77,12 @@ fn main() {
     let r3 = d3.build_clock_tree();
     let a3 = d3.analyze_skew(r3);
     viz.visualize_tree(d3.get_tree(), r3, &s3, "dme_elbow.svg", 800, 600, Some(&a3));
-    println!("Elbow:   skew={:.3} ({:.2}%) wl={}", a3.skew, a3.skew / a3.max_delay * 100.0, a3.total_wirelength);
+    println!(
+        "Elbow:   skew={:.3} ({:.2}%) wl={}",
+        a3.skew,
+        a3.skew / a3.max_delay * 100.0,
+        a3.total_wirelength
+    );
 
     // Dataset 4: 5 unbalanced sinks
     let s4 = vec![
@@ -66,8 +95,21 @@ fn main() {
     let mut d4 = DMEAlgorithm::new(s4.clone(), calc());
     let r4 = d4.build_clock_tree();
     let a4 = d4.analyze_skew(r4);
-    viz.visualize_tree(d4.get_tree(), r4, &s4, "dme_random.svg", 800, 600, Some(&a4));
-    println!("Random:  skew={:.3} ({:.2}%) wl={}", a4.skew, a4.skew / a4.max_delay * 100.0, a4.total_wirelength);
+    viz.visualize_tree(
+        d4.get_tree(),
+        r4,
+        &s4,
+        "dme_random.svg",
+        800,
+        600,
+        Some(&a4),
+    );
+    println!(
+        "Random:  skew={:.3} ({:.2}%) wl={}",
+        a4.skew,
+        a4.skew / a4.max_delay * 100.0,
+        a4.total_wirelength
+    );
 
     // Dataset 5: 2 sinks far apart
     let s5 = vec![
@@ -78,7 +120,12 @@ fn main() {
     let r5 = d5.build_clock_tree();
     let a5 = d5.analyze_skew(r5);
     viz.visualize_tree(d5.get_tree(), r5, &s5, "dme_long.svg", 800, 600, Some(&a5));
-    println!("Long:    skew={:.3} ({:.2}%) wl={}", a5.skew, a5.skew / a5.max_delay * 100.0, a5.total_wirelength);
+    println!(
+        "Long:    skew={:.3} ({:.2}%) wl={}",
+        a5.skew,
+        a5.skew / a5.max_delay * 100.0,
+        a5.total_wirelength
+    );
 
     // Dataset 6: 3 sinks with varying capacitances
     let s6 = vec![
@@ -89,8 +136,21 @@ fn main() {
     let mut d6 = DMEAlgorithm::new(s6.clone(), calc());
     let r6 = d6.build_clock_tree();
     let a6 = d6.analyze_skew(r6);
-    viz.visualize_tree(d6.get_tree(), r6, &s6, "dme_varicap.svg", 800, 600, Some(&a6));
-    println!("Varicap: skew={:.3} ({:.2}%) wl={}", a6.skew, a6.skew / a6.max_delay * 100.0, a6.total_wirelength);
+    viz.visualize_tree(
+        d6.get_tree(),
+        r6,
+        &s6,
+        "dme_varicap.svg",
+        800,
+        600,
+        Some(&a6),
+    );
+    println!(
+        "Varicap: skew={:.3} ({:.2}%) wl={}",
+        a6.skew,
+        a6.skew / a6.max_delay * 100.0,
+        a6.total_wirelength
+    );
 
     println!("\nAll 6 SVG files generated. Not checked-in.");
 }

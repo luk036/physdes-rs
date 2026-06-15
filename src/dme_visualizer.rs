@@ -89,9 +89,18 @@ impl ClockTreeVisualizer {
         svg.push_str(r#"<rect width="100%" height="100%" fill="white"/>"#);
         svg.push_str(r#"<g class="clock-tree">"#);
 
-        svg.push_str(&draw_wires(tree, root, &sc, &self.wire_color, self.wire_width));
+        svg.push_str(&draw_wires(
+            tree,
+            root,
+            &sc,
+            &self.wire_color,
+            self.wire_width,
+        ));
         svg.push_str(&draw_nodes(
-            tree, root, sinks, &sc,
+            tree,
+            root,
+            sinks,
+            &sc,
             self.root_color.as_str(),
             self.internal_color.as_str(),
             self.sink_color.as_str(),
@@ -129,7 +138,13 @@ impl TreeData {
         analysis: Option<SkewAnalysis>,
         title: &str,
     ) -> Self {
-        TreeData { tree, root, sinks, analysis, title: title.to_string() }
+        TreeData {
+            tree,
+            root,
+            sinks,
+            analysis,
+            title: title.to_string(),
+        }
     }
 }
 
@@ -199,12 +214,18 @@ pub fn create_comparison_visualization(
                     }
                     continue;
                 }
-                if inner[body_start + i..].starts_with("<g ") || inner[body_start + i..].starts_with("<g>") {
+                if inner[body_start + i..].starts_with("<g ")
+                    || inner[body_start + i..].starts_with("<g>")
+                {
                     depth += 1;
                 }
             }
             let content = &inner[body_start..end];
-            svg.push_str(&format!(r#"<g transform="translate({}, {})">"#, ox + 10, oy + 40));
+            svg.push_str(&format!(
+                r#"<g transform="translate({}, {})">"#,
+                ox + 10,
+                oy + 40
+            ));
             svg.push_str(content);
             svg.push_str("</g>");
         }
@@ -220,11 +241,7 @@ pub fn create_comparison_visualization(
 }
 
 /// Convenience wrapper: compare linear vs Elmore delay model trees side by side.
-pub fn create_delay_model_comparison(
-    linear: TreeData,
-    elmore: TreeData,
-    filename: &str,
-) -> String {
+pub fn create_delay_model_comparison(linear: TreeData, elmore: TreeData, filename: &str) -> String {
     create_comparison_visualization(&[linear, elmore], filename, 1200, 600)
 }
 
@@ -247,8 +264,12 @@ fn calculate_bounds(
         min_y = min_y.min(n.position.ycoord);
         max_x = max_x.max(n.position.xcoord);
         max_y = max_y.max(n.position.ycoord);
-        if let Some(r) = n.right { stack.push(r); }
-        if let Some(l) = n.left { stack.push(l); }
+        if let Some(r) = n.right {
+            stack.push(r);
+        }
+        if let Some(l) = n.left {
+            stack.push(l);
+        }
     }
     for sink in sinks {
         min_x = min_x.min(sink.position.xcoord);
@@ -262,11 +283,19 @@ fn calculate_bounds(
     }
 
     let padding = ((max_x - min_x).max(max_y - min_y) as f64 * 0.1).max(10.0) as i32;
-    (min_x - padding, min_y - padding, max_x + padding, max_y + padding)
+    (
+        min_x - padding,
+        min_y - padding,
+        max_x + padding,
+        max_y + padding,
+    )
 }
 
 fn sink_positions(sinks: &[crate::dme_algorithm::Sink]) -> std::collections::HashSet<(i32, i32)> {
-    sinks.iter().map(|s| (s.position.xcoord, s.position.ycoord)).collect()
+    sinks
+        .iter()
+        .map(|s| (s.position.xcoord, s.position.ycoord))
+        .collect()
 }
 
 fn draw_wires(
@@ -293,12 +322,18 @@ fn draw_wires(
                 let my = (y1 + y2) / 2.0;
                 out.push_str(&format!(
                     r#"<text x="{}" y="{}" class="dl" text-anchor="middle">{}</text>"#,
-                    mx, my - 5.0, n.wire_length
+                    mx,
+                    my - 5.0,
+                    n.wire_length
                 ));
             }
         }
-        if let Some(r) = n.right { stack.push(r); }
-        if let Some(l) = n.left { stack.push(l); }
+        if let Some(r) = n.right {
+            stack.push(r);
+        }
+        if let Some(l) = n.left {
+            stack.push(l);
+        }
     }
     out
 }
@@ -338,21 +373,31 @@ fn draw_nodes(
         ));
         out.push_str(&format!(
             r#"<text x="{}" y="{}" class="nl" text-anchor="middle">{}</text>"#,
-            x, y - r - 5.0, n.name
+            x,
+            y - r - 5.0,
+            n.name
         ));
         out.push_str(&format!(
             r#"<text x="{}" y="{}" class="dl" text-anchor="middle">d:{:.1}</text>"#,
-            x, y + r + 12.0, n.delay
+            x,
+            y + r + 12.0,
+            n.delay
         ));
         if is_sink {
             out.push_str(&format!(
                 r#"<text x="{}" y="{}" class="dl" text-anchor="middle">c:{:.1}</text>"#,
-                x, y + r + 22.0, n.capacitance
+                x,
+                y + r + 22.0,
+                n.capacitance
             ));
         }
 
-        if let Some(rn) = n.right { stack.push((rn, _depth + 1)); }
-        if let Some(ln) = n.left { stack.push((ln, _depth + 1)); }
+        if let Some(rn) = n.right {
+            stack.push((rn, _depth + 1));
+        }
+        if let Some(ln) = n.left {
+            stack.push((ln, _depth + 1));
+        }
     }
     out
 }
@@ -455,7 +500,12 @@ mod tests {
 
         assert!(analysis.max_delay > 0.0);
         let pct = analysis.skew / analysis.max_delay * 100.0;
-        assert!(pct < 2.0, "Skew {:.4} ({:.2}%) exceeds 2%", analysis.skew, pct);
+        assert!(
+            pct < 2.0,
+            "Skew {:.4} ({:.2}%) exceeds 2%",
+            analysis.skew,
+            pct
+        );
     }
 
     #[test]
@@ -475,7 +525,13 @@ mod tests {
         let (dme, root) = build_test_tree(sinks.clone());
         let analysis = dme.analyze_skew(root);
 
-        let td = TreeData::new(dme.get_tree().clone(), root, sinks, Some(analysis), "Test Tree");
+        let td = TreeData::new(
+            dme.get_tree().clone(),
+            root,
+            sinks,
+            Some(analysis),
+            "Test Tree",
+        );
         let svg = create_comparison_visualization(&[td], "", 800, 400);
         assert!(svg.starts_with("<svg"));
         assert!(svg.ends_with("</svg>"));
@@ -497,8 +553,20 @@ mod tests {
         let eroot = edme.build_clock_tree();
         let eanalysis = edme.analyze_skew(eroot);
 
-        let linear = TreeData::new(dme.get_tree().clone(), root, sinks.clone(), Some(analysis), "Linear Delay");
-        let elmore = TreeData::new(edme.get_tree().clone(), eroot, sinks, Some(eanalysis), "Elmore Delay");
+        let linear = TreeData::new(
+            dme.get_tree().clone(),
+            root,
+            sinks.clone(),
+            Some(analysis),
+            "Linear Delay",
+        );
+        let elmore = TreeData::new(
+            edme.get_tree().clone(),
+            eroot,
+            sinks,
+            Some(eanalysis),
+            "Elmore Delay",
+        );
         let svg = create_delay_model_comparison(linear, elmore, "");
         assert!(svg.contains("Linear Delay"));
         assert!(svg.contains("Elmore Delay"));
@@ -511,7 +579,15 @@ mod tests {
         let analysis = dme.analyze_skew(root);
         let viz = ClockTreeVisualizer::new();
         let path = "test_clock_tree.svg";
-        let svg = viz.visualize_tree(dme.get_tree(), root, &sinks, path, 800, 600, Some(&analysis));
+        let svg = viz.visualize_tree(
+            dme.get_tree(),
+            root,
+            &sinks,
+            path,
+            800,
+            600,
+            Some(&analysis),
+        );
 
         assert!(std::path::Path::new(path).exists());
         let saved = std::fs::read_to_string(path).unwrap();
