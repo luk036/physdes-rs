@@ -1,6 +1,8 @@
 // Criterion benchmarks for physdes-rs geometric operations
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
+
+use criterion::{criterion_group, criterion_main, Criterion};
 use physdes::generic::{MinDist, Overlap};
 use physdes::interval::Intersect;
 use physdes::interval::Interval;
