@@ -100,11 +100,11 @@ impl IndexArena {
             });
         }
         let len = nodes.len();
-        for i in 0..len {
+        for (i, node) in nodes.iter_mut().enumerate() {
             let next_i = if i == len - 1 { 0 } else { i + 1 };
             let prev_i = if i == 0 { len - 1 } else { i - 1 };
-            nodes[i].next = next_i;
-            nodes[i].prev = prev_i;
+            node.next = next_i;
+            node.prev = prev_i;
         }
         IndexArena { nodes }
     }

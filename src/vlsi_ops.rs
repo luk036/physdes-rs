@@ -188,7 +188,7 @@ where
         events.push((rect.max.xcoord, false, idx));
     }
 
-    events.sort_by(|a, b| a.0.cmp(&b.0));
+    events.sort_by_key(|a| a.0);
 
     // Active rectangles: (rect_index, y_min, y_max)
     let mut active: Vec<(usize, T, T)> = Vec::new();
