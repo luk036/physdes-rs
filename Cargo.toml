@@ -38,3 +38,7 @@ criterion = "0.8.2"
 [[bench]]
 name = "geometry_bench"
 harness = false
+
+[[bench]]
+name = "eda_compare_bench"
+harness = false
