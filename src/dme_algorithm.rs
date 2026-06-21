@@ -168,6 +168,8 @@ pub struct TappingResult {
 /// Abstract delay model for wire delay calculation.
 pub trait DelayCalculator {
     /// Calculates the total wire delay for a given length and load capacitance.
+    ///
+    /// The specific formula depends on the delay model (linear or Elmore).
     fn calculate_wire_delay(&self, length: i32, load_capacitance: f64) -> f64;
     /// Calculates the wire delay per unit length for a given load capacitance.
     fn calculate_wire_delay_per_unit(&self, load_capacitance: f64) -> f64;
@@ -210,6 +212,7 @@ impl LinearDelayCalculator {
 }
 
 impl DelayCalculator for LinearDelayCalculator {
+    /// Linear wire delay: $\text{delay} = \text{delay\_per\_unit} \times \text{length}$
     fn calculate_wire_delay(&self, length: i32, _load_capacitance: f64) -> f64 {
         self.delay_per_unit * length as f64
     }
@@ -219,6 +222,11 @@ impl DelayCalculator for LinearDelayCalculator {
     fn calculate_wire_capacitance(&self, length: i32) -> f64 {
         self.capacitance_per_unit * length as f64
     }
+    /// Tapping point for linear delay model:
+    ///
+    /// $$\text{skew} = \text{right\_delay} - \text{left\_delay}$$
+    ///
+    /// $$\text{raw} = \left\lfloor\frac{\text{skew} / \text{delay\_per\_unit} + \text{distance}}{2}\right\rceil$$
     fn calculate_tapping_point(
         &self,
         distance: i32,
@@ -275,6 +283,9 @@ impl ElmoreDelayCalculator {
 }
 
 impl DelayCalculator for ElmoreDelayCalculator {
+    /// Elmore wire delay: $\text{delay} = R \times \left(\frac{C}{2} + C_{\text{load}}\right)$
+    ///
+    /// where $R = r_{\text{unit}} \times \text{length}$ and $C = c_{\text{unit}} \times \text{length}$.
     fn calculate_wire_delay(&self, length: i32, load_capacitance: f64) -> f64 {
         let r = self.unit_resistance * length as f64;
         let c = self.unit_capacitance * length as f64;
@@ -286,6 +297,11 @@ impl DelayCalculator for ElmoreDelayCalculator {
     fn calculate_wire_capacitance(&self, length: i32) -> f64 {
         self.unit_capacitance * length as f64
     }
+    /// Tapping point for Elmore delay model. Solves for split fraction $z$:
+    ///
+    /// $$z = \frac{\text{skew} + R(C_W/2 + C_{\text{right}})}{R(C_W + C_{\text{right}} + C_{\text{left}})}$$
+    ///
+    /// where $R = r \cdot \text{distance}$ and $C_W = c \cdot \text{distance}$.
     fn calculate_tapping_point(
         &self,
         distance: i32,

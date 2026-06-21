@@ -5,7 +5,11 @@ use crate::point::Point;
 ///
 /// Repeatedly scans the polygon vertices and removes any vertex whose
 /// cross-product sign indicates concavity (relative to the polygon's
-/// winding direction). Stops when no more concave vertices remain.
+/// winding direction). The cross product test:
+///
+/// $$\text{cross} = (y_i - y_{i-1}) \cdot (x_{i+1} - x_i)$$
+///
+/// Stops when no more concave vertices remain.
 ///
 /// # Arguments
 ///
@@ -109,6 +113,12 @@ where
 
 /// Computes the convex hull of a rectilinear polygon using Andrew's
 /// monotone chain algorithm.
+///
+/// Uses the cross product test to determine clockwise/counter-clockwise turns:
+///
+/// $$\vec{(a-o)} \times \vec{(b-o)} = (a_x - o_x)(b_y - o_y) - (a_y - o_y)(b_x - o_x)$$
+///
+/// Points making a non-left turn ($\le 0$) are removed from the hull.
 ///
 /// The resulting hull satisfies: `convex_hull_area >= original_polygon_area`.
 /// For convex polygons the hull equals the original.

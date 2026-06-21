@@ -45,7 +45,9 @@ impl<T1, T2> MergeObj<T1, T2> {
     }
 
     /// Constructs a `MergeObj<i32, i32>` from raw coordinates by applying
-    /// the transform `(x+y, x-y)` to the internal point.
+    /// the transform `(x+y, x-y)` to the internal point:
+    ///
+    /// $$(x', y') = (x + y,\; x - y)$$
     ///
     /// This transform maps the point into a rotated coordinate space used
     /// for Manhattan-distance-based merging operations.
@@ -93,7 +95,10 @@ where
 {
     /// Computes the minimum Manhattan distance between two `MergeObj` values.
     ///
-    /// Returns the component-wise maximum of the individual coordinate distances.
+    /// Returns the Chebyshev distance in rotated space, corresponding to
+    /// Manhattan distance in the original space:
+    ///
+    /// $$d = \max(|x_1 - x_2|,\; |y_1 - y_2|)$$
     ///
     /// # Arguments
     ///
@@ -121,7 +126,9 @@ where
     T2: MinDist<T2> + Enlarge<i32, Output = T2> + Intersect<T2, Output = T2>,
 {
     /// Enlarges this merge object by a given margin, producing a new `MergeObj`
-    /// whose coordinates are expanded outward by `alpha` in all directions.
+    /// whose coordinates are expanded outward by `alpha` in all directions:
+    ///
+    /// $$x \to \[x - \alpha,\; x + \alpha\],\qquad y \to \[y - \alpha,\; y + \alpha\]$$
     ///
     /// # Arguments
     ///
@@ -149,9 +156,11 @@ where
     /// region between them.
     ///
     /// The merge is performed by:
-    /// 1. Computing the minimum distance between the two objects
-    /// 2. Enlarging each by a portion of that distance
-    /// 3. Intersecting the enlarged regions to find the merge result
+    /// 1. Computing the minimum distance $d$ between the two objects
+    /// 2. Enlarging each by a portion of that distance:
+    ///    $$\text{trr}_1 = \text{enlarge}(self,\; \alpha),\quad \text{trr}_2 = \text{enlarge}(other,\; d - \alpha)$$
+    /// 3. Intersecting the enlarged regions to find the merge result:
+    ///    $$\text{result} = \text{trr}_1 \cap \text{trr}_2$$
     ///
     /// This is the core operation of the DME (Deferred Merge Embedding) algorithm.
     ///

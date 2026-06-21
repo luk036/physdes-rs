@@ -19,6 +19,8 @@ pub trait Overlap<T> {
 
 /// Checks if two `i32` values are equal.
 ///
+/// Two scalars "overlap" iff they are equal: $a \cap b \iff a = b$
+///
 /// # Examples
 ///
 /// ```
@@ -34,6 +36,8 @@ pub trait Overlap<T> {
 /// ```
 impl Overlap<i32> for i32 {
     /// Checks if two `i32` values are equal.
+    ///
+    /// Two scalars "overlap" iff they are equal: $a \cap b \iff a = b$
     #[inline]
     fn overlaps(&self, other: &i32) -> bool {
         self == other
@@ -61,6 +65,8 @@ pub trait Contain<T> {
 
 /// `Contain` implementation for `i32`: returns true when values are equal.
 ///
+/// Scalar $a$ "contains" $b$ iff $a = b$.
+///
 /// # Examples
 ///
 /// ```
@@ -76,6 +82,8 @@ pub trait Contain<T> {
 /// ```
 impl Contain<i32> for i32 {
     /// Checks if the current `i32` value equals the provided value.
+    ///
+    /// Scalar $a$ "contains" $b$ iff $a = b$.
     #[inline]
     fn contains(&self, other: &i32) -> bool {
         self == other
@@ -107,6 +115,8 @@ pub trait MinDist<T> {
 
 /// Computes the absolute difference between two `i32` values.
 ///
+/// $$d = |a - b|$$
+///
 /// # Examples
 ///
 /// ```
@@ -118,6 +128,9 @@ pub trait MinDist<T> {
 /// assert_eq!(distance, 5);
 /// ```
 impl MinDist<i32> for i32 {
+    /// Minimum distance between two scalars is the absolute difference:
+    ///
+    /// $$d = |a - b|$$
     #[inline]
     fn min_dist_with(&self, other: &i32) -> u32 {
         (self - other).unsigned_abs()
@@ -145,6 +158,8 @@ pub trait Displacement<T: ?Sized> {
 
 /// Computes the displacement (difference) between two `i32` values: `self - other`.
 ///
+/// $$d = a - b$$
+///
 /// # Examples
 ///
 /// ```
@@ -158,6 +173,9 @@ pub trait Displacement<T: ?Sized> {
 impl Displacement<i32> for i32 {
     type Output = i32;
 
+    /// Displacement (difference) between two scalars:
+    ///
+    /// $$d = a - b$$
     #[inline]
     fn displace(&self, other: &i32) -> Self::Output {
         self - other

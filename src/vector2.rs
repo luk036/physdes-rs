@@ -56,6 +56,8 @@ impl<T1, T2> Vector2<T1, T2> {
 impl<T1: Clone + Num> Vector2<T1, T1> {
     /// Computes the dot product of two vectors.
     ///
+    /// $$\vec{a} \cdot \vec{b} = a_x b_x + a_y b_y$$
+    ///
     /// # Example
     ///
     /// ```
@@ -70,6 +72,8 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     }
 
     /// Computes the cross product (2D scalar) of two vectors.
+    ///
+    /// $$\vec{a} \times \vec{b} = a_x b_y - a_y b_x$$
     ///
     /// # Example
     ///
@@ -91,6 +95,8 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
 
     /// Multiplies the vector by a scalar factor.
     ///
+    /// $$\vec{v}' = \vec{v} \times f = (v_x \cdot f,\; v_y \cdot f)$$
+    ///
     /// # Example
     ///
     /// ```
@@ -105,6 +111,8 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
     }
 
     /// Divides the vector by a scalar factor.
+    ///
+    /// $$\vec{v}' = \vec{v} / f = (v_x / f,\; v_y / f)$$
     ///
     /// # Example
     ///
@@ -122,6 +130,8 @@ impl<T1: Clone + Num> Vector2<T1, T1> {
 
 impl<T1: Clone + Signed> Vector2<T1, T1> {
     /// Computes the L1 norm (Manhattan distance from origin): `|x_| + |y_|`.
+    ///
+    /// $$\|\vec{v}\|_1 = |v_x| + |v_y|$$
     ///
     /// [Manhattan distance]: https://en.wikipedia.org/wiki/Taxicab_geometry
     ///
@@ -141,6 +151,8 @@ impl<T1: Clone + Signed> Vector2<T1, T1> {
 
 impl<T1: Clone + PartialOrd> Vector2<T1, T1> {
     /// Computes the Chebyshev (infinity) norm: `max(x_, y_)`.
+    ///
+    /// $$\|\vec{v}\|_\infty = \max(v_x, v_y)$$
     ///
     /// Assumes non-negative coordinate values (does not take absolute values internally).
     ///
@@ -168,6 +180,8 @@ impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Vector2<T1, T2> 
 
     /// Adds two vectors component-wise.
     ///
+    /// $$\vec{a} + \vec{b} = (a_x + b_x,\; a_y + b_y)$$
+    ///
     /// # Example
     ///
     /// ```
@@ -186,6 +200,8 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Vector2<T1, T2> 
     type Output = Self;
 
     /// Subtracts two vectors component-wise.
+    ///
+    /// $$\vec{a} - \vec{b} = (a_x - b_x,\; a_y - b_y)$$
     ///
     /// # Example
     ///
@@ -210,9 +226,11 @@ mod opassign {
     use crate::Vector2;
 
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> AddAssign for Vector2<T1, T2> {
-        /// Adds another vector to this one component-wise.
-        ///
-        /// # Example
+    /// Adds another vector to this one component-wise.
+    ///
+    /// $$\vec{a} \mathrel{+}= \vec{b} \implies (a_x + b_x,\; a_y + b_y)$$
+    ///
+    /// # Example
         ///
         /// ```
         /// use physdes::vector2::Vector2;
@@ -230,18 +248,20 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> SubAssign for Vector2<T1, T2> {
-        /// Subtracts another vector from this one component-wise.
-        ///
-        /// # Example
-        ///
-        /// ```
-        /// use physdes::vector2::Vector2;
-        /// use std::ops::SubAssign;
-        /// let mut v = Vector2::new(1, 2);
-        /// let v2 = Vector2::new(3, 4);
-        /// v.sub_assign(v2);
-        /// assert_eq!(v, Vector2::new(-2, -2));
-        /// ```
+    /// Subtracts another vector from this one component-wise.
+    ///
+    /// $$\vec{a} \mathrel{-}= \vec{b} \implies (a_x - b_x,\; a_y - b_y)$$
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use physdes::vector2::Vector2;
+    /// use std::ops::SubAssign;
+    /// let mut v = Vector2::new(1, 2);
+    /// let v2 = Vector2::new(3, 4);
+    /// v.sub_assign(v2);
+    /// assert_eq!(v, Vector2::new(-2, -2));
+    /// ```
         fn sub_assign(&mut self, other: Self) {
             self.x_ -= other.x_;
             self.y_ -= other.y_;
@@ -249,9 +269,11 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign> MulAssign<T1> for Vector2<T1, T1> {
-        /// Multiplies each component of the vector by a scalar.
-        ///
-        /// # Example
+    /// Multiplies each component of the vector by a scalar.
+    ///
+    /// $$\vec{v} \mathrel{*}= s \implies (v_x \cdot s,\; v_y \cdot s)$$
+    ///
+    /// # Example
         ///
         /// ```
         /// use physdes::vector2::Vector2;
@@ -268,9 +290,11 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign> DivAssign<T1> for Vector2<T1, T1> {
-        /// Divides each component of the vector by a scalar.
-        ///
-        /// # Example
+    /// Divides each component of the vector by a scalar.
+    ///
+    /// $$\vec{v} \mathrel{/}= s \implies (v_x / s,\; v_y / s)$$
+    ///
+    /// # Example
         ///
         /// ```
         /// use physdes::vector2::Vector2;
@@ -323,6 +347,8 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 
     /// Negates both components of the vector.
     ///
+    /// $$-\vec{v} = (-v_x,\; -v_y)$$
+    ///
     /// # Example
     ///
     /// ```
@@ -343,6 +369,8 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
     type Output = Vector2<T1, T2>;
 
     /// Negates both components of a borrowed vector.
+    ///
+    /// $$-\vec{v} = (-v_x,\; -v_y)$$
     #[inline]
     fn neg(self) -> Self::Output {
         -self.clone()
@@ -424,6 +452,7 @@ macro_rules! scalar_arithmetic {
 impl<T1: Clone + Num> Mul<T1> for Vector2<T1, T1> {
     type Output = Vector2<T1, T1>;
 
+    /// Scalar multiplication: $\vec{v} \cdot s = (v_x \cdot s,\; v_y \cdot s)$
     #[inline]
     fn mul(self, other: T1) -> Self::Output {
         Self::Output::new(self.x_ * other.clone(), self.y_ * other)
@@ -433,6 +462,7 @@ impl<T1: Clone + Num> Mul<T1> for Vector2<T1, T1> {
 impl<T1: Clone + Num> Div<T1> for Vector2<T1, T1> {
     type Output = Self;
 
+    /// Scalar division: $\vec{v} / s = (v_x / s,\; v_y / s)$
     #[inline]
     fn div(self, other: T1) -> Self::Output {
         Self::Output::new(self.x_ / other.clone(), self.y_ / other)
@@ -442,6 +472,7 @@ impl<T1: Clone + Num> Div<T1> for Vector2<T1, T1> {
 impl<T1: Clone + Num> Rem<T1> for Vector2<T1, T1> {
     type Output = Vector2<T1, T1>;
 
+    /// Scalar remainder: $\vec{v} \bmod s = (v_x \bmod s,\; v_y \bmod s)$
     #[inline]
     fn rem(self, other: T1) -> Self::Output {
         Self::Output::new(self.x_ % other.clone(), self.y_ % other)
@@ -452,6 +483,7 @@ scalar_arithmetic!(usize, u8, u16, u32, u64, u128, isize, i8, i16, i32, i64, i12
 
 // constants
 impl<T1: Clone + Num + Add, T2: Clone + Num + Add> Zero for Vector2<T1, T2> {
+    /// Zero vector: $\vec{0} = (0, 0)$
     #[inline]
     fn zero() -> Self {
         Self::new(Zero::zero(), Zero::zero())

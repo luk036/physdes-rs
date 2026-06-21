@@ -11,6 +11,9 @@ categories = ["algorithms", "science", "visualization"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--html-in-header", "src/doc-header.html"]
+
 [lib]
 name = "physdes"
 path = "src/lib.rs"

@@ -67,6 +67,8 @@ impl RoutingNode {
     }
 
     /// Computes the Manhattan distance to another routing node.
+    ///
+    /// $$d = |x_1 - x_2| + |y_1 - y_2|$$
     pub fn manhattan_distance(&self, other: &RoutingNode) -> i32 {
         self.pt.min_dist_with(&other.pt) as i32
     }
@@ -391,6 +393,8 @@ impl GlobalRoutingTree {
     }
 
     /// Calculates the total wirelength of the entire routing tree.
+    ///
+    /// $$L = \sum_{\text{node}} \text{Manhattan}(\text{node},\; \text{parent(node)})$$
     pub fn calculate_total_wirelength(&self) -> i32 {
         let mut total = 0;
         for node in &self.nodes {
@@ -402,6 +406,8 @@ impl GlobalRoutingTree {
     }
 
     /// Calculates the worst-case (maximum) source-to-terminal wirelength.
+    ///
+    /// $$W = \max_{\text{leaf}} \sum_{\text{path(source, leaf)}} \text{edge\_length}$$
     pub fn calculate_worst_wirelength(&self) -> i32 {
         fn traverse(tree: &GlobalRoutingTree, idx: usize) -> i32 {
             let node = &tree.nodes[idx];

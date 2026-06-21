@@ -6,6 +6,10 @@ use crate::Polygon;
 
 /// Checks if a point is inside a polygon using the ray casting algorithm
 ///
+/// A horizontal ray from the point to the right intersects an edge if:
+///
+/// $$(y_i > q_y) \neq (y_j > q_y) \land q_x < \frac{x_j - x_i}{y_j - y_i}(q_y - y_i) + x_i$$
+///
 /// # Arguments
 ///
 /// * `point` - The point to check
@@ -77,6 +81,10 @@ where
 
 /// Computes the centroid (geometric center) of a polygon
 ///
+/// The centroid is the arithmetic mean of all vertex positions:
+///
+/// $$\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i,\qquad \bar{y} = \frac{1}{n}\sum_{i=1}^{n} y_i$$
+///
 /// # Arguments
 ///
 /// * `polygon` - The polygon
@@ -133,6 +141,12 @@ where
 }
 
 /// Computes the perimeter of a polygon
+///
+/// Sums the Manhattan distance between consecutive vertices (including wrap-around):
+///
+/// $$P = \sum_{i=0}^{n-1} (|x_{i+1} - x_i| + |y_{i+1} - y_i|)$$
+///
+/// where vertex $n$ wraps to vertex $0$.
 ///
 /// # Arguments
 ///

@@ -94,6 +94,8 @@ impl<T1, T2> Point<T1, T2> {
 
     /// Flips the coordinates according to xcoord-ycoord diagonal line
     ///
+    /// $$(x, y) \to (y, x)$$
+    ///
     /// Returns a new Point with x and y coordinates swapped
     ///
     /// # Examples
@@ -116,6 +118,8 @@ impl<T1, T2> Point<T1, T2> {
     }
 
     /// Flips according to ycoord-axis (negates x-coordinate)
+    ///
+    /// $$(x, y) \to (-x, y)$$
     ///
     /// Returns a new Point with x-coordinate negated
     ///
@@ -152,6 +156,7 @@ where
     T1: Overlap<U1>,
     T2: Overlap<U2>,
 {
+    /// Points overlap iff both coordinates overlap: $x_1 \cap x_2 \land y_1 \cap y_2$
     #[inline]
     fn overlaps(&self, other: &Point<U1, U2>) -> bool {
         self.xcoord.overlaps(&other.xcoord) && self.ycoord.overlaps(&other.ycoord)
@@ -174,6 +179,7 @@ where
     T1: MinDist<U1>,
     T2: MinDist<U2>,
 {
+    /// Manhattan distance: $d = |x_1 - x_2| + |y_1 - y_2|$
     #[inline]
     fn min_dist_with(&self, other: &Point<U1, U2>) -> u32 {
         self.xcoord.min_dist_with(&other.xcoord) + self.ycoord.min_dist_with(&other.ycoord)
@@ -187,6 +193,9 @@ where
 {
     type Output = Vector2<T1, T2>;
 
+    /// Displacement vector between two points:
+    ///
+    /// $$\vec{d} = (x_1 - x_2,\; y_1 - y_2)$$
     #[inline]
     fn displace(&self, other: &Point<T1, T2>) -> Self::Output {
         Self::Output::new(
@@ -203,6 +212,9 @@ where
 {
     type Output = Point<T1::Output, T2::Output>;
 
+    /// Component-wise hull (bounding box) of two points:
+    ///
+    /// $$\text{hull}(A,B) = (\min(A_x,B_x)..\max(A_x,B_x),\; \min(A_y,B_y)..\max(A_y,B_y))$$
     #[inline]
     fn hull_with(&self, other: &Point<T1, T2>) -> Self::Output {
         Self::Output::new(
@@ -219,6 +231,9 @@ where
 {
     type Output = Point<T1::Output, T2::Output>;
 
+    /// Component-wise intersection of two points (when coordinates are intervals):
+    ///
+    /// $$\text{intersect}(A,B) = (\max(A_x,B_x)..\min(A_x,B_x),\; \max(A_y,B_y)..\min(A_y,B_y))$$
     #[inline]
     fn intersect_with(&self, other: &Point<T1, T2>) -> Self::Output {
         Self::Output::new(
@@ -236,6 +251,7 @@ where
 {
     type Output = Point<Interval<T1>, Interval<T2>>;
 
+    /// Enlarges a point to a rectangle: $x \to \[x-\alpha,\; x+\alpha\]$, $y \to \[y-\alpha,\; y+\alpha\]$
     fn enlarge_with(&self, alpha: Alpha) -> Self::Output {
         Self::Output::new(
             self.xcoord.enlarge_with(alpha),
@@ -301,6 +317,8 @@ impl<T1: Clone + Num, T2: Clone + Num> Add<Vector2<T1, T2>> for Point<T1, T2> {
 
     /// Translate a point by a vector
     ///
+    /// $$P' = (x + v_x,\; y + v_y)$$
+    ///
     /// # Examples
     ///
     /// ```
@@ -327,6 +345,8 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub<Vector2<T1, T2>> for Point<T1, T2> {
 
     /// Translate a point by a vector (subtraction)
     ///
+    /// $$P' = (x - v_x,\; y - v_y)$$
+    ///
     /// # Examples
     ///
     /// ```
@@ -352,6 +372,8 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
 
     /// Calculate displacement vector between two points
     ///
+    /// $$\vec{d} = (x_1 - x_2,\; y_1 - y_2)$$
+    ///
     /// # Examples
     ///
     /// ```
@@ -372,7 +394,9 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
 
 // Assignment operations
 
-/// Translates the point by adding a vector to its coordinates
+    /// Translates the point by adding a vector to its coordinates
+    ///
+    /// $$P \mathrel{+}= (v_x, v_y) \implies (x + v_x,\; y + v_y)$$
 impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2<T1, T2>>
     for Point<T1, T2>
 {
@@ -383,7 +407,9 @@ impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2
     }
 }
 
-/// Translates the point by subtracting a vector from its coordinates
+    /// Translates the point by subtracting a vector from its coordinates
+    ///
+    /// $$P \mathrel{-}= (v_x, v_y) \implies (x - v_x,\; y - v_y)$$
 impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2<T1, T2>>
     for Point<T1, T2>
 {
@@ -422,6 +448,8 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 
     /// Negate a Point
     ///
+    /// $$-P = (-x,\; -y)$$
+    ///
     /// # Examples
     ///
     /// ```
@@ -449,7 +477,9 @@ impl<T1: Clone + Num + Neg<Output = T1>, T2: Clone + Num + Neg<Output = T2>> Neg
 
 impl Point<Interval<i32>, Interval<i32>> {
     /// Returns the point on this rectangle that is nearest to `other`.
-    /// Clips each coordinate to the interval bounds.
+    /// Clips each coordinate to the interval bounds:
+    ///
+    /// $$x' = \text{clip}(x,\; lb_x,\; ub_x), \quad y' = \text{clip}(y,\; lb_y,\; ub_y)$$
     pub fn nearest_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
         Point::new(
             self.xcoord.lb.max(other.xcoord.min(self.xcoord.ub)),

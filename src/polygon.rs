@@ -100,6 +100,10 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 
     /// Calculates the area of the polygon
     ///
+    /// Uses the shoelace formula (signed area):
+    ///
+    /// $$A = \frac{1}{2} \sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y_i)$$
+    ///
     /// # Returns
     ///
     /// The area of the polygon as a value of type T
@@ -200,9 +204,11 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 
     /// Calculates the signed area of the polygon multiplied by 2
     ///
-    /// This function calculates the signed area by summing the cross products
-    /// of adjacent edges. The result is multiplied by 2 to avoid the need for
-    /// floating-point arithmetic.
+    /// Computes twice the signed area via the shoelace formula:
+    ///
+    /// $$2A = \sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y_i)$$
+    ///
+    /// This avoids the need for floating-point arithmetic by omitting the $\frac{1}{2}$ factor.
     ///
     /// # Returns
     ///
@@ -362,6 +368,11 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     }
 
     /// Checks if the polygon is oriented anticlockwise
+    ///
+    /// Uses the cross product sign at the minimum-coordinate vertex:
+    ///
+    /// $$\vec{p_{prev}} \times \vec{p_{next}} > 0$$
+    /// where $\vec{p} = (current - prev)$ and $\vec{q} = (next - current)$
     pub fn is_anticlockwise(&self) -> bool
     where
         T: PartialOrd,
@@ -398,7 +409,9 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     /// Checks if the polygon is convex
     ///
     /// A polygon is convex if all its interior angles are less than 180 degrees
-    /// and no edges bend inward.
+    /// and no edges bend inward. All consecutive cross products must have the same sign:
+    ///
+    /// $$(v_i - v_{i-1}) \times (v_{i+1} - v_i) \text{ has consistent sign for all } i$$
     ///
     /// # Returns
     ///
@@ -472,6 +485,10 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
 }
 
 /// Creates a monotone polygon from a set of points using a custom comparison function
+///
+/// Partitions points using a cross product test relative to the extremal points:
+///
+/// $$\vec{diff} \times (p - min) \le 0$$
 ///
 /// # Arguments
 ///
@@ -576,6 +593,9 @@ where
 }
 
 /// Checks if a polygon is monotone in a given direction
+///
+/// A polygon is monotone in direction $d$ if the two chains from the minimum
+/// to maximum vertex in direction $d$ are both monotonic (non-decreasing in $d$).
 pub fn polygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -639,6 +659,10 @@ where
 }
 
 /// Determines if a point is inside a polygon using the winding number algorithm
+///
+/// Counts edge crossings using a cross product test:
+///
+/// $$\vec{(q-p_0)} \times \vec{(p_1-p_0)} \text{ determines which side of the edge the point lies on}$$
 pub fn point_in_polygon<T>(pointset: &[Point<T, T>], ptq: &Point<T, T>) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -671,6 +695,9 @@ where
 }
 
 /// Determines if a polygon represented by points is oriented anticlockwise
+///
+/// $$\vec{p_{prev}} \times \vec{p_{next}} > 0$$
+/// at the minimum-coordinate vertex.
 pub fn polygon_is_anticlockwise<T>(pointset: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,

@@ -13,9 +13,7 @@ use std::time::Duration;
 use criterion::{criterion_group, criterion_main, Criterion};
 use physdes::generic::MinDist;
 use physdes::interval::Interval;
-use physdes::rpolygon_cut::{
-    rpolygon_cut_convex, rpolygon_cut_explicit, rpolygon_cut_rectangle,
-};
+use physdes::rpolygon_cut::{rpolygon_cut_convex, rpolygon_cut_explicit, rpolygon_cut_rectangle};
 use physdes::rpolygon_hull::rpolygon_make_convex_hull;
 use physdes::Point;
 
@@ -180,7 +178,11 @@ fn divide_result(a: i32, b: i32) -> Result<i32, &'static str> {
 }
 
 fn divide_option(a: i32, b: i32) -> Option<i32> {
-    if b == 0 { None } else { Some(a / b) }
+    if b == 0 {
+        None
+    } else {
+        Some(a / b)
+    }
 }
 
 fn divide_panic(a: i32, b: i32) -> i32 {

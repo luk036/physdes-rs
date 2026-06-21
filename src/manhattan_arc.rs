@@ -49,7 +49,10 @@ impl<T: Copy> ManhattanArc<T> {
 
 impl<T: Copy + Sub<Output = T> + Add<Output = T>> ManhattanArc<T> {
     /// Converts a point from normal (Cartesian) space to the rotated (Manhattan) space.
-    /// Uses the same transformation as the Python reference: (x, y) -> (x - y, x + y).
+    ///
+    /// $$(x', y') = (x - y,\; x + y)$$
+    ///
+    /// Uses the same transformation as the Python reference.
     pub fn from_point(pt: Point<T, T>) -> Self {
         ManhattanArc {
             impl_p: Point::new(pt.xcoord - pt.ycoord, pt.xcoord + pt.ycoord),
@@ -83,6 +86,8 @@ impl<T: fmt::Display> fmt::Display for ManhattanArc<T> {
 impl ManhattanArc<i32> {
     /// Computes the Chebyshev distance to another arc in rotated space.
     ///
+    /// $$d = \max(|x_1 - x_2|,\; |y_1 - y_2|)$$
+    ///
     /// Returns the maximum of the component-wise absolute differences,
     /// which corresponds to Manhattan distance in the original Cartesian space.
     pub fn min_dist_with(&self, other: &Self) -> u32 {
@@ -92,7 +97,9 @@ impl ManhattanArc<i32> {
     }
 
     /// Enlarges this point arc by `alpha` in all directions, producing an
-    /// arc with interval-valued coordinates in rotated space.
+    /// arc with interval-valued coordinates in rotated space:
+    ///
+    /// $$x \to \[x-\alpha,\; x+\alpha\],\qquad y \to \[y-\alpha,\; y+\alpha\]$$
     ///
     /// # Arguments
     ///
@@ -139,9 +146,11 @@ impl ManhattanArc<i32> {
 impl ManhattanArc<Interval<i32>> {
     /// Returns the upper corner of the merging segment in normal (Cartesian) coordinates.
     ///
-    /// The upper corner in rotated space is `(xcoord.ub, ycoord.ub)`, then
-    /// transformed back to normal space using the inverse of the rotation
-    /// `(x-y, x+y)` → `(rx, ry)` → `((rx+ry)/2, (ry-rx)/2)`.
+    /// Inverse rotation back to Cartesian coordinates:
+    ///
+    /// $$(x, y) = \left(\frac{rx + ry}{2},\; \frac{ry - rx}{2}\right)$$
+    ///
+    /// where $(rx, ry)$ is the upper corner in rotated space.
     pub fn get_upper_corner(&self) -> Point<i32, i32> {
         let rx = self.impl_p.xcoord.ub;
         let ry = self.impl_p.ycoord.ub;
@@ -171,7 +180,11 @@ impl ManhattanArc<Interval<i32>> {
     /// Finds the nearest point on this interval arc to a given Cartesian point.
     ///
     /// The query point is first rotated into Manhattan space, then clamped
-    /// to the arc bounds, and finally rotated back to Cartesian coordinates.
+    /// to the arc bounds, and finally rotated back:
+    ///
+    /// $$(x, y) = \left(\frac{\text{clip}(rx)}{\text{clip}(ry)} \to \frac{rx'+ry'}{2},\; \frac{ry'-rx'}{2}\right)$$
+    ///
+    /// where $(rx, ry)$ are the rotated coordinates of the query point.
     pub fn nearest_point_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
         let ms = ManhattanArc::from_point(*other);
         // Clip the query point in rotated space to the segment bounds.

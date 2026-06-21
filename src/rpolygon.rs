@@ -107,7 +107,13 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
         self.origin -= rhs;
     }
 
-    /// The `signed_area` function calculates the signed area of a polygon.
+    /// The `signed_area` function calculates the signed area of a rectilinear polygon.
+    ///
+    /// Uses the formula for rectilinear polygons (sum of edge cross products):
+    ///
+    /// $$A = \sum_{i=0}^{n-2} x_i' (y_{i+1}' - y_i') + x_{n-1}' (0 - y_{n-1}')$$
+    ///
+    /// where $(x_i', y_i')$ are the displacement vectors from the origin.
     ///
     /// Returns:
     ///
@@ -197,6 +203,9 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Checks if the polygon is oriented anticlockwise
+    ///
+    /// Determines orientation by checking the previous vertex's y-coordinate
+    /// relative to the minimum-coordinate vertex.
     pub fn is_anticlockwise(&self) -> bool
     where
         T: PartialOrd,
@@ -345,7 +354,12 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
         Self::create_mono_rpolygon(pointset, |a| (a.ycoord, a.xcoord))
     }
 
-    /// The function `point_in_rpolygon` determines if a given point is within a polygon.
+    /// The function `point_in_rpolygon` determines if a given point is within a rectilinear polygon.
+    ///
+    /// Uses the ray casting algorithm. A point is inside if a horizontal ray to the right
+    /// crosses an odd number of upward edges:
+    ///
+    /// $$\text{crossing} = (y_1 \le q_y < y_0 \land x_1 > q_x)$$
     ///
     /// The code below is from Wm. Randolph Franklin <wrf@ecse.rpi.edu>
     /// (see URL below) with some minor modifications for integer. It returns
@@ -388,6 +402,9 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
 }
 
 /// Returns `true` if the polygon is monotone in the given direction.
+///
+/// A polygon is monotone in direction $d$ if the two chains from the minimum
+/// to maximum vertex in direction $d$ are both monotonic.
 pub fn rpolygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -451,6 +468,8 @@ where
 }
 
 /// Returns `true` if the polygon is rectilinearly convex (both x- and y-monotone).
+///
+/// A rectilinear polygon is convex iff it is both x-monotone and y-monotone.
 pub fn rpolygon_is_convex<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,

@@ -99,6 +99,8 @@ impl<T: PartialOrd> Interval<T> {
 impl<T: Copy + Sub<Output = T>> Interval<T> {
     /// Computes the length of the interval: `ub - lb`.
     ///
+    /// $$L = ub - lb$$
+    ///
     /// # Examples
     ///
     /// ```
@@ -127,6 +129,7 @@ where
     }
 }
 
+/// Interval subtraction (component-wise): $\[a,b\] - \[c,d\] = \[a-c,\; b-d\]$
 impl<T: Sub<Output = T>> Sub for Interval<T> {
     type Output = Self;
 
@@ -139,6 +142,7 @@ impl<T: Sub<Output = T>> Sub for Interval<T> {
     }
 }
 
+/// Interval negation: $-\[a,b\] = \[-b,\; -a\]$
 impl<T> Neg for Interval<T>
 where
     T: Copy + Neg<Output = T>,
@@ -159,14 +163,7 @@ impl<T> AddAssign<T> for Interval<T>
 where
     T: Copy + AddAssign<T>,
 {
-    /// The `add_assign` function in Rust adds a value to both the lower and upper bounds of a data
-    /// structure.
-    ///
-    /// Arguments:
-    ///
-    /// * `rhs`: The `rhs` parameter in the `add_assign` function represents the right-hand side operand
-    ///   that will be added to the `lb` and `ub` fields of the struct or object on which the method is
-    ///   called.
+    /// Shift the interval by a scalar: $\[a,b\] \mathrel{+}= t \implies \[a+t,\; b+t\]$
     #[inline]
     fn add_assign(&mut self, rhs: T) {
         self.lb += rhs;
@@ -180,13 +177,7 @@ where
 {
     type Output = Interval<T>;
 
-    /// The `add` function in Rust adds a value to both the lower and upper bounds of an `Interval`
-    /// struct.
-    ///
-    /// Arguments:
-    ///
-    /// * `rhs`: The `rhs` parameter in the `add` function represents the right-hand side operand that
-    ///   will be added to the current `Interval` instance.
+    /// Shift the interval by a scalar: $\[a,b\] + t = \[a+t,\; b+t\]$
     #[inline]
     fn add(self, rhs: T) -> Self::Output {
         Interval {
@@ -201,13 +192,7 @@ impl<T> SubAssign<T> for Interval<T>
 where
     T: Copy + SubAssign<T>,
 {
-    /// The `sub_assign` function subtracts a value from both the lower and upper bounds of a variable.
-    ///
-    /// Arguments:
-    ///
-    /// * `rhs`: `rhs` is a parameter of type `T` that is passed by value to the `sub_assign` function.
-    ///   It is used to subtract its value from both `self.lb` and `self.ub` in the function
-    ///   implementation.
+    /// Shift the interval by a negative scalar: $\[a,b\] \mathrel{-}= t \implies \[a-t,\; b-t\]$
     #[inline]
     fn sub_assign(&mut self, rhs: T) {
         self.lb -= rhs;
@@ -215,6 +200,7 @@ where
     }
 }
 
+/// Interval addition (component-wise): $\[a,b\] + \[c,d\] = \[a+c,\; b+d\]$
 impl<T: Add<Output = T>> Add for Interval<T> {
     type Output = Self;
 
@@ -233,12 +219,7 @@ where
 {
     type Output = Interval<T>;
 
-    /// The function subtracts a value from both the lower and upper bounds of an interval.
-    ///
-    /// Arguments:
-    ///
-    /// * `rhs`: The `rhs` parameter in the code snippet represents the right-hand side operand that
-    ///   will be subtracted from the interval's lower bound (`lb`) and upper bound (`ub`) values.
+    /// Shift the interval by a negative scalar: $\[a,b\] - t = \[a-t,\; b-t\]$
     #[inline]
     fn sub(self, rhs: T) -> Self::Output {
         Interval {
@@ -253,13 +234,7 @@ impl<T> MulAssign<T> for Interval<T>
 where
     T: Copy + MulAssign<T>,
 {
-    /// The `mul_assign` function in Rust multiplies both the lower and upper bounds of a range by a
-    /// given value.
-    ///
-    /// Arguments:
-    ///
-    /// * `rhs`: The `rhs` parameter in the `mul_assign` function represents the value that will be
-    ///   multiplied with the `lb` and `ub` fields of the struct or object on which the method is called.
+    /// Scale the interval by a scalar: $\[a,b\] \mathrel{*}= t \implies \[a \cdot t,\; b \cdot t\]$
     #[inline]
     fn mul_assign(&mut self, rhs: T) {
         self.lb *= rhs;
@@ -273,12 +248,7 @@ where
 {
     type Output = Interval<T>;
 
-    /// The `mul` function in Rust defines multiplication for an `Interval` type.
-    ///
-    /// Arguments:
-    ///
-    /// * `rhs`: The `rhs` parameter in the `mul` function represents the right-hand side operand that
-    ///   will be multiplied with the `Interval` instance on which the method is called.
+    /// Scale the interval by a scalar: $\[a,b\] \cdot t = \[a \cdot t,\; b \cdot t\]$
     #[inline]
     fn mul(self, rhs: T) -> Self::Output {
         Interval {
@@ -299,7 +269,7 @@ pub trait Enlarge<Alpha> {
 impl Enlarge<i32> for i32 {
     type Output = Interval<i32>;
 
-    /// Enlarges a scalar to an interval by subtracting/adding `alpha`.
+    /// Enlarges a scalar to an interval: $\text{enlarge}(x, \alpha) = \[x-\alpha,\; x+\alpha\]$
     #[inline]
     fn enlarge_with(&self, alpha: i32) -> Interval<i32> {
         Interval {
@@ -316,7 +286,7 @@ where
 {
     type Output = Interval<T>;
 
-    /// Enlarges the interval by `alpha` on both sides: `lb -= alpha`, `ub += alpha`.
+    /// Enlarges the interval by `alpha` on both sides: $\text{enlarge}(\[a,b\], \alpha) = \[a-\alpha,\; b+\alpha\]$
     #[inline]
     fn enlarge_with(&self, alpha: T) -> Self {
         Interval {
@@ -350,7 +320,7 @@ impl<T: PartialOrd> PartialOrd for Interval<T> {
 }
 
 impl<T: PartialOrd> Overlap<Interval<T>> for Interval<T> {
-    /// Checks if two intervals overlap.
+    /// Checks if two intervals overlap: $\[a,b\] \cap \[c,d\] \neq \varnothing \iff a \le d \land c \le b$
     #[inline]
     fn overlaps(&self, other: &Interval<T>) -> bool {
         self.ub >= other.lb && other.ub >= self.lb
@@ -358,7 +328,7 @@ impl<T: PartialOrd> Overlap<Interval<T>> for Interval<T> {
 }
 
 impl<T: PartialOrd> Overlap<T> for Interval<T> {
-    /// Checks if the interval contains a scalar value.
+    /// Checks if the interval contains a scalar value: $x \in \[a,b\] \iff a \le x \le b$
     #[inline]
     fn overlaps(&self, other: &T) -> bool {
         self.ub >= *other && *other >= self.lb
@@ -374,7 +344,7 @@ impl<T: PartialOrd> Overlap<Interval<T>> for T {
 }
 
 impl<T: PartialOrd> Contain<Interval<T>> for Interval<T> {
-    /// Checks if `self` entirely contains `other`.
+    /// Checks if `self` entirely contains `other`: $\[a,b\] \supseteq \[c,d\] \iff a \le c \land d \le b$
     #[inline]
     fn contains(&self, other: &Interval<T>) -> bool {
         self.lb <= other.lb && other.ub <= self.ub
@@ -382,7 +352,7 @@ impl<T: PartialOrd> Contain<Interval<T>> for Interval<T> {
 }
 
 impl<T: PartialOrd> Contain<T> for Interval<T> {
-    /// Checks if the interval contains a scalar value.
+    /// Checks if the interval contains a scalar value: $x \in \[a,b\] \iff a \le x \le b$
     #[inline]
     fn contains(&self, other: &T) -> bool {
         self.lb <= *other && *other <= self.ub
@@ -421,7 +391,9 @@ where
 }
 
 impl MinDist<Interval<i32>> for Interval<i32> {
-    /// Computes the minimum distance between two intervals.
+    /// Computes the minimum distance between two intervals:
+    ///
+    /// $$d = \begin{cases} c-b & \text{if } b < c \\ a-d & \text{if } d < a \\ 0 & \text{otherwise} \end{cases}$$
     #[inline]
     fn min_dist_with(&self, other: &Interval<i32>) -> u32 {
         if self.ub < other.lb {
@@ -472,7 +444,7 @@ pub trait Hull<T: ?Sized> {
 impl Hull<i32> for i32 {
     type Output = Interval<i32>;
 
-    /// Computes the hull (min, max) of two `i32` values.
+    /// Computes the hull of two scalars: $\text{hull}(a,b) = \[\\min(a,b),\; \\max(a,b)\]$
     #[inline]
     fn hull_with(&self, other: &i32) -> Self::Output {
         if *self < *other {
@@ -489,8 +461,9 @@ where
 {
     type Output = Interval<T>;
 
-    /// Computes the hull (bounding interval) of two intervals by taking the
-    /// minimum lower bound and maximum upper bound.
+    /// Computes the hull (bounding interval) of two intervals:
+    ///
+    /// $$\text{hull}(\[a,b\],\[c,d\]) = \[\\min(a,c),\; \\max(b,d)\]$$
     #[inline]
     fn hull_with(&self, other: &Interval<T>) -> Self::Output {
         Self::Output {
@@ -547,7 +520,7 @@ pub trait Intersect<T: ?Sized> {
 impl Intersect<i32> for i32 {
     type Output = Interval<i32>;
 
-    /// Computes the intersection of two `i32` values as an interval.
+    /// Computes the intersection of two scalars: $\text{intersect}(a,b) = \[\\max(a,b),\; \\min(a,b)\]$
     #[inline]
     fn intersect_with(&self, other: &i32) -> Self::Output {
         Self::Output {
@@ -564,7 +537,9 @@ where
 {
     type Output = Interval<T>;
 
-    /// Computes the intersection of two intervals.
+    /// Computes the intersection of two intervals:
+    ///
+    /// $$\text{intersect}(\[a,b\],\[c,d\]) = \[\\max(a,c),\; \\min(b,d)\]$$
     #[inline]
     fn intersect_with(&self, other: &Interval<T>) -> Self::Output {
         Self::Output {

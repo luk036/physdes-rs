@@ -47,6 +47,10 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
 
     /// Checks if this rectangle overlaps with another
     ///
+    /// Two rectangles overlap iff their projections on both axes overlap:
+    ///
+    /// $$\[a_x,b_x\] \cap \[c_x,d_x\] \neq \varnothing \land \[a_y,b_y\] \cap \[c_y,d_y\] \neq \varnothing$$
+    ///
     /// # Examples
     ///
     /// ```
@@ -67,6 +71,8 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
     }
 
     /// Checks if this rectangle contains another rectangle
+    ///
+    /// $$A \supseteq B \iff A_{\min x} \le B_{\min x} \land A_{\max x} \ge B_{\max x}$$
     pub fn contains(&self, other: &Self) -> bool {
         self.min.xcoord <= other.min.xcoord
             && self.max.xcoord >= other.max.xcoord
@@ -83,6 +89,8 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
     }
 
     /// Computes the intersection with another rectangle
+    ///
+    /// $$A \cap B = \[\\max(x_{A\\min}, x_{B\\min}),\; \\min(x_{A\\max}, x_{B\\max})\] \times \[\\max(y_{A\\min}, y_{B\\min}),\; \\min(y_{A\\max}, y_{B\\max})\]$$
     ///
     /// Returns `None` if the rectangles don't overlap
     pub fn intersect(&self, other: &Self) -> Option<Self>
@@ -106,6 +114,8 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
     }
 
     /// Computes the area of the rectangle
+    ///
+    /// $$A = w \times h = (x_{\max} - x_{\min}) \times (y_{\max} - y_{\min})$$
     pub fn area(&self) -> T
     where
         T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T>,
@@ -116,6 +126,8 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
     }
 
     /// Computes the bounding rectangle of two rectangles
+    ///
+    /// $$\text{bbox}(A,B) = \[\\min(x_{A\\min}, x_{B\\min}),\; \\max(x_{A\\max}, x_{B\\max})\] \times \[\\min(y_{A\\min}, y_{B\\min}),\; \\max(y_{A\\max}, y_{B\\max})\]$$
     pub fn bounding_rect(&self, other: &Self) -> Self {
         Rectangle::new(
             Point::new(
@@ -220,6 +232,8 @@ where
 
 /// Calculates Manhattan distance between two points
 ///
+/// $$d = |x_1 - x_2| + |y_1 - y_2|$$
+///
 /// The Manhattan distance is the sum of the absolute differences of coordinates.
 /// This is commonly used in VLSI routing where wires can only run horizontally or vertically.
 ///
@@ -308,6 +322,8 @@ where
 }
 
 /// Computes the minimum bounding rectangle of a set of rectangles
+///
+/// $$\text{bbox} = \left\[\\min_i x_{i\\min},\; \\max_i x_{i\\max}\\right\] \times \left\[\\min_i y_{i\\min},\; \\max_i y_{i\\max}\\right\]$$
 ///
 /// # Arguments
 ///
