@@ -226,11 +226,11 @@ mod opassign {
     use crate::Vector2;
 
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> AddAssign for Vector2<T1, T2> {
-    /// Adds another vector to this one component-wise.
-    ///
-    /// $$\vec{a} \mathrel{+}= \vec{b} \implies (a_x + b_x,\; a_y + b_y)$$
-    ///
-    /// # Example
+        /// Adds another vector to this one component-wise.
+        ///
+        /// $$\vec{a} \mathrel{+}= \vec{b} \implies (a_x + b_x,\; a_y + b_y)$$
+        ///
+        /// # Example
         ///
         /// ```
         /// use physdes::vector2::Vector2;
@@ -248,20 +248,20 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign, T2: Clone + NumAssign> SubAssign for Vector2<T1, T2> {
-    /// Subtracts another vector from this one component-wise.
-    ///
-    /// $$\vec{a} \mathrel{-}= \vec{b} \implies (a_x - b_x,\; a_y - b_y)$$
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use physdes::vector2::Vector2;
-    /// use std::ops::SubAssign;
-    /// let mut v = Vector2::new(1, 2);
-    /// let v2 = Vector2::new(3, 4);
-    /// v.sub_assign(v2);
-    /// assert_eq!(v, Vector2::new(-2, -2));
-    /// ```
+        /// Subtracts another vector from this one component-wise.
+        ///
+        /// $$\vec{a} \mathrel{-}= \vec{b} \implies (a_x - b_x,\; a_y - b_y)$$
+        ///
+        /// # Example
+        ///
+        /// ```
+        /// use physdes::vector2::Vector2;
+        /// use std::ops::SubAssign;
+        /// let mut v = Vector2::new(1, 2);
+        /// let v2 = Vector2::new(3, 4);
+        /// v.sub_assign(v2);
+        /// assert_eq!(v, Vector2::new(-2, -2));
+        /// ```
         fn sub_assign(&mut self, other: Self) {
             self.x_ -= other.x_;
             self.y_ -= other.y_;
@@ -269,11 +269,11 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign> MulAssign<T1> for Vector2<T1, T1> {
-    /// Multiplies each component of the vector by a scalar.
-    ///
-    /// $$\vec{v} \mathrel{*}= s \implies (v_x \cdot s,\; v_y \cdot s)$$
-    ///
-    /// # Example
+        /// Multiplies each component of the vector by a scalar.
+        ///
+        /// $$\vec{v} \mathrel{*}= s \implies (v_x \cdot s,\; v_y \cdot s)$$
+        ///
+        /// # Example
         ///
         /// ```
         /// use physdes::vector2::Vector2;
@@ -290,11 +290,11 @@ mod opassign {
     }
 
     impl<T1: Clone + NumAssign> DivAssign<T1> for Vector2<T1, T1> {
-    /// Divides each component of the vector by a scalar.
-    ///
-    /// $$\vec{v} \mathrel{/}= s \implies (v_x / s,\; v_y / s)$$
-    ///
-    /// # Example
+        /// Divides each component of the vector by a scalar.
+        ///
+        /// $$\vec{v} \mathrel{/}= s \implies (v_x / s,\; v_y / s)$$
+        ///
+        /// # Example
         ///
         /// ```
         /// use physdes::vector2::Vector2;

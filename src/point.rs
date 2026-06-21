@@ -394,9 +394,9 @@ impl<T1: Clone + Num, T2: Clone + Num> Sub for Point<T1, T2> {
 
 // Assignment operations
 
-    /// Translates the point by adding a vector to its coordinates
-    ///
-    /// $$P \mathrel{+}= (v_x, v_y) \implies (x + v_x,\; y + v_y)$$
+/// Translates the point by adding a vector to its coordinates
+///
+/// $$P \mathrel{+}= (v_x, v_y) \implies (x + v_x,\; y + v_y)$$
 impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2<T1, T2>>
     for Point<T1, T2>
 {
@@ -407,9 +407,9 @@ impl<T1: Clone + Num + AddAssign, T2: Clone + Num + AddAssign> AddAssign<Vector2
     }
 }
 
-    /// Translates the point by subtracting a vector from its coordinates
-    ///
-    /// $$P \mathrel{-}= (v_x, v_y) \implies (x - v_x,\; y - v_y)$$
+/// Translates the point by subtracting a vector from its coordinates
+///
+/// $$P \mathrel{-}= (v_x, v_y) \implies (x - v_x,\; y - v_y)$$
 impl<T1: Clone + Num + SubAssign, T2: Clone + Num + SubAssign> SubAssign<Vector2<T1, T2>>
     for Point<T1, T2>
 {
