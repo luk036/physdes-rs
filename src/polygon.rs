@@ -596,6 +596,8 @@ where
 ///
 /// A polygon is monotone in direction $d$ if the two chains from the minimum
 /// to maximum vertex in direction $d$ are both monotonic (non-decreasing in $d$).
+///
+/// For the chain from min to max: $d(v_i) \le d(v_{i+1})$ for all consecutive vertices.
 pub fn polygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,

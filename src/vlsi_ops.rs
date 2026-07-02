@@ -81,6 +81,8 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
     }
 
     /// Checks if this rectangle contains a point
+    ///
+    /// $$P \in R \iff x_{\min} \le x \le x_{\max} \land y_{\min} \le y \le y_{\max}$$
     pub fn contains_point(&self, point: &Point<T, T>) -> bool {
         point.xcoord >= self.min.xcoord
             && point.xcoord <= self.max.xcoord
@@ -162,6 +164,10 @@ impl<T: Clone + Ord + Copy + std::ops::Add<Output = T>> Rectangle<T> {
 /// 2. Sort events by x-coordinate
 /// 3. Sweep from left to right, maintaining active rectangles
 /// 4. Check y-overlap when a new rectangle becomes active
+///
+/// Two active rectangles overlap in y iff:
+///
+/// $$y_{\min}^{(1)} \le y_{\max}^{(2)} \land y_{\min}^{(2)} \le y_{\max}^{(1)}$$
 ///
 /// # Arguments
 ///
@@ -271,6 +277,11 @@ where
 
 /// Checks if two rectangles satisfy minimum spacing requirements
 ///
+/// Two rectangles satisfy spacing $s$ if they do not overlap and the gap on
+/// each axis is at least $s$:
+///
+/// $$\\text{spacing}_x \ge s \land \\text{spacing}_y \ge s$$
+///
 /// # Arguments
 ///
 /// * `rect1` - First rectangle
@@ -370,6 +381,8 @@ where
 }
 
 /// Computes total area covered by rectangles, accounting for overlaps
+///
+/// $$A_{\\text{total}} = \sum_i A(R_i) - \sum_{i<j} A(R_i \cap R_j)$$
 ///
 /// # Examples
 ///

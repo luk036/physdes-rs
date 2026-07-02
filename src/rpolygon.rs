@@ -205,7 +205,9 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     /// Checks if the polygon is oriented anticlockwise
     ///
     /// Determines orientation by checking the previous vertex's y-coordinate
-    /// relative to the minimum-coordinate vertex.
+    /// relative to the minimum-coordinate vertex:
+    ///
+    /// $$P_{\text{prev}}.y > P_{\text{min}}.y \implies \text{anticlockwise}$$
     pub fn is_anticlockwise(&self) -> bool
     where
         T: PartialOrd,
@@ -251,6 +253,9 @@ impl<T: Clone + Copy + Num + Ord + AddAssign + SubAssign> RPolygon<T> {
 /// Converts a rectilinear polygon to a general polygon.
 ///
 /// Adds intermediate points for axis-aligned segments.
+///
+/// For each consecutive pair of vectors $(v_i, v_{i+1})$, if $v_i.x \neq v_{i+1}.x \land v_i.y \neq v_{i+1}.y$,
+/// inserts an intermediate point $(v_{i+1}.x,\; v_i.y)$ to ensure axis-aligned edges.
 pub fn rpolygon_to_polygon<T: Clone + Copy + Num + Ord + AddAssign + SubAssign>(
     rpoly: &RPolygon<T>,
 ) -> crate::polygon::Polygon<T> {
@@ -293,6 +298,11 @@ impl<T: PartialEq> PartialEq for RPolygon<T> {
 impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
     /// The `create_mono_rpolygon` function creates a monotone polygon from a given set of points based
     /// on a provided comparison function.
+    ///
+    /// Partitions the point set into two chains using the direction function $f$:
+    ///
+    /// $$\\text{lst}_1 = \\{p \mid f(p) \le f(\\text{leftmost})\\},\qquad
+    /// \\text{lst}_2 = P \\setminus \\text{lst}_1$$
     ///
     /// Arguments:
     ///
@@ -404,7 +414,7 @@ impl<T: Clone + Num + Ord + Copy> RPolygon<T> {
 /// Returns `true` if the polygon is monotone in the given direction.
 ///
 /// A polygon is monotone in direction $d$ if the two chains from the minimum
-/// to maximum vertex in direction $d$ are both monotonic.
+/// to maximum vertex in direction $d$ are both monotonic ($d(v_i) \le d(v_{i+1})$).
 pub fn rpolygon_is_monotone<T, F>(lst: &[Point<T, T>], dir: F) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -469,7 +479,9 @@ where
 
 /// Returns `true` if the polygon is rectilinearly convex (both x- and y-monotone).
 ///
-/// A rectilinear polygon is convex iff it is both x-monotone and y-monotone.
+/// A rectilinear polygon is convex iff it is both x-monotone and y-monotone:
+///
+/// $$\\text{convex} \iff \\text{x-monotone} \land \\text{y-monotone}$$
 pub fn rpolygon_is_convex<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -478,6 +490,8 @@ where
 }
 
 /// Returns `true` if the polygon is oriented anticlockwise.
+///
+/// $$\\text{anticlockwise} \iff P_{\\text{prev}}.y > P_{\\text{min}}.y$$
 pub fn rpolygon_is_anticlockwise<T>(pointset: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
