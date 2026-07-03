@@ -2,7 +2,6 @@ use crate::generic::{Contain, Displacement, MinDist, Overlap};
 
 use std::cmp::{Eq, PartialEq, PartialOrd};
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// A range of values with a lower bound (`lb`) and an upper bound (`ub`).
@@ -30,7 +29,6 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 pub struct Interval<T> {
     pub lb: T,
     pub ub: T,
-    pub _marker: PhantomData<T>,
 }
 
 impl<T> Interval<T> {
@@ -54,11 +52,7 @@ impl<T> Interval<T> {
     /// ```
     #[inline]
     pub const fn new(lb: T, ub: T) -> Self {
-        Self {
-            lb,
-            ub,
-            _marker: PhantomData,
-        }
+        Self { lb, ub }
     }
 }
 
@@ -137,7 +131,6 @@ impl<T: Sub<Output = T>> Sub for Interval<T> {
         Self {
             lb: self.lb - other.lb,
             ub: self.ub - other.ub,
-            _marker: PhantomData,
         }
     }
 }
@@ -154,7 +147,6 @@ where
         Interval {
             lb: -self.ub,
             ub: -self.lb,
-            _marker: self._marker,
         }
     }
 }
@@ -183,7 +175,6 @@ where
         Interval {
             lb: self.lb + rhs,
             ub: self.ub + rhs,
-            _marker: self._marker,
         }
     }
 }
@@ -208,7 +199,6 @@ impl<T: Add<Output = T>> Add for Interval<T> {
         Self {
             lb: self.lb + other.lb,
             ub: self.ub + other.ub,
-            _marker: PhantomData,
         }
     }
 }
@@ -225,7 +215,6 @@ where
         Interval {
             lb: self.lb - rhs,
             ub: self.ub - rhs,
-            _marker: self._marker,
         }
     }
 }
@@ -254,7 +243,6 @@ where
         Interval {
             lb: self.lb * rhs,
             ub: self.ub * rhs,
-            _marker: self._marker,
         }
     }
 }
@@ -275,7 +263,6 @@ impl Enlarge<i32> for i32 {
         Interval {
             lb: *self - alpha,
             ub: *self + alpha,
-            _marker: PhantomData,
         }
     }
 }
@@ -292,7 +279,6 @@ where
         Interval {
             lb: self.lb - alpha,
             ub: self.ub + alpha,
-            _marker: self._marker,
         }
     }
 }
@@ -469,7 +455,6 @@ where
         Self::Output {
             lb: self.lb.min(other.lb),
             ub: self.ub.max(other.ub),
-            _marker: self._marker,
         }
     }
 }
@@ -492,7 +477,6 @@ where
         Self::Output {
             lb: self.lb.min(*other),
             ub: self.ub.max(*other),
-            _marker: self._marker,
         }
     }
 }
@@ -526,7 +510,6 @@ impl Intersect<i32> for i32 {
         Self::Output {
             lb: (*self).max(*other),
             ub: (*self).min(*other),
-            _marker: PhantomData,
         }
     }
 }
@@ -545,7 +528,6 @@ where
         Self::Output {
             lb: self.lb.max(other.lb),
             ub: self.ub.min(other.ub),
-            _marker: self._marker,
         }
     }
 }
@@ -562,7 +544,6 @@ where
         Self::Output {
             lb: self.lb.max(*other),
             ub: self.ub.min(*other),
-            _marker: self._marker,
         }
     }
 }

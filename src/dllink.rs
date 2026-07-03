@@ -3,8 +3,6 @@
 //! Provides a low-level intrusive doubly-linked list node (`Dllink<T>`)
 //! used internally by rectilinear polygon cut and hull algorithms.
 
-use std::marker::PhantomData;
-
 /// A doubly-linked list node.
 ///
 /// Each node holds a value of type `T` and pointers to the next and previous
@@ -23,8 +21,6 @@ pub struct Dllink<T> {
     pub prev: *mut Dllink<T>,
     /// Stored data value.
     pub data: T,
-    /// Marker to opt out of auto-Send/Sync.
-    _marker: PhantomData<*mut T>,
 }
 
 // SAFETY: Dllink is designed for single-threaded internal use.
@@ -44,7 +40,6 @@ impl<T> Dllink<T> {
             next: std::ptr::null_mut(),
             prev: std::ptr::null_mut(),
             data,
-            _marker: PhantomData,
         }
     }
 
@@ -55,7 +50,6 @@ impl<T> Dllink<T> {
             next: std::ptr::null_mut(),
             prev: std::ptr::null_mut(),
             data,
-            _marker: PhantomData,
         }
     }
 
