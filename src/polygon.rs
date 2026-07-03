@@ -292,24 +292,25 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     where
         T: Ord + Copy,
     {
-        let vertices = self.vertices();
-        let mut min_x = vertices[0].xcoord;
-        let mut min_y = vertices[0].ycoord;
-        let mut max_x = vertices[0].xcoord;
-        let mut max_y = vertices[0].ycoord;
+        let mut min_x = self.origin.xcoord;
+        let mut min_y = self.origin.ycoord;
+        let mut max_x = self.origin.xcoord;
+        let mut max_y = self.origin.ycoord;
 
-        for pt in &vertices {
-            if pt.xcoord < min_x {
-                min_x = pt.xcoord;
+        for vec in &self.vecs {
+            let x = self.origin.xcoord + vec.x_;
+            let y = self.origin.ycoord + vec.y_;
+            if x < min_x {
+                min_x = x;
             }
-            if pt.ycoord < min_y {
-                min_y = pt.ycoord;
+            if y < min_y {
+                min_y = y;
             }
-            if pt.xcoord > max_x {
-                max_x = pt.xcoord;
+            if x > max_x {
+                max_x = x;
             }
-            if pt.ycoord > max_y {
-                max_y = pt.ycoord;
+            if y > max_y {
+                max_y = y;
             }
         }
 
@@ -377,18 +378,22 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     where
         T: PartialOrd,
     {
-        let mut pointset = Vec::with_capacity(self.vecs.len() + 1);
-        pointset.push(Vector2::new(T::zero(), T::zero()));
-        pointset.extend(self.vecs.iter().cloned());
-
-        if pointset.len() < 3 {
+        let n = self.vecs.len() + 1;
+        if n < 3 {
             panic!("Polygon must have at least 3 points");
         }
 
+        let get_pt = |i: usize| -> Vector2<T, T> {
+            if i == 0 {
+                Vector2::new(T::zero(), T::zero())
+            } else {
+                self.vecs[i - 1]
+            }
+        };
+
         // Find the point with minimum coordinates
-        let (min_index, _) = pointset
-            .iter()
-            .enumerate()
+        let (min_index, _) = (0..n)
+            .map(|i| (i, get_pt(i)))
             .min_by(|(_, a), (_, b)| {
                 a.x_.partial_cmp(&b.x_)
                     .unwrap_or(Ordering::Equal)
@@ -397,10 +402,9 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
             .unwrap();
 
         // Get previous and next points with wrap-around
-        let n = pointset.len();
-        let prev_point = pointset[(min_index + n - 1) % n];
-        let current_point = pointset[min_index];
-        let next_point = pointset[(min_index + 1) % n];
+        let prev_point = get_pt((min_index + n - 1) % n);
+        let current_point = get_pt(min_index);
+        let next_point = get_pt((min_index + 1) % n);
 
         // Calculate cross product
         (current_point - prev_point).cross(&(next_point - current_point)) > T::zero()

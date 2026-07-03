@@ -212,18 +212,22 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     where
         T: PartialOrd,
     {
-        let mut pointset = Vec::with_capacity(self.vecs.len() + 1);
-        pointset.push(Vector2::new(T::zero(), T::zero()));
-        pointset.extend(self.vecs.iter().cloned());
-
-        if pointset.len() < 2 {
+        let n = self.vecs.len() + 1;
+        if n < 2 {
             panic!("Polygon must have at least 2 points");
         }
 
+        let get_pt = |i: usize| -> Vector2<T, T> {
+            if i == 0 {
+                Vector2::new(T::zero(), T::zero())
+            } else {
+                self.vecs[i - 1]
+            }
+        };
+
         // Find the point with minimum coordinates
-        let (min_index, _) = pointset
-            .iter()
-            .enumerate()
+        let (min_index, min_point) = (0..n)
+            .map(|i| (i, get_pt(i)))
             .min_by(|(_, a), (_, b)| {
                 a.x_.partial_cmp(&b.x_)
                     .unwrap_or(Ordering::Equal)
@@ -232,9 +236,8 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
             .unwrap();
 
         // Get previous and next points with wrap-around
-        let n = pointset.len();
-        let prev_point = pointset[(min_index + n - 1) % n];
-        let current_point = pointset[min_index];
+        let prev_point = get_pt((min_index + n - 1) % n);
+        let current_point = min_point;
 
         prev_point.y_ > current_point.y_
     }
