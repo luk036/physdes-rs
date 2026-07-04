@@ -36,6 +36,7 @@ quickcheck = "1.1.0"
 quickcheck_macros = "1.2.0"
 svgbobdoc = "0.3"
 criterion = "0.8.2"
+dhat = "0.3"
 
 [[bench]]
 name = "geometry_bench"

@@ -6,8 +6,6 @@
 //! Nodes are stored in an arena (`Tree`) and referenced by `usize` index,
 //! avoiding `Rc<RefCell<>>` overhead.
 
-use std::collections::HashMap;
-
 use crate::generic::MinDist;
 use crate::interval::Interval;
 use crate::manhattan_arc::ManhattanArc;
@@ -484,10 +482,14 @@ impl DMEAlgorithm {
             self.tree.add(node);
         }
 
-        let leaf_indices: Vec<NodeIdx> = (0..self.tree.len()).collect();
-        let root = self.build_merging_tree(&leaf_indices, false);
+        // Free sink memory — no longer needed after building leaf nodes.
+        self.sinks = Vec::new();
 
-        let mut merging_segments: HashMap<NodeIdx, ManhattanArc<Interval<i32>>> = HashMap::new();
+        let mut leaf_indices: Vec<NodeIdx> = (0..self.tree.len()).collect();
+        let root = self.build_merging_tree(&mut leaf_indices, false);
+
+        let n = self.tree.len();
+        let mut merging_segments: Vec<Option<ManhattanArc<Interval<i32>>>> = vec![None; n];
         self.compute_merging_segment(root, &mut merging_segments);
         self.embed_node(root, None, &merging_segments);
         self.compute_delays(root, 0.0);
@@ -497,14 +499,17 @@ impl DMEAlgorithm {
     }
 
     /// Build a balanced merging tree by recursive bipartition.
-    fn build_merging_tree(&mut self, node_ids: &[NodeIdx], vertical: bool) -> NodeIdx {
+    ///
+    /// Uses `select_nth_unstable_by` for O(n) median partitioning per level
+    /// instead of O(n log n) full sort + copy.
+    fn build_merging_tree(&mut self, node_ids: &mut [NodeIdx], vertical: bool) -> NodeIdx {
         if node_ids.len() == 1 {
             return node_ids[0];
         }
 
-        let mut sorted: Vec<NodeIdx> = node_ids.to_vec();
+        let mid = node_ids.len() / 2;
         if vertical {
-            sorted.sort_by(|&a, &b| {
+            node_ids.select_nth_unstable_by(mid, |&a, &b| {
                 self.tree
                     .get(a)
                     .position
@@ -512,7 +517,7 @@ impl DMEAlgorithm {
                     .cmp(&self.tree.get(b).position.xcoord)
             });
         } else {
-            sorted.sort_by(|&a, &b| {
+            node_ids.select_nth_unstable_by(mid, |&a, &b| {
                 self.tree
                     .get(a)
                     .position
@@ -521,9 +526,9 @@ impl DMEAlgorithm {
             });
         }
 
-        let mid = sorted.len() / 2;
-        let left_child = self.build_merging_tree(&sorted[..mid], !vertical);
-        let right_child = self.build_merging_tree(&sorted[mid..], !vertical);
+        let (left, right) = node_ids.split_at_mut(mid);
+        let left_child = self.build_merging_tree(left, !vertical);
+        let right_child = self.build_merging_tree(right, !vertical);
 
         let id = format!("n{}", self.node_id);
         self.node_id += 1;
@@ -541,7 +546,7 @@ impl DMEAlgorithm {
     fn compute_merging_segment(
         &mut self,
         node: NodeIdx,
-        segments: &mut HashMap<NodeIdx, ManhattanArc<Interval<i32>>>,
+        segments: &mut Vec<Option<ManhattanArc<Interval<i32>>>>,
     ) -> ManhattanArc<Interval<i32>> {
         if self.tree.get(node).is_leaf() {
             let pos = self.tree.get(node).position;
@@ -550,7 +555,7 @@ impl DMEAlgorithm {
                 Interval::new(ms1.xcoord(), ms1.xcoord()),
                 Interval::new(ms1.ycoord(), ms1.ycoord()),
             );
-            segments.insert(node, ms);
+            segments[node] = Some(ms);
             return ms;
         }
 
@@ -622,7 +627,7 @@ impl DMEAlgorithm {
         self.tree.get_mut(node).delay = tp.delay_left;
 
         let merged_segment = left_ms.merge_with(&right_ms, tp.extend_left);
-        segments.insert(node, merged_segment);
+        segments[node] = Some(merged_segment);
 
         let wire_cap = self.delay_calculator.calculate_wire_capacitance(distance);
         self.tree.get_mut(node).capacitance = {
@@ -638,10 +643,10 @@ impl DMEAlgorithm {
         &mut self,
         node: NodeIdx,
         parent_segment: Option<&ManhattanArc<Interval<i32>>>,
-        segments: &HashMap<NodeIdx, ManhattanArc<Interval<i32>>>,
+        segments: &Vec<Option<ManhattanArc<Interval<i32>>>>,
     ) {
-        let node_segment = segments
-            .get(&node)
+        let node_segment = segments[node]
+            .as_ref()
             .expect("Merging segment not found for node");
 
         if parent_segment.is_none() {
