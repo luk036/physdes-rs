@@ -6,9 +6,7 @@
 //! dhat writes `dhat-heap.json` at exit.
 
 use dhat::{HeapStats, Profiler};
-use physdes::dme_algorithm::{
-    DMEAlgorithm, LinearDelayCalculator, Sink,
-};
+use physdes::dme_algorithm::{DMEAlgorithm, LinearDelayCalculator, Sink};
 use physdes::Point;
 
 #[global_allocator]
