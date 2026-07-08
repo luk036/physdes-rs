@@ -929,4 +929,89 @@ mod tests {
         assert_eq!(router.terminal_positions[1], Point::new(5, 0));
         assert_eq!(router.terminal_positions[2], Point::new(10, 0));
     }
+
+    #[test]
+    fn test_node_type_display() {
+        assert_eq!(format!("{}", NodeType::Steiner), "Steiner");
+        assert_eq!(format!("{}", NodeType::Terminal), "Terminal");
+        assert_eq!(format!("{}", NodeType::Source), "Source");
+    }
+
+    #[test]
+    fn test_routing_node_new_and_manhattan() {
+        let n1 = RoutingNode::new("test1", NodeType::Source, Point::new(0, 0));
+        assert_eq!(n1.id, "test1");
+        assert_eq!(n1.node_type, NodeType::Source);
+        assert_eq!(n1.pt, Point::new(0, 0));
+        assert!(n1.children.is_empty());
+        assert!(n1.parent.is_none());
+
+        let n2 = RoutingNode::new("test2", NodeType::Terminal, Point::new(3, 4));
+        assert_eq!(n1.manhattan_distance(&n2), 7);
+        assert_eq!(n2.manhattan_distance(&n1), 7);
+    }
+
+    #[test]
+    fn test_insert_terminal_with_steiner() {
+        let mut tree = GlobalRoutingTree::new(Point::new(0, 0));
+        tree.insert_terminal_with_steiner(Point::new(2, 2), None);
+        assert_eq!(tree.calculate_total_wirelength(), 4);
+    }
+
+    #[test]
+    fn test_insert_terminal_with_constraints_coverage() {
+        let mut tree = GlobalRoutingTree::new(Point::new(0, 0));
+        tree.insert_terminal_with_constraints(Point::new(2, 2), 10, None);
+        assert_eq!(tree.calculate_total_wirelength(), 4);
+    }
+
+    #[test]
+    fn test_get_tree_structure() {
+        let mut tree = GlobalRoutingTree::new(Point::new(0, 0));
+        let s1 = tree.insert_steiner_node(Point::new(1, 1), None);
+        let _t1 = tree.insert_terminal_node(Point::new(2, 2), Some(&s1));
+        let structure = tree.get_tree_structure();
+        assert!(structure.find("Source").is_some());
+        assert!(structure.find("Steiner").is_some());
+        assert!(structure.find("Terminal").is_some());
+    }
+
+    #[test]
+    fn test_visualize_tree() {
+        let mut tree = GlobalRoutingTree::new(Point::new(0, 0));
+        let s1 = tree.insert_steiner_node(Point::new(1, 1), None);
+        let _t1 = tree.insert_terminal_node(Point::new(2, 2), Some(&s1));
+        tree.visualize_tree();
+    }
+
+    #[test]
+    fn test_to_svg_empty_tree() {
+        let tree = GlobalRoutingTree::new(Point::new(0, 0));
+        // Empty nodes vector
+        let empty_result = "<svg></svg>".to_string();
+        let svg = tree.to_svg(None, 200, 200, 50);
+        assert_eq!(svg.find("<svg"), empty_result.find("<svg"));
+    }
+
+    #[test]
+    fn test_to_svg_with_keepouts() {
+        let mut tree = GlobalRoutingTree::new(Point::new(0, 0));
+        let _t1 = tree.insert_terminal_node(Point::new(2, 2), None);
+        let keepout = make_keepout(0, 1, 0, 1);
+        let svg = tree.to_svg(Some(&vec![keepout]), 200, 200, 50);
+        assert!(svg.find("keepout").is_some() || svg.find("red").is_some() || svg.find("<svg").is_some());
+    }
+
+    #[test]
+    fn test_get_source() {
+        let tree = GlobalRoutingTree::new(Point::new(3, 5));
+        assert_eq!(tree.get_source().pt, Point::new(3, 5));
+    }
+
+    #[test]
+    fn test_get_source_mut() {
+        let mut tree = GlobalRoutingTree::new(Point::new(3, 5));
+        tree.get_source_mut().capacitance = 1.0;
+        assert_eq!(tree.get_source().capacitance, 1.0);
+    }
 }

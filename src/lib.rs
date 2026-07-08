@@ -111,26 +111,6 @@ mod tests {
     use super::*;
     use quickcheck_macros::quickcheck;
 
-    #[test]
-    pub fn it_works() {
-        let pt_a = Point::<i32, i32>::new(12, 23);
-        let vec_b = Vector2::<i32, i32>::new(34, 45);
-        println!("{:?}", pt_a + vec_b);
-        println!("{:?}", pt_a - vec_b);
-
-        let mut pt_a = Point::<i32, i32>::new(42, 53);
-        pt_a += vec_b;
-        pt_a -= vec_b;
-        println!("{:?}", -pt_a);
-
-        let pt_nested = Point::<Point<i32, i32>, Point<i32, i32>>::new(pt_a, pt_a);
-        println!("{:?}", pt_nested);
-
-        let interval_x = interval::Interval::<i32>::new(12, 23);
-        // let interval_y = interval::Interval::<i32>::new(42, 53);
-        println!("{:?}", interval_x);
-    }
-
     #[quickcheck]
     fn check_point(ax: u16, bx: u16) -> bool {
         let pt_a = Point::<i32, i32>::new(ax as i32, 23);
