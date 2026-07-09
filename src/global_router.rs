@@ -999,7 +999,11 @@ mod tests {
         let _t1 = tree.insert_terminal_node(Point::new(2, 2), None);
         let keepout = make_keepout(0, 1, 0, 1);
         let svg = tree.to_svg(Some(&vec![keepout]), 200, 200, 50);
-        assert!(svg.find("keepout").is_some() || svg.find("red").is_some() || svg.find("<svg").is_some());
+        assert!(
+            svg.find("keepout").is_some()
+                || svg.find("red").is_some()
+                || svg.find("<svg").is_some()
+        );
     }
 
     #[test]
