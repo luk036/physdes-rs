@@ -749,7 +749,8 @@ impl GlobalRouter {
             let da = source_pos.min_dist_with(a) as i32;
             let db = source_pos.min_dist_with(b) as i32;
             da.cmp(&db).then_with(|| {
-                a.xcoord.cmp(&b.xcoord)
+                a.xcoord
+                    .cmp(&b.xcoord)
                     .then_with(|| a.ycoord.cmp(&b.ycoord))
             })
         });

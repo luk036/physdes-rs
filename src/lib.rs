@@ -92,12 +92,12 @@ pub mod rpolygon;
 pub mod rpolygon_cut;
 /// Rectilinear polygon hull operations
 pub mod rpolygon_hull;
+/// Steiner forest grid construction using primal-dual approximation
+pub mod steiner_forest_grid;
 /// Vector2 types and operations
 pub mod vector2;
 /// VLSI-specific geometric operations
 pub mod vlsi_ops;
-/// Steiner forest grid construction using primal-dual approximation
-pub mod steiner_forest_grid;
 
 /// Logging module - available when `std` feature is enabled.
 #[cfg(feature = "std")]

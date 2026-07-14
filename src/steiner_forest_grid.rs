@@ -112,8 +112,7 @@ pub fn steiner_forest_grid(
     let mut f: Vec<(usize, usize, f64)> = Vec::new();
 
     loop {
-        let term_root: HashMap<usize, usize> =
-            all_term.iter().map(|&t| (t, uf.find(t))).collect();
+        let term_root: HashMap<usize, usize> = all_term.iter().map(|&t| (t, uf.find(t))).collect();
 
         let mut feasible = true;
         for (&src, partners) in &pair_dict {

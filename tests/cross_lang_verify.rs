@@ -1,8 +1,6 @@
 use std::collections::HashSet;
 
-use physdes::dme_algorithm::{
-    DMEAlgorithm, ElmoreDelayCalculator, LinearDelayCalculator, Sink,
-};
+use physdes::dme_algorithm::{DMEAlgorithm, ElmoreDelayCalculator, LinearDelayCalculator, Sink};
 use physdes::global_router::GlobalRouter;
 use physdes::interval::Interval;
 use physdes::point::Point;
@@ -13,7 +11,11 @@ fn make_sinks(count: i32) -> Vec<Sink> {
         .map(|i| {
             let x = (i * 37) % 100;
             let y = (i * 53) % 100;
-            Sink::new(&format!("s{}", i), Point::new(x, y), 1.0 + (i % 5) as f64 * 0.2)
+            Sink::new(
+                &format!("s{}", i),
+                Point::new(x, y),
+                1.0 + (i % 5) as f64 * 0.2,
+            )
         })
         .collect()
 }
@@ -80,11 +82,32 @@ fn cross_lang_steiner_forest_edges() {
     let result = steiner_forest_grid(h, w, &pairs);
     // Must match C++ and Python edge set exactly (17 edges, cost=17.0)
     let expected: HashSet<(usize, usize)> = [
-        (0,1),(1,2),(2,3),(2,10),(3,4),(4,5),(10,18),(18,26),
-        (25,26),(25,33),(36,37),(37,38),(37,45),(38,39),(39,47),(45,53),(53,61)
-    ].iter().cloned().collect();
-    let actual: HashSet<(usize, usize)> = result.edges.iter().map(|(u,v,_)| (*u,*v)).collect();
-    assert_eq!(actual, expected, "Steiner forest edge set must match C++/Python");
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (2, 10),
+        (3, 4),
+        (4, 5),
+        (10, 18),
+        (18, 26),
+        (25, 26),
+        (25, 33),
+        (36, 37),
+        (37, 38),
+        (37, 45),
+        (38, 39),
+        (39, 47),
+        (45, 53),
+        (53, 61),
+    ]
+    .iter()
+    .cloned()
+    .collect();
+    let actual: HashSet<(usize, usize)> = result.edges.iter().map(|(u, v, _)| (*u, *v)).collect();
+    assert_eq!(
+        actual, expected,
+        "Steiner forest edge set must match C++/Python"
+    );
     assert!((result.total_cost - 17.0).abs() < 1e-9);
 }
 
@@ -173,7 +196,12 @@ fn cross_lang_global_router_keepout() {
 #[test]
 fn cross_lang_polygon_signed_area_x2() {
     use physdes::polygon::Polygon;
-    let pts = vec![Point::new(0, 0), Point::new(100, 0), Point::new(100, 100), Point::new(0, 100)];
+    let pts = vec![
+        Point::new(0, 0),
+        Point::new(100, 0),
+        Point::new(100, 100),
+        Point::new(0, 100),
+    ];
     let poly = Polygon::new(&pts);
     // Square 100x100: signed_area_x2 = 2 * 100*100 = 20000 (matches C++ BM_Polygon_Area)
     assert_eq!(poly.signed_area_x2(), 20000);
