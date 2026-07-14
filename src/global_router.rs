@@ -748,7 +748,10 @@ impl GlobalRouter {
         sorted.sort_by(|a, b| {
             let da = source_pos.min_dist_with(a) as i32;
             let db = source_pos.min_dist_with(b) as i32;
-            da.cmp(&db)
+            da.cmp(&db).then_with(|| {
+                a.xcoord.cmp(&b.xcoord)
+                    .then_with(|| a.ycoord.cmp(&b.ycoord))
+            })
         });
 
         let worst = if sorted.is_empty() {

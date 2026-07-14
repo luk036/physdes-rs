@@ -6,6 +6,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use physdes::generic::{MinDist, Overlap};
 use physdes::interval::Intersect;
 use physdes::interval::Interval;
+use physdes::rpolygon::RPolygon;
 use physdes::{Point, Polygon, Vector2};
 
 fn bench_point_creation(c: &mut Criterion) {
@@ -92,6 +93,29 @@ fn bench_point_distance(c: &mut Criterion) {
     });
 }
 
+fn bench_polygon_signed_area_x2(c: &mut Criterion) {
+    let points = vec![
+        Point::new(0, 0),
+        Point::new(100, 0),
+        Point::new(100, 100),
+        Point::new(0, 100),
+    ];
+    let polygon = Polygon::new(&points);
+
+    c.bench_function("polygon_signed_area_x2", |b| {
+        b.iter(|| black_box(&polygon).signed_area_x2())
+    });
+}
+
+fn bench_rpolygon_area(c: &mut Criterion) {
+    let points = vec![Point::new(0, 0), Point::new(100, 100)];
+    let rpoly = RPolygon::new(&points);
+
+    c.bench_function("rpolygon_signed_area", |b| {
+        b.iter(|| black_box(&rpoly).signed_area())
+    });
+}
+
 criterion_group!(
     benches,
     bench_point_creation,
@@ -99,6 +123,8 @@ criterion_group!(
     bench_interval_operations,
     bench_polygon_creation,
     bench_polygon_area,
+    bench_polygon_signed_area_x2,
+    bench_rpolygon_area,
     bench_polygon_convex_check,
     bench_point_distance
 );

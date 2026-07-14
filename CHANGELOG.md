@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Steiner forest grid module (`steiner_forest_grid`) matching C++/Python
+- Cross-language verification tests (11 integration tests)
+- Polygon `signed_area_x2` and RPolygon `signed_area` benchmarks
 - Cross-links to polyglot implementations (physdes-cpp, physdes-py)
 - SVG document comments (`svgbobdoc`) for `cargo doc`
 - const-fn support for core types
@@ -16,11 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `GlobalRouter::new` terminal sort: added deterministic tiebreaker
+- Sync with sibling C++/Python projects — all three now produce identical numerical results
 - Sync with sibling C++ project (physdes-cpp) by opencode + deepseek-v4-flash
-- Optimize `Polygon::is_rectilinear()` and `Polygon::is_convex()` — avoid temp vector allocation (align with C++ polygon.hpp)
-- Use O(1) swap-remove in `detect_overlap` line sweep (align with C++ recti.hpp)
-- Apply `cargo clippy --fix` and `cargo fmt` fixes
-- Improved variable naming (minimum 3 characters)
 
 ### Fixed
 

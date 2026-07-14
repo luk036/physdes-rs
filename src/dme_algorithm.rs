@@ -501,7 +501,9 @@ impl DMEAlgorithm {
     /// Build a balanced merging tree by recursive bipartition.
     ///
     /// Uses `select_nth_unstable_by` for O(n) median partitioning per level
-    /// instead of O(n log n) full sort + copy.
+    /// instead of O(n log n) full sort.  C++ and Python use the equivalent
+    /// `std::nth_element` / `statistics.median_low` partition so that all
+    /// three produce identical tree topologies.
     fn build_merging_tree(&mut self, node_ids: &mut [NodeIdx], vertical: bool) -> NodeIdx {
         if node_ids.len() == 1 {
             return node_ids[0];
