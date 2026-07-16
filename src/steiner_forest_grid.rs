@@ -76,11 +76,7 @@ type Pair = ((usize, usize), (usize, usize));
 /// # Panics
 ///
 /// Panics if the graph is disconnected and pairs cannot be connected.
-pub fn steiner_forest_grid(
-    height: usize,
-    width: usize,
-    pairs: &[Pair],
-) -> SteinerForestResult {
+pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> SteinerForestResult {
     let n = height * width;
     let mut uf = UnionFind::new(n);
     let mut sources = HashSet::new();
