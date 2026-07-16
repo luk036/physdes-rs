@@ -54,6 +54,9 @@ pub struct SteinerForestResult {
     pub steiner_nodes: HashSet<usize>,
 }
 
+/// A pair of grid coordinates `((sx, sy), (tx, ty))`.
+type Pair = ((usize, usize), (usize, usize));
+
 /// Computes an approximate Steiner forest on a grid graph using a primal-dual
 /// approach with reverse-delete pruning.
 ///
@@ -76,7 +79,7 @@ pub struct SteinerForestResult {
 pub fn steiner_forest_grid(
     height: usize,
     width: usize,
-    pairs: &[((usize, usize), (usize, usize))],
+    pairs: &[Pair],
 ) -> SteinerForestResult {
     let n = height * width;
     let mut uf = UnionFind::new(n);
