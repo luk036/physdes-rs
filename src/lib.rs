@@ -111,34 +111,36 @@ pub use crate::vector2::Vector2;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quickcheck_macros::quickcheck;
+    use proptest::prelude::*;
 
-    #[quickcheck]
-    fn check_point(ax: u16, bx: u16) -> bool {
-        let pt_a = Point::<i32, i32>::new(ax as i32, 23);
-        let vec_b = Vector2::<i32, i32>::new(bx as i32, 45);
-        pt_a == (pt_a - vec_b) + vec_b
-    }
+    // Additional proptest tests to verify build configuration
+    proptest! {
+        #[test]
+        fn check_point(ax in any::<u16>(), bx in any::<u16>()) {
+            let pt_a = Point::<i32, i32>::new(ax as i32, 23);
+            let vec_b = Vector2::<i32, i32>::new(bx as i32, 45);
+            assert!(pt_a == (pt_a - vec_b) + vec_b);
+        }
 
-    // Additional quickcheck tests to verify build configuration
-    #[quickcheck]
-    fn check_point_arithmetic_properties(x: i16, y: i16, dx: i16, dy: i16) -> bool {
-        let pt = Point::<i32, i32>::new(x as i32, y as i32);
-        let vec = Vector2::<i32, i32>::new(dx as i32, dy as i32);
+        #[test]
+        fn check_point_arithmetic_properties(x in any::<i16>(), y in any::<i16>(), dx in any::<i16>(), dy in any::<i16>()) {
+            let pt = Point::<i32, i32>::new(x as i32, y as i32);
+            let vec = Vector2::<i32, i32>::new(dx as i32, dy as i32);
 
-        // Test associative property: (pt + vec) - vec == pt
-        let result = (pt + vec) - vec;
-        pt == result
-    }
+            // Test associative property: (pt + vec) - vec == pt
+            let result = (pt + vec) - vec;
+            assert!(pt == result);
+        }
 
-    #[quickcheck]
-    fn check_interval_properties(a: i32, b: i32) -> bool {
-        let lower = a.min(b);
-        let upper = a.max(b);
-        let interval = interval::Interval::<i32>::new(lower, upper);
+        #[test]
+        fn check_interval_properties(a in any::<i32>(), b in any::<i32>()) {
+            let lower = a.min(b);
+            let upper = a.max(b);
+            let interval = interval::Interval::<i32>::new(lower, upper);
 
-        // Test that the interval has correct bounds
-        interval.lb() <= interval.ub()
+            // Test that the interval has correct bounds
+            assert!(interval.lb() <= interval.ub());
+        }
     }
 
     #[test]
