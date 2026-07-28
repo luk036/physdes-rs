@@ -113,7 +113,6 @@ mod tests {
     use super::*;
     use proptest::prelude::*;
 
-    // Additional proptest tests to verify build configuration
     proptest! {
         #[test]
         fn check_point(ax in any::<u16>(), bx in any::<u16>()) {
@@ -127,7 +126,6 @@ mod tests {
             let pt = Point::<i32, i32>::new(x as i32, y as i32);
             let vec = Vector2::<i32, i32>::new(dx as i32, dy as i32);
 
-            // Test associative property: (pt + vec) - vec == pt
             let result = (pt + vec) - vec;
             assert!(pt == result);
         }
@@ -138,14 +136,12 @@ mod tests {
             let upper = a.max(b);
             let interval = interval::Interval::<i32>::new(lower, upper);
 
-            // Test that the interval has correct bounds
             assert!(interval.lb() <= interval.ub());
         }
     }
 
     #[test]
     fn test_const_functions() {
-        // Test that the const functions we added actually work in const contexts
         const _P1: Point<i32, i32> = Point::new(1, 2);
         const _I1: interval::Interval<i32> = interval::Interval::new(1, 5);
         const _LB: i32 = _I1.lb();

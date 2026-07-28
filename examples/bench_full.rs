@@ -30,8 +30,8 @@ fn main() {
     {
         let sinks: Vec<Sink> = (0..16)
             .map(|i| {
-                let x = i as i32 * 33 + 7;
-                let y = (i as i32 * 17) % 200;
+                let x = i * 33 + 7;
+                let y = (i * 17) % 200;
                 Sink::new(&format!("s{}", i), Point::new(x, y), 1.0)
             })
             .collect();
@@ -42,8 +42,8 @@ fn main() {
     {
         let sinks: Vec<Sink> = (0..64)
             .map(|i| {
-                let x = i as i32 * 8 + 5;
-                let y = (i as i32 * 31 + 7) % 500;
+                let x = i * 8 + 5;
+                let y = (i * 31 + 7) % 500;
                 Sink::new(&format!("s{}", i), Point::new(x, y), 1.0)
             })
             .collect();

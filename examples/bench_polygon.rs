@@ -19,7 +19,7 @@ fn make_rpoly(i: i32) -> RPolygon<i32> {
 }
 
 fn bench_polygon_signed_area_x2() {
-    let polys: Vec<Polygon<i32>> = (0..1000).map(|i| make_square_poly(i)).collect();
+    let polys: Vec<Polygon<i32>> = (0..1000).map(make_square_poly).collect();
     let mut accum = 0i64;
     let n = 100_000;
     let start = Instant::now();
@@ -33,7 +33,7 @@ fn bench_polygon_signed_area_x2() {
 }
 
 fn bench_rpolygon_signed_area() {
-    let polys: Vec<RPolygon<i32>> = (0..1000).map(|i| make_rpoly(i)).collect();
+    let polys: Vec<RPolygon<i32>> = (0..1000).map(make_rpoly).collect();
     let mut accum = 0i64;
     let n = 100_000;
     let start = Instant::now();

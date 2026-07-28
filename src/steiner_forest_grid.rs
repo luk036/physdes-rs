@@ -54,7 +54,6 @@ pub struct SteinerForestResult {
     pub steiner_nodes: HashSet<usize>,
 }
 
-/// A pair of grid coordinates `((sx, sy), (tx, ty))`.
 type Pair = ((usize, usize), (usize, usize));
 
 /// Computes an approximate Steiner forest on a grid graph using a primal-dual
@@ -107,8 +106,8 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
         }
     }
 
-    let mut paid: HashMap<(usize, usize), f64> = HashMap::new();
-    let mut f: Vec<(usize, usize, f64)> = Vec::new();
+    let mut paid = HashMap::new();
+    let mut f = Vec::new();
 
     loop {
         let term_root: HashMap<usize, usize> = all_term.iter().map(|&t| (t, uf.find(t))).collect();
