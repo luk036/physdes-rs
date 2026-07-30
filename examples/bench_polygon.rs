@@ -15,7 +15,10 @@ fn make_square_poly(i: i32) -> Polygon<i32> {
 }
 
 fn make_rpoly(i: i32) -> RPolygon<i32> {
-    RPolygon::new(&[Point::new(i * 10, i * 10), Point::new(i * 10 + 100, i * 10 + 100)])
+    RPolygon::new(&[
+        Point::new(i * 10, i * 10),
+        Point::new(i * 10 + 100, i * 10 + 100),
+    ])
 }
 
 fn bench_polygon_signed_area_x2() {
@@ -29,7 +32,10 @@ fn bench_polygon_signed_area_x2() {
         }
     }
     let ns = start.elapsed().as_nanos() as f64 / (n as f64 * polys.len() as f64);
-    println!("  {:<35} {:>8.2} ns/op  (accum={})", "Polygon signed_area_x2", ns, accum);
+    println!(
+        "  {:<35} {:>8.2} ns/op  (accum={})",
+        "Polygon signed_area_x2", ns, accum
+    );
 }
 
 fn bench_rpolygon_signed_area() {
@@ -43,7 +49,10 @@ fn bench_rpolygon_signed_area() {
         }
     }
     let ns = start.elapsed().as_nanos() as f64 / (n as f64 * polys.len() as f64);
-    println!("  {:<35} {:>8.2} ns/op  (accum={})", "RPolygon signed_area", ns, accum);
+    println!(
+        "  {:<35} {:>8.2} ns/op  (accum={})",
+        "RPolygon signed_area", ns, accum
+    );
 }
 
 fn main() {

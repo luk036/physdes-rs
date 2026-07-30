@@ -1,9 +1,7 @@
 use std::hint::black_box;
 use std::time::Instant;
 
-use physdes::dme_algorithm::{
-    DMEAlgorithm, LinearDelayCalculator, Sink,
-};
+use physdes::dme_algorithm::{DMEAlgorithm, LinearDelayCalculator, Sink};
 use physdes::global_router::GlobalRoutingTree;
 use physdes::steiner_forest_grid::steiner_forest_grid;
 use physdes::Point;
@@ -36,7 +34,12 @@ fn main() {
             })
             .collect();
         let ns = bench_dme(&sinks);
-        println!("  {:<40} {:>8.1} ns/op  ({} sinks)", "DME build_clock_tree (16 sinks)", ns, sinks.len());
+        println!(
+            "  {:<40} {:>8.1} ns/op  ({} sinks)",
+            "DME build_clock_tree (16 sinks)",
+            ns,
+            sinks.len()
+        );
     }
 
     {
@@ -48,15 +51,26 @@ fn main() {
             })
             .collect();
         let ns = bench_dme(&sinks);
-        println!("  {:<40} {:>8.1} ns/op  ({} sinks)", "DME build_clock_tree (64 sinks)", ns, sinks.len());
+        println!(
+            "  {:<40} {:>8.1} ns/op  ({} sinks)",
+            "DME build_clock_tree (64 sinks)",
+            ns,
+            sinks.len()
+        );
     }
 
     // 2. Global Routing
     {
         let terminals = vec![
-            Point::new(10, 20), Point::new(30, 50), Point::new(60, 10),
-            Point::new(80, 40), Point::new(40, 70), Point::new(90, 90),
-            Point::new(20, 80), Point::new(70, 30), Point::new(50, 60),
+            Point::new(10, 20),
+            Point::new(30, 50),
+            Point::new(60, 10),
+            Point::new(80, 40),
+            Point::new(40, 70),
+            Point::new(90, 90),
+            Point::new(20, 80),
+            Point::new(70, 30),
+            Point::new(50, 60),
             Point::new(100, 100),
         ];
         let n = 50000u32;
@@ -69,15 +83,24 @@ fn main() {
             black_box(tree.calculate_total_wirelength());
         }
         let ns = start.elapsed().as_nanos() as f64 / n as f64;
-        println!("  {:<40} {:>8.1} ns/op  (10 terminals)", "Global routing (10 terminals)", ns);
+        println!(
+            "  {:<40} {:>8.1} ns/op  (10 terminals)",
+            "Global routing (10 terminals)", ns
+        );
     }
 
     // 3. Steiner Forest Grid
     {
         let pairs = vec![
-            ((0, 0), (5, 5)), ((2, 1), (7, 3)), ((1, 4), (6, 2)),
-            ((3, 0), (8, 5)), ((0, 3), (4, 7)), ((2, 6), (9, 1)),
-            ((5, 2), (7, 6)), ((3, 5), (6, 8)), ((1, 7), (9, 9)),
+            ((0, 0), (5, 5)),
+            ((2, 1), (7, 3)),
+            ((1, 4), (6, 2)),
+            ((3, 0), (8, 5)),
+            ((0, 3), (4, 7)),
+            ((2, 6), (9, 1)),
+            ((5, 2), (7, 6)),
+            ((3, 5), (6, 8)),
+            ((1, 7), (9, 9)),
         ];
         let n = 10000;
         let start = Instant::now();
@@ -85,7 +108,10 @@ fn main() {
             black_box(steiner_forest_grid(10, 10, &pairs));
         }
         let ns = start.elapsed().as_nanos() as f64 / n as f64;
-        println!("  {:<40} {:>8.1} ns/op  (10x10 grid, 9 pairs)", "Steiner Forest Grid (small)", ns);
+        println!(
+            "  {:<40} {:>8.1} ns/op  (10x10 grid, 9 pairs)",
+            "Steiner Forest Grid (small)", ns
+        );
     }
 
     {
@@ -104,6 +130,9 @@ fn main() {
             black_box(steiner_forest_grid(20, 20, &pairs));
         }
         let ns = start.elapsed().as_nanos() as f64 / n as f64;
-        println!("  {:<40} {:>8.1} ns/op  (20x20 grid, 49 pairs)", "Steiner Forest Grid (large)", ns);
+        println!(
+            "  {:<40} {:>8.1} ns/op  (20x20 grid, 49 pairs)",
+            "Steiner Forest Grid (large)", ns
+        );
     }
 }
