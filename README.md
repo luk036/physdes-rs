@@ -43,12 +43,6 @@ Add this to your `Cargo.toml`:
 physdes-rs = "0.1"
 ```
 
-Or install the binary:
-
-```bash
-cargo install physdes-rs
-```
-
 ## 🚀 Quick Start
 
 ### Creating and Manipulating Points
