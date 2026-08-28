@@ -87,19 +87,16 @@ pub struct GlobalRoutingTree {
 
 impl GlobalRoutingTree {
     pub fn new(source_position: Point<i32, i32>) -> Self {
-        let source = RoutingNode::new("source", NodeType::Source, source_position);
-        let mut nodes = Vec::new();
-        let mut node_map = HashMap::new();
-        node_map.insert("source".to_string(), 0usize);
-        nodes.push(source);
-        GlobalRoutingTree {
-            nodes,
-            node_map,
+        let mut tree = GlobalRoutingTree {
+            nodes: Vec::new(),
+            node_map: HashMap::new(),
             source_idx: 0,
             next_steiner_id: 1,
             next_terminal_id: 1,
             worst_wirelength: 0,
-        }
+        };
+        tree._create_node(NodeType::Source, source_position);
+        tree
     }
 
     /// Returns a shared reference to the source node.
@@ -117,6 +114,28 @@ impl GlobalRoutingTree {
         self.node_map.insert(node.id.clone(), idx);
         self.nodes.push(node);
         idx
+    }
+
+    /// Factory Method: creates a node of the given type, registers it in the
+    /// node map and arena, and returns its index.
+    ///
+    /// ID generation (e.g. "steiner_3"), the per-type counter, arena allocation
+    /// and map registration all funnel through this single method.
+    fn _create_node(&mut self, node_type: NodeType, pt: Point<i32, i32>) -> usize {
+        let id = match node_type {
+            NodeType::Steiner => {
+                let s = format!("steiner_{}", self.next_steiner_id);
+                self.next_steiner_id += 1;
+                s
+            }
+            NodeType::Terminal => {
+                let s = format!("terminal_{}", self.next_terminal_id);
+                self.next_terminal_id += 1;
+                s
+            }
+            NodeType::Source => "source".to_string(),
+        };
+        self.add_node(RoutingNode::new(&id, node_type, pt))
     }
 
     fn _find_nearest_node(&self, point: Point<i32, i32>, exclude_id: Option<&str>) -> usize {
@@ -145,9 +164,8 @@ impl GlobalRoutingTree {
         point: Point<i32, i32>,
         parent_id: Option<&str>,
     ) -> String {
-        let id = format!("steiner_{}", self.next_steiner_id);
-        self.next_steiner_id += 1;
-        let idx = self.add_node(RoutingNode::new(&id, NodeType::Steiner, point));
+        let idx = self._create_node(NodeType::Steiner, point);
+        let id = self.nodes[idx].id.clone();
 
         let parent_idx = match parent_id {
             Some(pid) => *self.node_map.get(pid).expect("Parent node not found"),
@@ -163,15 +181,13 @@ impl GlobalRoutingTree {
         point: Point<i32, i32>,
         parent_id: Option<&str>,
     ) -> String {
-        let id = format!("terminal_{}", self.next_terminal_id);
-        self.next_terminal_id += 1;
-
         let parent_idx = match parent_id {
             Some(pid) => *self.node_map.get(pid).expect("Parent node not found"),
             None => self._find_nearest_node(point, None),
         };
 
-        let idx = self.add_node(RoutingNode::new(&id, NodeType::Terminal, point));
+        let idx = self._create_node(NodeType::Terminal, point);
+        let id = self.nodes[idx].id.clone();
         self.nodes[idx].parent = Some(parent_idx);
         self.nodes[parent_idx].children.push(idx);
         id
@@ -201,20 +217,8 @@ impl GlobalRoutingTree {
             "branch_end is not a direct child of branch_start"
         );
 
-        let id = match node_type {
-            NodeType::Steiner => {
-                let s = format!("steiner_{}", self.next_steiner_id);
-                self.next_steiner_id += 1;
-                s
-            }
-            NodeType::Terminal => {
-                let s = format!("terminal_{}", self.next_terminal_id);
-                self.next_terminal_id += 1;
-                s
-            }
-            _ => panic!("Node type must be Steiner or Terminal"),
-        };
-        let new_idx = self.add_node(RoutingNode::new(&id, node_type, point));
+        let new_idx = self._create_node(node_type, point);
+        let id = self.nodes[new_idx].id.clone();
 
         // Rewire: start -> new -> end
         self.nodes[start_idx].children.retain(|c| *c != end_idx);
@@ -324,9 +328,7 @@ impl GlobalRoutingTree {
         allowed_wirelength: i32,
         keepouts: Option<Vec<Point<Interval<i32>, Interval<i32>>>>,
     ) {
-        let terminal_id = format!("terminal_{}", self.next_terminal_id);
-        self.next_terminal_id += 1;
-        let terminal_idx = self.add_node(RoutingNode::new(&terminal_id, NodeType::Terminal, point));
+        let terminal_idx = self._create_node(NodeType::Terminal, point);
 
         let (parent_node, nearest_node) =
             self._find_insertion_point(point, allowed_wirelength, &keepouts);
@@ -340,15 +342,11 @@ impl GlobalRoutingTree {
                 self.nodes[terminal_idx].path_length = self.nodes[nearest_idx].path_length + dist;
             }
             Some(parent_idx) => {
-                let steiner_id = format!("steiner_{}", self.next_steiner_id);
-                self.next_steiner_id += 1;
-
                 let possible_path = self.nodes[parent_idx]
                     .pt
                     .hull_with(&self.nodes[nearest_idx].pt);
                 let nearest_pt = possible_path.nearest_to(&point);
-                let steiner_idx =
-                    self.add_node(RoutingNode::new(&steiner_id, NodeType::Steiner, nearest_pt));
+                let steiner_idx = self._create_node(NodeType::Steiner, nearest_pt);
 
                 // Rewire: parent -> nearest  becomes  parent -> steiner -> nearest
                 self.nodes[parent_idx]
