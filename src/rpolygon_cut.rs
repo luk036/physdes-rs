@@ -31,18 +31,7 @@ where
         + num_traits::Zero
         + num_traits::Num,
 {
-    let mut lst: Vec<Point<T, T>> = pointset.to_vec();
-    let mut rdll = RDllist::new(lst.len(), false);
-
-    // For convex cut, we check if area_diff is positive (anti-clockwise) or negative (clockwise)
-    // In C++: cmp = is_anticlockwise ? [](T a) { return a > 0; } : [](T a) { return a < 0; }
-    let first_ptr: *mut Dllink<usize> = rdll.get_mut(0);
-    let index_lists = rpolygon_cut_convex_recur(first_ptr, &mut lst, is_anticlockwise, &mut rdll);
-
-    index_lists
-        .into_iter()
-        .map(|indices| indices.into_iter().map(|i| lst[i]).collect())
-        .collect()
+    rpolygon_cut_impl(pointset, is_anticlockwise, rpolygon_cut_convex_recur::<T>)
 }
 
 /// Decomposes a rectilinear polygon into convex pieces using explicit
@@ -64,16 +53,7 @@ where
         + num_traits::Zero
         + num_traits::Num,
 {
-    let mut lst: Vec<Point<T, T>> = pointset.to_vec();
-    let mut rdll = RDllist::new(lst.len(), false);
-
-    let first_ptr: *mut Dllink<usize> = rdll.get_mut(0);
-    let index_lists = rpolygon_cut_explicit_recur(first_ptr, &mut lst, is_anticlockwise, &mut rdll);
-
-    index_lists
-        .into_iter()
-        .map(|indices| indices.into_iter().map(|i| lst[i]).collect())
-        .collect()
+    rpolygon_cut_impl(pointset, is_anticlockwise, rpolygon_cut_explicit_recur::<T>)
 }
 
 /// Decomposes a rectilinear polygon into convex pieces using implicit
@@ -96,16 +76,7 @@ where
         + num_traits::Zero
         + num_traits::Num,
 {
-    let mut lst: Vec<Point<T, T>> = pointset.to_vec();
-    let mut rdll = RDllist::new(lst.len(), false);
-
-    let first_ptr: *mut Dllink<usize> = rdll.get_mut(0);
-    let index_lists = rpolygon_cut_implicit_recur(first_ptr, &mut lst, is_anticlockwise, &mut rdll);
-
-    index_lists
-        .into_iter()
-        .map(|indices| indices.into_iter().map(|i| lst[i]).collect())
-        .collect()
+    rpolygon_cut_impl(pointset, is_anticlockwise, rpolygon_cut_implicit_recur::<T>)
 }
 
 /// Decomposes a rectilinear polygon into rectangles.
@@ -134,6 +105,38 @@ where
         res.extend(l2);
     }
     res
+}
+
+/// Signature of the internal recursive decomposers.
+type RecurFn<T> = fn(*mut Dllink<usize>, &mut [Point<T, T>], bool, &mut RDllist) -> Vec<Vec<usize>>;
+
+/// Shared wrapper: runs the given recursive decomposer over a copy of the
+/// point set and converts the resulting index lists back into point polygons.
+fn rpolygon_cut_impl<T>(
+    pointset: &[Point<T, T>],
+    is_anticlockwise: bool,
+    recur: RecurFn<T>,
+) -> Vec<Vec<Point<T, T>>>
+where
+    T: Clone
+        + Copy
+        + PartialOrd
+        + Ord
+        + std::ops::Sub<Output = T>
+        + std::ops::Mul<Output = T>
+        + num_traits::Zero
+        + num_traits::Num,
+{
+    let mut lst: Vec<Point<T, T>> = pointset.to_vec();
+    let mut rdll = RDllist::new(lst.len(), false);
+
+    let first_ptr: *mut Dllink<usize> = rdll.get_mut(0);
+    let index_lists = recur(first_ptr, &mut lst, is_anticlockwise, &mut rdll);
+
+    index_lists
+        .into_iter()
+        .map(|indices| indices.into_iter().map(|i| lst[i]).collect())
+        .collect()
 }
 
 // --- Internal recursive helpers ---
