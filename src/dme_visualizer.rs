@@ -11,6 +11,18 @@ use crate::dme_algorithm::{NodeIdx, SkewAnalysis, Tree};
 /// Color-codes nodes by type (root=red, internal=blue, sinks=green),
 /// draws parent-child wires with length labels, and overlays delay/capacitance
 /// info. Optionally displays a skew analysis panel.
+///
+/// Configure appearance through the fluent [`ClockTreeVisualizerBuilder`]
+/// (Builder pattern) or the [`ClockTreeVisualizer::new`] default:
+///
+/// ```
+/// # use physdes::dme_visualizer::ClockTreeVisualizer;
+/// let viz = ClockTreeVisualizer::builder()
+///     .node_radius(10)
+///     .wire_width(3)
+///     .sink_color("#2E7D32")
+///     .build();
+/// ```
 pub struct ClockTreeVisualizer {
     pub margin: u32,
     pub node_radius: u32,
@@ -20,6 +32,99 @@ pub struct ClockTreeVisualizer {
     pub root_color: String,
     pub wire_color: String,
     pub text_color: String,
+}
+
+/// Fluent builder for configuring a [`ClockTreeVisualizer`].
+///
+/// Unset options fall back to the same defaults as [`ClockTreeVisualizer::new`].
+pub struct ClockTreeVisualizerBuilder {
+    margin: u32,
+    node_radius: u32,
+    wire_width: u32,
+    sink_color: String,
+    internal_color: String,
+    root_color: String,
+    wire_color: String,
+    text_color: String,
+}
+
+impl Default for ClockTreeVisualizerBuilder {
+    fn default() -> Self {
+        Self {
+            margin: 50,
+            node_radius: 8,
+            wire_width: 2,
+            sink_color: "#4CAF50".into(),
+            internal_color: "#2196F3".into(),
+            root_color: "#F44336".into(),
+            wire_color: "#666666".into(),
+            text_color: "#333333".into(),
+        }
+    }
+}
+
+impl ClockTreeVisualizerBuilder {
+    /// Sets the drawing margin.
+    pub fn margin(mut self, value: u32) -> Self {
+        self.margin = value;
+        self
+    }
+
+    /// Sets the base radius of node circles.
+    pub fn node_radius(mut self, value: u32) -> Self {
+        self.node_radius = value;
+        self
+    }
+
+    /// Sets the wire stroke width.
+    pub fn wire_width(mut self, value: u32) -> Self {
+        self.wire_width = value;
+        self
+    }
+
+    /// Sets the sink node color.
+    pub fn sink_color(mut self, value: impl Into<String>) -> Self {
+        self.sink_color = value.into();
+        self
+    }
+
+    /// Sets the internal node color.
+    pub fn internal_color(mut self, value: impl Into<String>) -> Self {
+        self.internal_color = value.into();
+        self
+    }
+
+    /// Sets the root node color.
+    pub fn root_color(mut self, value: impl Into<String>) -> Self {
+        self.root_color = value.into();
+        self
+    }
+
+    /// Sets the wire color.
+    pub fn wire_color(mut self, value: impl Into<String>) -> Self {
+        self.wire_color = value.into();
+        self
+    }
+
+    /// Sets the text color.
+    pub fn text_color(mut self, value: impl Into<String>) -> Self {
+        self.text_color = value.into();
+        self
+    }
+
+    /// Builds the configured [`ClockTreeVisualizer`].
+    pub fn build(self) -> ClockTreeVisualizer {
+        ClockTreeVisualizer {
+            margin: self.margin,
+            node_radius: self.node_radius,
+            wire_width: self.wire_width,
+            sink_color: self.sink_color,
+            internal_color: self.internal_color,
+            root_color: self.root_color,
+            wire_color: self.wire_color,
+            text_color: self.text_color,
+        }
+    }
 }
 
 impl Default for ClockTreeVisualizer {
@@ -38,8 +143,14 @@ impl Default for ClockTreeVisualizer {
 }
 
 impl ClockTreeVisualizer {
+    /// Creates a visualizer with default appearance settings.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Returns a fluent builder for customizing appearance.
+    pub fn builder() -> ClockTreeVisualizerBuilder {
+        ClockTreeVisualizerBuilder::default()
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -175,12 +286,11 @@ pub fn create_comparison_visualization(
         "<style>.nl{font:8px sans-serif;fill:#333}.dl{font:7px sans-serif;fill:#666}</style>",
     );
 
-    let viz = ClockTreeVisualizer {
-        margin: 40,
-        node_radius: 6,
-        wire_width: 2,
-        ..Default::default()
-    };
+    let viz = ClockTreeVisualizer::builder()
+        .margin(40)
+        .node_radius(6)
+        .wire_width(2)
+        .build();
 
     for (i, td) in trees_data.iter().enumerate() {
         let row = (i as u32) / cols;
@@ -462,6 +572,38 @@ mod tests {
         let mut dme = DMEAlgorithm::new(sinks, calc);
         let root = dme.build_clock_tree();
         (dme, root)
+    }
+
+    #[test]
+    fn test_visualizer_builder_configuration() {
+        let sinks = sample_sinks();
+        let (dme, root) = build_test_tree(sinks.clone());
+        let viz = ClockTreeVisualizer::builder()
+            .margin(20)
+            .node_radius(12)
+            .wire_width(4)
+            .sink_color("#112233")
+            .internal_color("#445566")
+            .root_color("#778899")
+            .wire_color("#AABBCC")
+            .text_color("#DDEEFF")
+            .build();
+        let svg = viz.visualize_tree(dme.get_tree(), root, &sinks, "", 400, 300, None);
+        assert!(svg.starts_with("<svg"));
+        assert!(svg.ends_with("</svg>"));
+        assert!(svg.contains("stroke=\"#AABBCC\""));
+    }
+
+    #[test]
+    fn test_visualizer_builder_defaults_match_new() {
+        let sinks = sample_sinks();
+        let (dme, root) = build_test_tree(sinks.clone());
+        let from_builder = ClockTreeVisualizer::builder().build();
+        let from_new = ClockTreeVisualizer::new();
+        assert_eq!(
+            from_builder.visualize_tree(dme.get_tree(), root, &sinks, "", 400, 300, None),
+            from_new.visualize_tree(dme.get_tree(), root, &sinks, "", 400, 300, None)
+        );
     }
 
     #[test]
