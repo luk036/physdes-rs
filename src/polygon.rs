@@ -86,6 +86,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     ///
     /// * `origin` - The origin point of the polygon
     /// * `vecs` - Vector of displacement vectors from origin
+    #[inline]
     pub fn from_origin_and_vectors(origin: Point<T, T>, vecs: Vec<Vector2<T, T>>) -> Self {
         Polygon { origin, vecs }
     }
@@ -94,6 +95,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     ///
     /// The first point in the set is used as the origin, and the remaining points
     /// are used to construct displacement vectors relative to the origin.
+    #[inline]
     pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
         Self::new(pointset)
     }
@@ -187,6 +189,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     }
 
     /// Translates the polygon by adding a vector to its origin.
+    #[inline]
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: AddAssign,
@@ -195,6 +198,7 @@ impl<T: Clone + Num + Ord + Copy + std::ops::AddAssign> Polygon<T> {
     }
 
     /// Translates the polygon by subtracting a vector from its origin.
+    #[inline]
     pub fn sub_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: SubAssign,
@@ -649,6 +653,7 @@ where
 }
 
 /// Checks if a polygon is x-monotone
+#[inline]
 pub fn polygon_is_xmonotone<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -657,6 +662,7 @@ where
 }
 
 /// Checks if a polygon is y-monotone
+#[inline]
 pub fn polygon_is_ymonotone<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -737,6 +743,7 @@ where
 // Implement PartialEq for Polygon
 impl<T: PartialEq> PartialEq for Polygon<T> {
     /// Returns `true` if two polygons have the same origin and vectors.
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.origin == other.origin && self.vecs == other.vecs
     }
@@ -745,6 +752,7 @@ impl<T: PartialEq> PartialEq for Polygon<T> {
 // Implement AddAssign and SubAssign for Polygon
 impl<T: AddAssign + Clone + Num> AddAssign<Vector2<T, T>> for Polygon<T> {
     /// Translates the polygon by adding a vector to its origin.
+    #[inline]
     fn add_assign(&mut self, rhs: Vector2<T, T>) {
         self.origin += rhs;
     }
@@ -752,6 +760,7 @@ impl<T: AddAssign + Clone + Num> AddAssign<Vector2<T, T>> for Polygon<T> {
 
 impl<T: SubAssign + Clone + Num> SubAssign<Vector2<T, T>> for Polygon<T> {
     /// Translates the polygon by subtracting a vector from its origin.
+    #[inline]
     fn sub_assign(&mut self, rhs: Vector2<T, T>) {
         self.origin -= rhs;
     }

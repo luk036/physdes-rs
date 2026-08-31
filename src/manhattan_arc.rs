@@ -76,6 +76,7 @@ impl<T: Copy + Add<Output = T> + Sub<Output = T>> ManhattanArc<T> {
 }
 
 impl<T: fmt::Display> fmt::Display for ManhattanArc<T> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "/{}, {}/", self.impl_p.xcoord, self.impl_p.ycoord)
     }
@@ -111,6 +112,7 @@ impl ManhattanArc<i32> {
     }
 
     /// Returns the nearest Cartesian point to `other` (identity for point arcs).
+    #[inline]
     pub fn nearest_point_to(&self, other: &Point<i32, i32>) -> Point<i32, i32> {
         *other
     }
@@ -165,6 +167,7 @@ impl ManhattanArc<Interval<i32>> {
         dx.max(dy)
     }
 
+    #[inline]
     fn enlarge_interval(iv: Interval<i32>, alpha: i32) -> Interval<i32> {
         Interval::new(iv.lb - alpha, iv.ub + alpha)
     }

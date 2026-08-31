@@ -144,11 +144,13 @@ impl Default for ClockTreeVisualizer {
 
 impl ClockTreeVisualizer {
     /// Creates a visualizer with default appearance settings.
+    #[inline]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Returns a fluent builder for customizing appearance.
+    #[inline]
     pub fn builder() -> ClockTreeVisualizerBuilder {
         ClockTreeVisualizerBuilder::default()
     }
@@ -351,6 +353,7 @@ pub fn create_comparison_visualization(
 }
 
 /// Convenience wrapper: compare linear vs Elmore delay model trees side by side.
+#[inline]
 pub fn create_delay_model_comparison(linear: TreeData, elmore: TreeData, filename: &str) -> String {
     create_comparison_visualization(&[linear, elmore], filename, 1200, 600)
 }

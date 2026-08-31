@@ -17,6 +17,7 @@ use crate::rdllist::RDllist;
 /// # Returns
 ///
 /// Vector of convex polygon pieces, each defined by its vertices.
+#[inline]
 pub fn rpolygon_cut_convex<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -39,6 +40,7 @@ where
 ///
 /// This algorithm inserts intermediate vertices at concave corners to
 /// partition the polygon into rectilinearly convex sub-polygons.
+#[inline]
 pub fn rpolygon_cut_explicit<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,
@@ -62,6 +64,7 @@ where
 /// Unlike the explicit variant, this algorithm partitions the polygon
 /// without inserting new vertices — cuts are made along existing
 /// grid lines.
+#[inline]
 pub fn rpolygon_cut_implicit<T>(
     pointset: &[Point<T, T>],
     is_anticlockwise: bool,

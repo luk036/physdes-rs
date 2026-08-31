@@ -93,6 +93,7 @@ pub fn try_init_logger_with_filter(filter: &str) -> Result<(), &'static str> {
 /// Check if the logger has been initialized.
 ///
 /// Returns `true` if the logger is active, `false` otherwise.
+#[inline]
 pub fn is_logger_initialized() -> bool {
     LOGGER_INITIALIZED.load(Ordering::SeqCst)
 }

@@ -69,6 +69,7 @@ impl RoutingNode {
     /// Computes the Manhattan distance to another routing node.
     ///
     /// $$d = |x_1 - x_2| + |y_1 - y_2|$$
+    #[inline]
     pub fn manhattan_distance(&self, other: &RoutingNode) -> i32 {
         self.pt.min_dist_with(&other.pt) as i32
     }
@@ -100,11 +101,13 @@ impl GlobalRoutingTree {
     }
 
     /// Returns a shared reference to the source node.
+    #[inline]
     pub fn get_source(&self) -> &RoutingNode {
         &self.nodes[self.source_idx]
     }
 
     /// Returns a mutable reference to the source node.
+    #[inline]
     pub fn get_source_mut(&mut self) -> &mut RoutingNode {
         &mut self.nodes[self.source_idx]
     }
@@ -373,6 +376,7 @@ impl GlobalRoutingTree {
         }
     }
 
+    #[inline]
     pub fn insert_terminal_with_steiner(
         &mut self,
         point: Point<i32, i32>,
@@ -381,6 +385,7 @@ impl GlobalRoutingTree {
         self._insert_terminal_impl(point, i32::MAX, keepouts);
     }
 
+    #[inline]
     pub fn insert_terminal_with_constraints(
         &mut self,
         point: Point<i32, i32>,
@@ -798,6 +803,7 @@ impl GlobalRouter {
     }
 
     /// Returns a reference to the constructed routing tree.
+    #[inline]
     pub fn get_tree(&self) -> &GlobalRoutingTree {
         &self.tree
     }

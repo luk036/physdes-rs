@@ -83,6 +83,7 @@ impl<T1, T2> MergeObj<T1, T2> {
     /// assert_eq!(internal_point.xcoord, 3);
     /// assert_eq!(internal_point.ycoord, 4);
     /// ```
+    #[inline]
     pub fn get_impl(&self) -> &Point<T1, T2> {
         &self.impl_
     }

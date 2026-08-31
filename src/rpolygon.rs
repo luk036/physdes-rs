@@ -79,6 +79,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     ///
     /// * `origin` - The origin point of the polygon
     /// * `vecs` - Vector of displacement vectors from origin
+    #[inline]
     pub fn from_origin_and_vectors(origin: Point<T, T>, vecs: Vec<Vector2<T, T>>) -> Self {
         RPolygon { origin, vecs }
     }
@@ -87,11 +88,13 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     ///
     /// The first point in the set is used as the origin, and the remaining points
     /// are used to construct displacement vectors relative to the origin.
+    #[inline]
     pub fn from_pointset(pointset: &[Point<T, T>]) -> Self {
         Self::new(pointset)
     }
 
     /// Translates the polygon by adding a vector to its origin
+    #[inline]
     pub fn add_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: AddAssign,
@@ -100,6 +103,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     }
 
     /// Translates the polygon by subtracting a vector from its origin
+    #[inline]
     pub fn sub_assign(&mut self, rhs: Vector2<T, T>)
     where
         T: SubAssign,
@@ -198,6 +202,7 @@ impl<T: Clone + Num + Copy + std::ops::AddAssign + Ord> RPolygon<T> {
     /// let poly2 = RPolygon::new(&[p5, p6, p7]);
     /// assert!(poly2.is_rectilinear());
     /// ```
+    #[inline]
     pub fn is_rectilinear(&self) -> bool {
         true
     }
@@ -248,6 +253,7 @@ impl<T: Clone + Copy + Num + Ord + AddAssign + SubAssign> RPolygon<T> {
     ///
     /// Inserts intermediate axis-aligned points for any non-rectilinear
     /// segment transitions.
+    #[inline]
     pub fn to_polygon(&self) -> crate::polygon::Polygon<T> {
         rpolygon_to_polygon(self)
     }
@@ -293,6 +299,7 @@ pub fn rpolygon_to_polygon<T: Clone + Copy + Num + Ord + AddAssign + SubAssign>(
 // Implement PartialEq for RPolygon
 impl<T: PartialEq> PartialEq for RPolygon<T> {
     /// Returns `true` if two rectilinear polygons have the same origin and vectors.
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.origin == other.origin && self.vecs == other.vecs
     }
@@ -465,6 +472,7 @@ where
 }
 
 /// Returns `true` if the polygon is x-monotone.
+#[inline]
 pub fn rpolygon_is_xmonotone<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -473,6 +481,7 @@ where
 }
 
 /// Returns `true` if the polygon is y-monotone.
+#[inline]
 pub fn rpolygon_is_ymonotone<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,
@@ -485,6 +494,7 @@ where
 /// A rectilinear polygon is convex iff it is both x-monotone and y-monotone:
 ///
 /// $$\\text{convex} \iff \\text{x-monotone} \land \\text{y-monotone}$$
+#[inline]
 pub fn rpolygon_is_convex<T>(lst: &[Point<T, T>]) -> bool
 where
     T: Clone + Num + Ord + Copy + PartialOrd,

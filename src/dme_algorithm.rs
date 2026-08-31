@@ -80,6 +80,7 @@ impl TreeNode {
     }
 
     /// Returns `true` if this node is a leaf (has no children).
+    #[inline]
     pub fn is_leaf(&self) -> bool {
         self.left.is_none() && self.right.is_none()
     }
@@ -99,6 +100,7 @@ pub struct Tree {
 
 impl Tree {
     /// Creates an empty tree with no nodes.
+    #[inline]
     pub fn new() -> Self {
         Self::default()
     }
@@ -111,26 +113,31 @@ impl Tree {
     }
 
     /// Returns a shared reference to the node at the given index.
+    #[inline]
     pub fn get(&self, idx: NodeIdx) -> &TreeNode {
         &self.nodes[idx]
     }
 
     /// Returns a mutable reference to the node at the given index.
+    #[inline]
     pub fn get_mut(&mut self, idx: NodeIdx) -> &mut TreeNode {
         &mut self.nodes[idx]
     }
 
     /// Returns the number of nodes in the tree.
+    #[inline]
     pub fn len(&self) -> usize {
         self.nodes.len()
     }
 
     /// Returns `true` if the tree contains no nodes.
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.nodes.is_empty()
     }
 
     /// Returns an iterator over all nodes in the tree.
+    #[inline]
     pub fn iter(&self) -> impl Iterator<Item = &TreeNode> {
         self.nodes.iter()
     }
@@ -211,12 +218,15 @@ impl LinearDelayCalculator {
 
 impl DelayCalculator for LinearDelayCalculator {
     /// Linear wire delay: $\text{delay} = \text{delay\_per\_unit} \times \text{length}$
+    #[inline]
     fn calculate_wire_delay(&self, length: i32, _load_capacitance: f64) -> f64 {
         self.delay_per_unit * length as f64
     }
+    #[inline]
     fn calculate_wire_delay_per_unit(&self, _load_capacitance: f64) -> f64 {
         self.delay_per_unit
     }
+    #[inline]
     fn calculate_wire_capacitance(&self, length: i32) -> f64 {
         self.capacitance_per_unit * length as f64
     }
@@ -289,9 +299,11 @@ impl DelayCalculator for ElmoreDelayCalculator {
         let c = self.unit_capacitance * length as f64;
         r * (c / 2.0 + load_capacitance)
     }
+    #[inline]
     fn calculate_wire_delay_per_unit(&self, load_capacitance: f64) -> f64 {
         self.unit_resistance * (self.unit_capacitance / 2.0 + load_capacitance)
     }
+    #[inline]
     fn calculate_wire_capacitance(&self, length: i32) -> f64 {
         self.unit_capacitance * length as f64
     }
@@ -462,11 +474,13 @@ impl DMEAlgorithm {
     }
 
     /// Returns a reference to the constructed tree.
+    #[inline]
     pub fn get_tree(&self) -> &Tree {
         &self.tree
     }
 
     /// Returns a mutable reference to the constructed tree.
+    #[inline]
     pub fn get_tree_mut(&mut self) -> &mut Tree {
         &mut self.tree
     }
@@ -1052,6 +1066,7 @@ mod tests {
     }
 
     /// Helper: approximate float equality within 1e-9.
+    #[inline]
     fn approx_eq(a: f64, b: f64) {
         assert!((a - b).abs() < 1e-9, "left={}, right={}", a, b);
     }
