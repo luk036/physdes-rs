@@ -624,7 +624,7 @@ impl DMEAlgorithm {
                 r_node.wire_length = distance - tp.raw_extend_left;
                 r_node.need_elongation = true;
                 #[cfg(feature = "std")]
-                log::warn!(
+                log::debug!(
                     "Warning: Right node needs elongation: extend_left < 0  => extend_left \
                      set to 0"
                 );
@@ -633,7 +633,7 @@ impl DMEAlgorithm {
                 l_node.wire_length = tp.raw_extend_left;
                 l_node.need_elongation = true;
                 #[cfg(feature = "std")]
-                log::warn!(
+                log::debug!(
                     "Warning: Left node needs elongation: extend_left > distance => \
                      extend_left set to distance"
                 );

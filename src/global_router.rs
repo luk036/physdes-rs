@@ -460,22 +460,22 @@ impl GlobalRoutingTree {
 
     /// Returns a formatted string representation of the tree structure.
     pub fn get_tree_structure(&self) -> String {
-        fn fmt_node(tree: &GlobalRoutingTree, idx: usize, level: usize) -> String {
+        fn fmt_node(tree: &GlobalRoutingTree, idx: usize, level: usize, out: &mut String) {
+            use std::fmt::Write as _;
+
             let node = &tree.nodes[idx];
-            let mut s = format!(
-                "{}{}({}, {})",
-                "  ".repeat(level),
-                node.node_type,
-                node.id,
-                node.pt
-            );
-            s.push('\n');
-            for &child in &node.children {
-                s.push_str(&fmt_node(tree, child, level + 1));
+            for _ in 0..level * 2 {
+                out.push(' ');
             }
-            s
+            let _ = writeln!(out, "{}({}, {})", node.node_type, node.id, node.pt);
+            for &child in &node.children {
+                fmt_node(tree, child, level + 1, out);
+            }
         }
-        fmt_node(self, self.source_idx, 0)
+
+        let mut out = String::new();
+        fmt_node(self, self.source_idx, 0, &mut out);
+        out
     }
 
     pub fn visualize_tree(&self) {

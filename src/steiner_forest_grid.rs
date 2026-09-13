@@ -15,10 +15,17 @@ impl UnionFind {
     }
 
     fn find(&mut self, x: usize) -> usize {
-        if self.parent[x] != x {
-            self.parent[x] = self.find(self.parent[x]);
+        let mut root = x;
+        while self.parent[root] != root {
+            root = self.parent[root];
         }
-        self.parent[x]
+        let mut node = x;
+        while self.parent[node] != root {
+            let next = self.parent[node];
+            self.parent[node] = root;
+            node = next;
+        }
+        root
     }
 
     fn union(&mut self, a: usize, b: usize) -> bool {
@@ -106,7 +113,7 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
         }
     }
 
-    let mut paid = HashMap::new();
+    let mut paid = vec![0.0; edges.len()];
     let mut f = Vec::new();
 
     loop {
@@ -156,14 +163,17 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
         }
 
         let mut min_delta = f64::INFINITY;
-        let mut candidate_edges: Vec<(usize, usize, f64, (usize, usize))> = Vec::new();
+        let mut chosen_idx = 0usize;
+        let mut chosen_u = 0usize;
+        let mut chosen_v = 0usize;
+        let mut chosen_c = 0.0f64;
 
-        for &(u, v, cost) in &edges {
-            if uf.find(u) == uf.find(v) {
-                continue;
-            }
+        for (edge_idx, &(u, v, cost)) in edges.iter().enumerate() {
             let root_u = uf.find(u);
             let root_v = uf.find(v);
+            if root_u == root_v {
+                continue;
+            }
             let mut num = 0;
             if active_comps.contains(&root_u) {
                 num += 1;
@@ -174,18 +184,17 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
             if num == 0 {
                 continue;
             }
-            let key = (u.min(v), u.max(v));
-            let paid_val = *paid.get(&key).unwrap_or(&0.0);
+            let paid_val = paid[edge_idx];
             if paid_val > cost {
                 continue;
             }
             let delta_e = (cost - paid_val) / num as f64;
             if delta_e < min_delta {
                 min_delta = delta_e;
-                candidate_edges.clear();
-                candidate_edges.push((u, v, cost, key));
-            } else if (delta_e - min_delta).abs() < 1e-12 {
-                candidate_edges.push((u, v, cost, key));
+                chosen_idx = edge_idx;
+                chosen_u = u;
+                chosen_v = v;
+                chosen_c = cost;
             }
         }
 
@@ -193,14 +202,12 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
             panic!("Graph is not connected or cannot connect pairs");
         }
 
-        let (chosen_u, chosen_v, chosen_c, chosen_key) = candidate_edges[0];
-
-        for &(u2, v2, c2) in &edges {
-            if uf.find(u2) == uf.find(v2) {
-                continue;
-            }
+        for (edge_idx, &(u2, v2, c2)) in edges.iter().enumerate() {
             let ru2 = uf.find(u2);
             let rv2 = uf.find(v2);
+            if ru2 == rv2 {
+                continue;
+            }
             let mut num2 = 0;
             if active_comps.contains(&ru2) {
                 num2 += 1;
@@ -211,46 +218,75 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
             if num2 == 0 {
                 continue;
             }
-            let key2 = (u2.min(v2), u2.max(v2));
-            let entry = paid.entry(key2).or_insert(0.0);
+            let entry = &mut paid[edge_idx];
             *entry += min_delta * num2 as f64;
             if *entry > c2 + 1e-6 {
                 *entry = c2;
             }
         }
 
-        if *paid.get(&chosen_key).unwrap_or(&0.0) >= chosen_c - 1e-6 {
+        if paid[chosen_idx] >= chosen_c - 1e-6 {
             f.push((chosen_u, chosen_v, chosen_c));
             uf.union(chosen_u, chosen_v);
         }
     }
 
-    let mut f_pruned = f.clone();
-    let mut idx = f.len();
-    while idx > 0 {
-        idx -= 1;
-        let mut temp_uf = UnionFind::new(n);
-        for (j, &(ej_u, ej_v, _)) in f.iter().enumerate() {
-            if j != idx {
-                temp_uf.union(ej_u, ej_v);
-            }
-        }
-        let mut connected = true;
-        for &src in &sources {
-            if let Some(partners) = pair_dict.get(&src) {
-                for &tgt in partners {
-                    if temp_uf.find(src) != temp_uf.find(tgt) {
-                        connected = false;
-                        break;
-                    }
+    // `f` is a forest: every added edge merges two distinct components, so the
+    // minimal sub-forest preserving all required pair connections is the union
+    // of the unique paths between each pair. Mark those paths directly instead
+    // of rebuilding a UnionFind for every candidate edge.
+    let mut adjacency: Vec<Vec<(usize, usize)>> = vec![Vec::new(); n];
+    for (edge_idx, &(u, v, _)) in f.iter().enumerate() {
+        adjacency[u].push((v, edge_idx));
+        adjacency[v].push((u, edge_idx));
+    }
+
+    let mut visited = vec![false; n];
+    let mut parent_edge = vec![usize::MAX; n];
+    let mut parent_node = vec![usize::MAX; n];
+    let mut needed = vec![false; f.len()];
+    let mut stack: Vec<usize> = Vec::new();
+    let mut touched: Vec<usize> = Vec::new();
+
+    for &src in &sources {
+        stack.clear();
+        touched.clear();
+        stack.push(src);
+        visited[src] = true;
+        touched.push(src);
+        while let Some(node) = stack.pop() {
+            for &(neighbor, edge_idx) in &adjacency[node] {
+                if !visited[neighbor] {
+                    visited[neighbor] = true;
+                    parent_edge[neighbor] = edge_idx;
+                    parent_node[neighbor] = node;
+                    stack.push(neighbor);
+                    touched.push(neighbor);
                 }
             }
-            if !connected {
-                break;
+        }
+        if let Some(partners) = pair_dict.get(&src) {
+            for &tgt in partners {
+                let mut current = tgt;
+                while current != src {
+                    let edge_idx = parent_edge[current];
+                    if edge_idx == usize::MAX {
+                        break;
+                    }
+                    needed[edge_idx] = true;
+                    current = parent_node[current];
+                }
             }
         }
-        if connected {
-            f_pruned.remove(idx);
+        for &node in &touched {
+            visited[node] = false;
+        }
+    }
+
+    let mut f_pruned: Vec<(usize, usize, f64)> = Vec::with_capacity(f.len());
+    for (edge_idx, &edge) in f.iter().enumerate() {
+        if needed[edge_idx] {
+            f_pruned.push(edge);
         }
     }
 

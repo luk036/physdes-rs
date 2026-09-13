@@ -723,20 +723,21 @@ mod tests {
         let (dme, root) = build_test_tree(sinks.clone());
         let analysis = dme.analyze_skew(root);
         let viz = ClockTreeVisualizer::new();
-        let path = "test_clock_tree.svg";
+        let path = std::env::temp_dir().join("test_clock_tree.svg");
+        let path_str = path.to_string_lossy().into_owned();
         let svg = viz.visualize_tree(
             dme.get_tree(),
             root,
             &sinks,
-            path,
+            &path_str,
             800,
             600,
             Some(&analysis),
         );
 
-        assert!(std::path::Path::new(path).exists());
-        let saved = std::fs::read_to_string(path).unwrap();
+        assert!(path.exists());
+        let saved = std::fs::read_to_string(&path).unwrap();
         assert_eq!(saved, svg);
-        let _ = std::fs::remove_file(path);
+        let _ = std::fs::remove_file(&path);
     }
 }
