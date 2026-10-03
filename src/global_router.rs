@@ -94,7 +94,7 @@ impl GlobalRoutingTree {
             source_idx: 0,
             next_steiner_id: 1,
             next_terminal_id: 1,
-            worst_wirelength: 0,
+            worst_wirelength: i32::MAX,
         };
         tree._create_node(NodeType::Source, source_position);
         tree
@@ -382,7 +382,7 @@ impl GlobalRoutingTree {
         point: Point<i32, i32>,
         keepouts: Option<Vec<Point<Interval<i32>, Interval<i32>>>>,
     ) {
-        self._insert_terminal_impl(point, i32::MAX, keepouts);
+        self._insert_terminal_impl(point, self.worst_wirelength, keepouts);
     }
 
     #[inline]
@@ -783,7 +783,6 @@ impl GlobalRouter {
     /// Routes terminals with Steiner point insertion to reduce total
     /// wirelength while avoiding keepout regions.
     pub fn route_with_steiners(&mut self) {
-        self.tree.worst_wirelength = self.worst_wirelength;
         for &terminal in &self.terminal_positions {
             self.tree
                 .insert_terminal_with_steiner(terminal, self.keepouts.clone());
