@@ -117,7 +117,12 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
     let mut f = Vec::new();
 
     loop {
-        let term_root: HashMap<usize, usize> = all_term.iter().map(|&t| (t, uf.find(t))).collect();
+        // Cache every node's component root once per iteration. Both scans
+        // below only read find() results and no union happens between them, so
+        // this is identical to calling find() per edge, only cheaper.
+        let roots: Vec<usize> = (0..n).map(|node| uf.find(node)).collect();
+
+        let term_root: HashMap<usize, usize> = all_term.iter().map(|&t| (t, roots[t])).collect();
 
         let mut feasible = true;
         for (&src, partners) in &pair_dict {
@@ -169,8 +174,8 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
         let mut chosen_c = 0.0f64;
 
         for (edge_idx, &(u, v, cost)) in edges.iter().enumerate() {
-            let root_u = uf.find(u);
-            let root_v = uf.find(v);
+            let root_u = roots[u];
+            let root_v = roots[v];
             if root_u == root_v {
                 continue;
             }
@@ -203,8 +208,8 @@ pub fn steiner_forest_grid(height: usize, width: usize, pairs: &[Pair]) -> Stein
         }
 
         for (edge_idx, &(u2, v2, c2)) in edges.iter().enumerate() {
-            let ru2 = uf.find(u2);
-            let rv2 = uf.find(v2);
+            let ru2 = roots[u2];
+            let rv2 = roots[v2];
             if ru2 == rv2 {
                 continue;
             }
