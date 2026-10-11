@@ -49,11 +49,14 @@ pub struct RoutingNode {
     pub delay: f64,
     /// Path length from source to this node
     pub path_length: i32,
+    /// Bounding box of this node and all its descendants (for search pruning).
+    pub bbox: Point<Interval<i32>, Interval<i32>>,
 }
 
 impl RoutingNode {
     /// Creates a new routing node with the given id, type, and position.
     pub fn new(id: &str, node_type: NodeType, pt: Point<i32, i32>) -> Self {
+        let bbox = pt.hull_with(&pt);
         RoutingNode {
             id: id.to_string(),
             node_type,
@@ -63,6 +66,7 @@ impl RoutingNode {
             capacitance: 0.0,
             delay: 0.0,
             path_length: 0,
+            bbox,
         }
     }
 
@@ -162,6 +166,40 @@ impl GlobalRoutingTree {
         nearest
     }
 
+    /// Recompute node `i`'s bounding box from its position and its children's boxes.
+    fn _recompute_node_bbox(&mut self, i: usize) {
+        let mut b = self.nodes[i].pt.hull_with(&self.nodes[i].pt);
+        for ci in 0..self.nodes[i].children.len() {
+            let c = self.nodes[i].children[ci];
+            b = b.hull_with(&self.nodes[c].bbox);
+        }
+        self.nodes[i].bbox = b;
+    }
+
+    /// Recompute subtree bounding boxes from `start` up to the root.
+    fn _refresh_bbox_upward(&mut self, start: usize) {
+        let mut cur = Some(start);
+        while let Some(i) = cur {
+            self._recompute_node_bbox(i);
+            cur = self.nodes[i].parent;
+        }
+    }
+
+    /// Recompute every node's bounding box (post-order from the source).
+    fn _recompute_all_bboxes(&mut self) {
+        let mut order = Vec::new();
+        let mut stack = vec![self.source_idx];
+        while let Some(i) = stack.pop() {
+            order.push(i);
+            for ci in 0..self.nodes[i].children.len() {
+                stack.push(self.nodes[i].children[ci]);
+            }
+        }
+        for &i in order.iter().rev() {
+            self._recompute_node_bbox(i);
+        }
+    }
+
     pub fn insert_steiner_node(
         &mut self,
         point: Point<i32, i32>,
@@ -176,6 +214,7 @@ impl GlobalRoutingTree {
         };
         self.nodes[idx].parent = Some(parent_idx);
         self.nodes[parent_idx].children.push(idx);
+        self._refresh_bbox_upward(idx);
         id
     }
 
@@ -193,6 +232,7 @@ impl GlobalRoutingTree {
         let id = self.nodes[idx].id.clone();
         self.nodes[idx].parent = Some(parent_idx);
         self.nodes[parent_idx].children.push(idx);
+        self._refresh_bbox_upward(idx);
         id
     }
 
@@ -233,6 +273,8 @@ impl GlobalRoutingTree {
         self.nodes[end_idx].parent = Some(new_idx);
         self.nodes[new_idx].children.push(end_idx);
 
+        self._refresh_bbox_upward(new_idx);
+
         id
     }
 
@@ -254,6 +296,13 @@ impl GlobalRoutingTree {
         let mut stack = vec![self.source_idx];
 
         while let Some(node_idx) = stack.pop() {
+            // Once a valid candidate exists, an update needs distance < min_distance,
+            // and the subtree box lower-bounds every distance inside it, so an
+            // equal-or-farther subtree cannot improve.
+            if valid_found && self.nodes[node_idx].bbox.min_dist_with(&point) as i32 >= min_distance
+            {
+                continue;
+            }
             let child_count = self.nodes[node_idx].children.len();
             // Push children in order (reverse for DFS order)
             for ci in (0..child_count).rev() {
@@ -341,6 +390,7 @@ impl GlobalRoutingTree {
             None => {
                 self.nodes[terminal_idx].parent = Some(nearest_idx);
                 self.nodes[nearest_idx].children.push(terminal_idx);
+                self._refresh_bbox_upward(terminal_idx);
                 let dist = self.nodes[nearest_idx].pt.min_dist_with(&point) as i32;
                 self.nodes[terminal_idx].path_length = self.nodes[nearest_idx].path_length + dist;
             }
@@ -372,6 +422,7 @@ impl GlobalRoutingTree {
                 let dist_st = nearest_pt.min_dist_with(&point) as i32;
                 self.nodes[terminal_idx].path_length =
                     self.nodes[steiner_idx].path_length + dist_st;
+                self._refresh_bbox_upward(steiner_idx);
             }
         }
     }
@@ -515,6 +566,7 @@ impl GlobalRoutingTree {
         }
         self.nodes.retain(|n| self.node_map.contains_key(&n.id));
         self.remap_indices();
+        self._recompute_all_bboxes();
     }
 
     fn remap_indices(&mut self) {
