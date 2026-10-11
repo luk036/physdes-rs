@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GlobalRouter::new` terminal sort: added deterministic tiebreaker
 - Sync with sibling C++/Python projects — all three now produce identical numerical results
 - Sync with sibling C++ project (physdes-cpp) by opencode + deepseek-v4-flash
+- `GlobalRoutingTree` insertion search prunes subtrees via per-node bounding boxes (output-preserving; ~3.8x faster at 2000 terminals)
+- `steiner_forest_grid` caches component roots once per iteration instead of calling `find` per edge (output-preserving)
 
 ### Fixed
 
